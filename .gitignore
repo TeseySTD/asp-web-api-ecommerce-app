@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+#For docker postgres data
+ecommercedb-data
+
+
 # User-specific files
 *.rsuser
 *.suo
