@@ -1,11 +1,15 @@
+using EcommerceProject.Persistence;
+using Microsoft.EntityFrameworkCore;
+using EcommerceProject.Persistence.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//From extensions
+builder.Services.AddPersistenceServices(builder.Configuration);
 
 var app = builder.Build();
 
