@@ -7,9 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EcommerceProject.Persistence.Extensions;
 
-public static class DependencyInjection
+public static class DependencyInjectionExtension
 {
-    public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration){
+    public static IServiceCollection AddPersistenceLayerServices(this IServiceCollection services, IConfiguration configuration){
         //Add db context
         services.AddDbContext<StoreDbContext>(
             options =>

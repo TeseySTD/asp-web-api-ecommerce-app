@@ -9,5 +9,5 @@ public interface IProductsRepository
     Task<List<Product>> Get();
     Task Update(Guid id, string title, string description, decimal price);
     Task Delete(Guid productId);
-    Task<Product> FindById(Guid productId);
+    Task<Product?> FindById(Guid productId);
 }

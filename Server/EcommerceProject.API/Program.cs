@@ -1,6 +1,7 @@
 using EcommerceProject.Persistence;
 using Microsoft.EntityFrameworkCore;
 using EcommerceProject.Persistence.Extensions;
+using EcommerceProject.Application.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +10,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //From extensions
-builder.Services.AddPersistenceServices(builder.Configuration);
-
+builder.Services.AddPersistenceLayerServices(builder.Configuration);
+builder.Services.AddApplicationLayerServices();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
