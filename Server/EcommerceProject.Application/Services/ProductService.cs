@@ -1,7 +1,6 @@
-using System;
-using EcommerceProject.Core.Abstractions.Interfaces.Repositories;
-using EcommerceProject.Core.Abstractions.Interfaces.Services;
-using EcommerceProject.Core.Models;
+using EcommerceProject.Application.Abstractions.Interfaces.Repositories;
+using EcommerceProject.Application.Abstractions.Interfaces.Services;
+using EcommerceProject.Core.Models.Products;
 
 namespace EcommerceProject.Application.Services;
 

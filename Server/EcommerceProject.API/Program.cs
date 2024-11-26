@@ -10,8 +10,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //From extensions
-builder.Services.AddPersistenceLayerServices(builder.Configuration);
-builder.Services.AddApplicationLayerServices();
+builder.Services
+    .AddApplicationLayerServices()
+    .AddPersistenceLayerServices(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

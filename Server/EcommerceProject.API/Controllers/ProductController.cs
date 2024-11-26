@@ -8,7 +8,7 @@ using System.Reflection.Metadata.Ecma335;
 namespace EcommerceProject.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/products")]
 public class ProductController : ControllerBase
 {
     private readonly IProductService _productService;

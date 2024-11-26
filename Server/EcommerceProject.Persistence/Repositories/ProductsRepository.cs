@@ -1,5 +1,6 @@
-using EcommerceProject.Core.Abstractions.Interfaces.Repositories;
+using EcommerceProject.Application.Abstractions.Interfaces.Repositories;
 using EcommerceProject.Core.Models;
+using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +28,7 @@ public class ProductsRepository : IProductsRepository
 
     public async Task<List<Product>> Get()
     {
-        return await _context.Products.Select(p => Product.Create(p.Id, p.Title, p.Description, p.Price))
+        return await _context.Products.Select(p => Product.Create(p.Title, p.Description, p.Price, new  p.Id))
                                         .AsNoTracking()
                                         .ToListAsync();
     }

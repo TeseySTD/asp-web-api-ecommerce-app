@@ -1,7 +1,8 @@
 using System;
 using EcommerceProject.Core.Models;
+using EcommerceProject.Core.Models.Products;
 
-namespace EcommerceProject.Core.Abstractions.Interfaces.Repositories;
+namespace EcommerceProject.Application.Abstractions.Interfaces.Repositories;
 
 public interface IProductsRepository
 {
