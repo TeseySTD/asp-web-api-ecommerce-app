@@ -16,11 +16,6 @@
 
 
   <ItemGroup>
-    <Folder Include="Configurations\" />
-  </ItemGroup>
-
-
-  <ItemGroup>
     <ProjectReference Include="..\EcommerceProject.Application\EcommerceProject.Application.csproj" />
   </ItemGroup>
 

@@ -1,19 +1,28 @@
-using System;
-using EcommerceProject.Persistence.Entities;
+using System.Reflection;
+using EcommerceProject.Core.Models.Categories;
+using EcommerceProject.Core.Models.Orders;
+using EcommerceProject.Core.Models.Orders.Entities;
+using EcommerceProject.Core.Models.Products;
+using EcommerceProject.Core.Models.Users;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace EcommerceProject.Persistence;
 
 public class StoreDbContext : DbContext
 {
-    public DbSet<ProductEntity> Products { get; set; }
-    public DbSet<CategoryEntity> Categories { get; set; }
-    public DbSet<OrderEntity> Orders { get; set; }
-    public DbSet<OrderItemEntity> OrderItems { get; set; }
-    public DbSet<UserEntity> Users { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<User> Users { get; set; }
 
     public StoreDbContext(DbContextOptions options) : base(options)
     {
+    }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        base.OnModelCreating(modelBuilder);
     }
 }

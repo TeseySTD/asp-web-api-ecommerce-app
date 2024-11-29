@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using EcommerceProject.Application.Abstractions.Interfaces.Services;
-using EcommerceProject.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 namespace EcommerceProject.Application.Extensions;
 
@@ -12,7 +11,7 @@ public static class DependencyInjectionExtension
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
         });
-        services.AddTransient<IProductService, ProductService>();
+        // services.AddTransient<IProductService, ProductService>();
         return services;
     }
 }

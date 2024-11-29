@@ -2,10 +2,10 @@ namespace EcommerceProject.Core.Models.Orders.ValueObjects;
 
 public record class Address
 {
-    public string AddressLine { get; } = default!;
-    public string Country { get; } = default!;
-    public string State { get; } = default!;
-    public string ZipCode { get; } = default!;
+    public string AddressLine { get; init; } = default!;
+    public string Country { get; init; } = default!;
+    public string State { get; init; } = default!;
+    public string ZipCode { get; init; } = default!;
 
     private Address(string addressLine, string country, string state, string zipCode)
     {

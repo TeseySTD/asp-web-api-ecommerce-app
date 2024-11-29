@@ -1,22 +1,25 @@
-using System;
-using EcommerceProject.Core.Abstractions.Classes;
+﻿using EcommerceProject.Core.Abstractions.Classes;
+using EcommerceProject.Core.Models.Categories.ValueObjects;
 
-namespace EcommerceProject.Core.Models.Products.Entities;
+namespace EcommerceProject.Core.Models.Categories;
 
-public class Category : Entity<Guid>
+public class Category : AggregateRoot<CategoryId>
 {
     public const int MaxNameLength = 50;
     public const int MinDescriptionLength = 3;
     public const int MaxDescriptionLength = 200;
 
-    public Category(Guid id) : base(id)
+    internal Category(CategoryId id, string name, string description) : base(id)
     {
+        Name = name;
+        Description = description;
     }
 
     private string _name = string.Empty;
+
     public string Name
     {
-        get { return _name; }
+        get => _name;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -28,15 +31,18 @@ public class Category : Entity<Guid>
     }
 
     private string _description = string.Empty;
+
     public string Description
     {
-        get { return _description; }
+        get => _description;
         set
         {
             if (string.IsNullOrEmpty(value))
                 throw new ArgumentNullException(nameof(value));
             if (value.Length < MinDescriptionLength || value.Length > MaxDescriptionLength)
-                throw new ArgumentException($"Description must be less then {MaxDescriptionLength} symbols and more than {MinDescriptionLength} symbols", nameof(value));
+                throw new ArgumentException(
+                    $"Description must be less then {MaxDescriptionLength} symbols and more than {MinDescriptionLength} symbols",
+                    nameof(value));
 
             _description = value;
         }

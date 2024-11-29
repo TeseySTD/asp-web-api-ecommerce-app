@@ -22,7 +22,7 @@ public static class DependencyInjectionExtension
             options.AddInterceptors(serviceProvider.GetServices<ISaveChangesInterceptor>());
             options.UseNpgsql(configuration.GetConnectionString(nameof(StoreDbContext)));
         });
-
+        
         //Add repositories
         services.AddScoped<IProductsRepository, ProductsRepository>();
 

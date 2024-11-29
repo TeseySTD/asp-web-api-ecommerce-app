@@ -2,11 +2,17 @@ namespace EcommerceProject.Core.Models.Orders.ValueObjects;
 
 public record Payment
 {
-    public string? CardName { get; } = default!;
-    public string? CardNumber { get; } = default!;
-    public string? Expiration { get; } = default!;
-    public string? CVV { get; } = default!;
-    public string? PaymentMethod { get; } = default!;
+    public const int MaxCardNameLength = 50;
+    public const int MaxCardNumberLength = 50;
+    public const int MaxExpirationLength = 50;
+    public const int CVVLength = 3;
+    
+    
+    public string? CardName { get; init; } = default!;
+    public string? CardNumber { get; init; } = default!;
+    public string? Expiration { get; init; } = default!;
+    public string? CVV { get; init; } = default!;
+    public string? PaymentMethod { get; init; } = default!;
 
     protected Payment()
     {
@@ -26,7 +32,7 @@ public record Payment
         ArgumentException.ThrowIfNullOrWhiteSpace(cardName);
         ArgumentException.ThrowIfNullOrWhiteSpace(cardNumber);
         ArgumentException.ThrowIfNullOrWhiteSpace(cvv);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(cvv.Length, 3);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(cvv.Length, CVVLength);
 
         return new Payment(cardName, cardNumber, expiration, cvv, paymentMethod);
     }

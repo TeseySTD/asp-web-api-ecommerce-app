@@ -1,12 +1,13 @@
 using System;
 using EcommerceProject.Core.Abstractions.Interfaces;
+using EcommerceProject.Core.Models.Orders.ValueObjects;
 
 namespace EcommerceProject.Core.Models.Orders.Events;
 
 public class OrderCreatedDomainEvent : IDomainEvent
 {
-    public Guid OrderId { get; set; }
-    public OrderCreatedDomainEvent(Guid orderId)
+    public OrderId OrderId { get; set; }
+    public OrderCreatedDomainEvent(OrderId orderId)
     {
         OrderId = orderId;
     }

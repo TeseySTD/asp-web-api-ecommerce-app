@@ -1,49 +1,27 @@
 using System;
 using EcommerceProject.Core.Abstractions.Classes;
+using EcommerceProject.Core.Models.Orders.ValueObjects;
 using EcommerceProject.Core.Models.Products;
+using EcommerceProject.Core.Models.Products.ValueObjects;
 
 namespace EcommerceProject.Core.Models.Orders.Entities;
 
-public class OrderItem : Entity<Guid>
+public class OrderItem : Entity<OrderItemId>
 {
-    private Product _product = null!;
-    private int _quantity = 0;
-    private decimal _price;
-
-    private OrderItem(Guid id, Product product, int quantity, decimal price) : base(id)
+    private OrderItem(OrderItemId id, ProductId productId, OrderId orderId, OrderItemQuantity quantity,
+        ProductPrice price) : base(id)
     {
-        Product = product;
+        ProductId = productId;
+        OrderId = orderId;
         Quantity = quantity;
         Price = price;
     }
 
-    public Product Product
-    {
-        get => _product;
-        set
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(Product));
-            _product = value; 
-        }
-    }
-    public int Quantity {
-        get => _quantity;
-        set
-        {
-            if (value < 0)
-                throw new ArgumentException("Quantity cannot be negative", nameof(Quantity));
-            _quantity = value;
-        }
-    }
-    public decimal Price {
-        get => _price;
-        set
-        {
-            if (value < 0) throw new ArgumentException("Price cannot be negative", nameof(Price));
-            _price = value;
-        }
-    }
+    public ProductId ProductId { get; init; }
+    public OrderId OrderId { get; init; }
+    public OrderItemQuantity Quantity { get; init; }
+    public ProductPrice Price { get; set; }
 
-    public static OrderItem Create(Product product, int quantity, decimal price) => new(new Guid(), product, quantity, price);
+    public static OrderItem Create(Product product, OrderId orderId, OrderItemQuantity quantity, ProductPrice price) =>
+        new(new OrderItemId(Guid.NewGuid()), product.Id, orderId, quantity, price);
 }
