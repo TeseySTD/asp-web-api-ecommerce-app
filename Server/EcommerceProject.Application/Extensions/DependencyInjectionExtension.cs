@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using EcommerceProject.Application.Abstractions.Interfaces.Services;
 using Microsoft.Extensions.DependencyInjection;
 namespace EcommerceProject.Application.Extensions;
 

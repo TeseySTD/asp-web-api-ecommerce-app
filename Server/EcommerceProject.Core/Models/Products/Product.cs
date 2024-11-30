@@ -22,7 +22,7 @@ public class Product : AggregateRoot<ProductId>
     public ProductDescription Description { get; private set; }
     public CategoryId? CategoryId { get; private set; }
     public ProductPrice Price { get; private set; }
-    public StockQuantity StockQuantity { get; private set; } = default!;
+    public StockQuantity StockQuantity { get; set; } = default!;
 
     public bool IsInStock => StockQuantity.Value > 0;
 

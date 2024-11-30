@@ -1,8 +1,6 @@
-using System;
-using EcommerceProject.Core.Models;
 using EcommerceProject.Core.Models.Products;
 
-namespace EcommerceProject.Application.Abstractions.Interfaces.Services;
+namespace EcommerceProject.Application.Common.Interfaces.Services;
 
 public interface IProductService
 {

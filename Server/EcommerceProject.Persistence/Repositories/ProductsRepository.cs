@@ -1,4 +1,4 @@
-using EcommerceProject.Application.Abstractions.Interfaces.Repositories;
+using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
 using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Products.ValueObjects;
@@ -16,25 +16,18 @@ public class ProductsRepository : IProductsRepository
 
     public async Task Add(Product product)
     {
-        var entity = Product.Create(
-            id: product.Id,
-            title: product.Title,
-            description: product.Description,
-            price: product.Price,
-            categoryId: product.CategoryId
-        );
-        await _context.Products.AddAsync(entity);
+        await _context.Products.AddAsync(product);
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Product>> Get()
+    public async Task<List<Product>> Get(CancellationToken cancellationToken = default)
     {
         return await _context.Products
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, CategoryId category)
+    public async Task Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, CategoryId categoryId)
     {
         if(!await _context.Products.AnyAsync(p => p.Id == id))
             throw new Exception("Product not found, incorrect id");
@@ -45,7 +38,7 @@ public class ProductsRepository : IProductsRepository
                     .SetProperty(p => p.Title, title)
                     .SetProperty(p => p.Description, description)
                     .SetProperty(p => p.Price, price)
-                    .SetProperty(p => p.CategoryId, category));
+                    .SetProperty(p => p.CategoryId, categoryId));
     }
 
     public async Task Delete(ProductId id)
@@ -55,12 +48,17 @@ public class ProductsRepository : IProductsRepository
         await _context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
     }
 
-    public async Task<Product?> FindById(ProductId id)
+    public async Task<Product?> FindById(ProductId id, CancellationToken cancellationToken = default)
     {
         var product = await _context.Products.Where(p => p.Id == id)
                                             .AsNoTracking()
-                                            .FirstOrDefaultAsync();
+                                            .FirstOrDefaultAsync(cancellationToken);
 
         return product;
+    }
+
+    public async Task<bool> Exists(ProductId id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Products.AnyAsync(p => p.Id == id);
     }
 }

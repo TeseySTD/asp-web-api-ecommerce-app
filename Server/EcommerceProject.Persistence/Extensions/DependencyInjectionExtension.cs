@@ -1,5 +1,5 @@
 using System;
-using EcommerceProject.Application.Abstractions.Interfaces.Repositories;
+using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Persistence.Interceptors;
 using EcommerceProject.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
