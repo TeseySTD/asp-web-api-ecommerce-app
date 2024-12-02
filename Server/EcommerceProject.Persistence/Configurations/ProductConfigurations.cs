@@ -21,38 +21,38 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                value => ProductId.Of(value));
+                value => ProductId.Create(value));
 
         builder
             .Property(p => p.Title)
             .HasMaxLength(ProductTitle.MaxTitleLength)
             .HasConversion(
                 t => t.Value,
-                value => ProductTitle.Of(value));
+                value => ProductTitle.Create(value));
 
         builder
             .Property(p => p.Description)
             .HasMaxLength(ProductDescription.MaxDescriptionLength)
             .HasConversion(
                 d => d.Value,
-                value => ProductDescription.Of(value));
+                value => ProductDescription.Create(value));
 
         builder
             .Property(p => p.Price)
             .HasConversion(
                 p => p.Value,
-                value => ProductPrice.Of(value));
+                value => ProductPrice.Create(value));
 
         builder
             .Property(p => p.StockQuantity)
             .HasConversion(
                 p => p.Value,
-                value => StockQuantity.Of(value));
+                value => StockQuantity.Create(value));
         
         builder.Property(p => p.CategoryId)
             .HasConversion(
                 c => c.Value,
-                value => new CategoryId(value));
+                value => CategoryId.Create(value));
 
         builder.HasOne<Category>()
             .WithMany()
@@ -73,7 +73,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(c => c.Id)
             .HasConversion(
                 c => c.Value,
-                value => new CategoryId(value));
+                value => CategoryId.Create(value));
         
         builder
             .Property(p => p.Name)

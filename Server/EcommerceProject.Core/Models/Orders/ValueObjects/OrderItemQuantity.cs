@@ -9,7 +9,7 @@ public record OrderItemQuantity
         Value = quantity;
     }
 
-    public static OrderItemQuantity Of(uint quantity)
+    public static OrderItemQuantity Create(uint quantity)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan<uint>(1, quantity, nameof(quantity));
         return new OrderItemQuantity(quantity);

@@ -29,7 +29,7 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                value => new OrderId(value));
+                value => OrderId.Create(value));
         
         builder.HasOne<User>()
             .WithMany()
@@ -40,7 +40,7 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             .ValueGeneratedNever()
             .HasConversion(
                 userId => userId.Value,
-                value => new UserId(value));
+                value => UserId.Create(value));
         
         builder.Property(o => o.OrderDate);
 
@@ -91,12 +91,12 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             oib.Property(o => o.Id)
                 .HasConversion(
                     id => id.Value,
-                    value => new OrderItemId(value));
+                    value => OrderItemId.Create(value));
 
             oib.Property(o => o.ProductId)
                 .HasConversion(
                     id => id.Value,
-                    value => ProductId.Of(value));
+                    value => ProductId.Create(value));
 
             oib.HasOne<Product>()
                 .WithMany()
@@ -109,12 +109,12 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             oib.Property(o => o.Quantity)
                 .HasConversion(
                     q => q.Value,
-                    value => OrderItemQuantity.Of(value));
+                    value => OrderItemQuantity.Create(value));
 
             oib.Property(o => o.Price)
                 .HasConversion(
                     price => price.Value,
-                    value => ProductPrice.Of(value));
+                    value => ProductPrice.Create(value));
         });
     }
 }

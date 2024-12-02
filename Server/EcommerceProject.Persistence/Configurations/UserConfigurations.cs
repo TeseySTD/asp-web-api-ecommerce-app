@@ -21,28 +21,28 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
         builder.Property(x => x.Id)
             .HasConversion(
                 x => x.Value,
-                value  => new UserId(value));
+                value  => UserId.Create(value));
 
         builder.Property(u => u.Name)
             .HasConversion(
                 n => n.Value,
-                value => UserName.Of(value))
+                value => UserName.Create(value))
             .HasMaxLength(UserName.MaxNameLength);
 
         builder.Property(u => u.Email)
             .HasConversion(
                 e => e.Value,
-                value => Email.Of(value));
+                value => Email.Create(value));
         
         builder.Property(u => u.Password)
             .HasConversion(
                 p => p.Value,
-                value => Password.Of(value));
+                value => Password.Create(value));
         
         builder.Property(u => u.PhoneNumber)
             .HasConversion(
                 p => p.Value,
-                value => PhoneNumber.Of(value));
+                value => PhoneNumber.Create(value));
         
         builder.Property(u => u.Role)
             .HasConversion(

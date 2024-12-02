@@ -20,4 +20,8 @@
     <ProjectReference Include="..\EcommerceProject.Application\EcommerceProject.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\Responses\" />
+  </ItemGroup>
+
 </Project>

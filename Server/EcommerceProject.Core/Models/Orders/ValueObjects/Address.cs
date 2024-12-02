@@ -15,7 +15,7 @@ public record class Address
         ZipCode = zipCode;
     }
 
-    public static Address Of(string addressLine, string country, string state, string zipCode)
+    public static Address Create(string addressLine, string country, string state, string zipCode)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(addressLine);
 

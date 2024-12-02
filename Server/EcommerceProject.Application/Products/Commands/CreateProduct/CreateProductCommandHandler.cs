@@ -21,11 +21,11 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
         {
             Product product;
             product = Product.Create(
-                title: ProductTitle.Of(request.Value.Title),
-                description: ProductDescription.Of(request.Value.Description),
-                price: ProductPrice.Of(request.Value.Price),
+                title: ProductTitle.Create(request.Value.Title),
+                description: ProductDescription.Create(request.Value.Description),
+                price: ProductPrice.Create(request.Value.Price),
                 null);
-            product.StockQuantity = StockQuantity.Of(request.Value.Quantity);
+            product.StockQuantity = StockQuantity.Create(request.Value.Quantity);
             
             await _productsRepository.Add(product);
             return Result.Success();

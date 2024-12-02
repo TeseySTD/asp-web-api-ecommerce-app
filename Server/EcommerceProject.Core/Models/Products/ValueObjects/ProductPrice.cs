@@ -10,7 +10,7 @@ public record ProductPrice
         Value = price;
     }
 
-    public static ProductPrice Of(decimal price){
+    public static ProductPrice Create(decimal price){
         if(price < MinPrice || price > MaxPrice) 
             throw new Exception($"Price must be between {MinPrice} and {MaxPrice}");
         return new ProductPrice(price);

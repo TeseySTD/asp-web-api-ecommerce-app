@@ -8,7 +8,7 @@ public record Password
 
     private Password(string password) => Value = password;
 
-    public static Password Of(string password)
+    public static Password Create(string password)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(password.Length, MinPasswordLength, nameof(password));
         return new Password(password);

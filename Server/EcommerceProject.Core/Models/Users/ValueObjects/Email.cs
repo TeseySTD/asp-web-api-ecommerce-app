@@ -10,7 +10,7 @@ public record Email
 
     private Email(string email) => Value = email;
 
-    public static Email Of(string email)
+    public static Email Create(string email)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
         if(Regex.IsMatch(email, RegexEmail))

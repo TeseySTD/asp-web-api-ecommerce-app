@@ -23,5 +23,5 @@ public class OrderItem : Entity<OrderItemId>
     public ProductPrice Price { get; set; }
 
     public static OrderItem Create(Product product, OrderId orderId, OrderItemQuantity quantity, ProductPrice price) =>
-        new(new OrderItemId(Guid.NewGuid()), product.Id, orderId, quantity, price);
+        new(OrderItemId.Create(Guid.NewGuid()), product.Id, orderId, quantity, price);
 }

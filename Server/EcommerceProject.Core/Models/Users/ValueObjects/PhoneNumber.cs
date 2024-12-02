@@ -10,7 +10,7 @@ public record PhoneNumber
 
     private PhoneNumber(string phoneNumber) => Value = phoneNumber;
 
-    public static PhoneNumber Of(string phoneNumber)
+    public static PhoneNumber Create(string phoneNumber)
     {
         if(Regex.IsMatch(phoneNumber, RegexPhoneNumber))
             return new PhoneNumber(phoneNumber);

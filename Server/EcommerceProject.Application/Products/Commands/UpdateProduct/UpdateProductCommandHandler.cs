@@ -16,15 +16,15 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        if(!await _productsRepository.Exists(ProductId.Of(request.dto.Id), cancellationToken))
+        if(!await _productsRepository.Exists(ProductId.Create(request.dto.Id), cancellationToken))
             return Result.Failure(Error.NotFound);
         try
         {
             await _productsRepository.Update(
-                id: ProductId.Of(request.dto.Id),
-                title: ProductTitle.Of(request.dto.Title),
-                description: ProductDescription.Of(request.dto.Description),
-                price: ProductPrice.Of(request.dto.Price),
+                id: ProductId.Create(request.dto.Id),
+                title: ProductTitle.Create(request.dto.Title),
+                description: ProductDescription.Create(request.dto.Description),
+                price: ProductPrice.Create(request.dto.Price),
                 categoryId: null);
             return Result.Success();
         }

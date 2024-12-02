@@ -38,7 +38,7 @@ public class Product : AggregateRoot<ProductId>
     public static Product Create(ProductTitle title, ProductDescription description, ProductPrice price,
         CategoryId? categoryId)
     {
-        var id = ProductId.Of(Guid.NewGuid());
+        var id = ProductId.Create(Guid.NewGuid());
         return Create(id, title, description, price, categoryId);
     }
 }

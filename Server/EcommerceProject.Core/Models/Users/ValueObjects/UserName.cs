@@ -9,7 +9,7 @@ public record UserName
 
     private UserName(string name) => Value = name;
 
-    public static UserName Of(string name)
+    public static UserName Create(string name)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(name.Length, MinNameLength, nameof(name));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(name.Length, MaxNameLength, nameof(name));

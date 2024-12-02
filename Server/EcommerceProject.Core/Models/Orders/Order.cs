@@ -32,7 +32,7 @@ public class Order : AggregateRoot<OrderId>
         ICollection<OrderItem>? orderItems = null, OrderId? id = null, OrderStatus status = OrderStatus.NotStarted)
     {
         orderItems = orderItems ?? new List<OrderItem>();
-        id ??= new OrderId(Guid.NewGuid());
+        id ??= OrderId.Create(Guid.NewGuid());
         var order = new Order(id, userId, status, orderItems, payment, destinationAddress);
         order.AddDomainEvent(new OrderCreatedDomainEvent(order.Id));
         return order;

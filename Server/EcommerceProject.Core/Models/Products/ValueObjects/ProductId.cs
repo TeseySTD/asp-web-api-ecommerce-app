@@ -8,7 +8,7 @@ public record ProductId
     {
         Value = value;
     }
-    public static ProductId Of(Guid productId)
+    public static ProductId Create(Guid productId)
     {
         return new ProductId(productId);
     }

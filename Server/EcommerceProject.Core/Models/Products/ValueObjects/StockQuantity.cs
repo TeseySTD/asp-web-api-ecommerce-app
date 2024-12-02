@@ -9,7 +9,7 @@ public record StockQuantity
         Value = stockQuantity;
     }
 
-    public static StockQuantity Of(uint stockQuantity)
+    public static StockQuantity Create(uint stockQuantity)
     {
         return new StockQuantity(stockQuantity);
     }

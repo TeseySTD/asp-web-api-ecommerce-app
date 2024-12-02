@@ -10,7 +10,6 @@ public static class DependencyInjectionExtension
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
         });
-        // services.AddTransient<IProductService, ProductService>();
         return services;
     }
 }

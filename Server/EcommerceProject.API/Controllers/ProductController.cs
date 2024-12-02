@@ -4,6 +4,7 @@ using EcommerceProject.Core.Models;
 using System.Drawing;
 using System.Reflection.Metadata.Ecma335;
 using EcommerceProject.API.Contracts;
+using EcommerceProject.API.Contracts.Requests;
 using EcommerceProject.Application.Dto;
 using EcommerceProject.Application.Products.Commands.CreateProduct;
 using EcommerceProject.Application.Products.Commands.DeleteProduct;
@@ -42,7 +43,7 @@ public class ProductController : ControllerBase
     [HttpGet("{id:guid}")] 
     public async Task<ActionResult<ProductDto>> GetProductById(Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetProductByIdQuery(ProductId.Of(id));
+        var query = new GetProductByIdQuery(ProductId.Create(id));
         var result = await _sender.Send(query, cancellationToken);
         
         if(result.IsFailure)
@@ -84,7 +85,7 @@ public class ProductController : ControllerBase
     [HttpDelete("{id:guid}")] 
     public async Task<ActionResult> DeleteProduct(Guid id)
     {
-        var cmd = new DeleteProductCommand(ProductId.Of(id));
+        var cmd = new DeleteProductCommand(ProductId.Create(id));
         
         var result = await _sender.Send(cmd);
         

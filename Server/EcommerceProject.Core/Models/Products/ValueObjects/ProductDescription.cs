@@ -11,7 +11,7 @@ public record ProductDescription
         Value = description;
     }
     
-    public static ProductDescription Of(string description){
+    public static ProductDescription Create(string description){
         ArgumentNullException.ThrowIfNull(description, nameof(description));
         if(description.Length < MinDescriptionLength || description.Length > MaxDescriptionLength)
             throw new ArgumentException($"Product description must be between {MinDescriptionLength} and {MaxDescriptionLength} characters.");

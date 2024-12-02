@@ -11,7 +11,7 @@ public record ProductTitle
         Value = title;
     }
 
-    public static ProductTitle Of(string title){
+    public static ProductTitle Create(string title){
         ArgumentNullException.ThrowIfNull(title, nameof(title));
         if(title.Length > MaxTitleLength || title.Length < MinTitleLength)
             throw new ArgumentException($"Product title must be between {MinTitleLength} and {MaxTitleLength} characters.");
