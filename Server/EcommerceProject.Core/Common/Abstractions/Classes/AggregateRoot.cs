@@ -1,7 +1,6 @@
-using System;
-using EcommerceProject.Core.Abstractions.Interfaces;
+using EcommerceProject.Core.Common.Abstractions.Interfaces;
 
-namespace EcommerceProject.Core.Abstractions.Classes;
+namespace EcommerceProject.Core.Common.Abstractions.Classes;
 
 public abstract class AggregateRoot<TId> : Entity<TId>, IAggregate<TId>
 {

@@ -1,4 +1,5 @@
 ﻿using EcommerceProject.Application.Common.Classes.Validation;
+using EcommerceProject.Core.Common;
 using MediatR;
 
 namespace EcommerceProject.Application.Common.Interfaces.Messaging;

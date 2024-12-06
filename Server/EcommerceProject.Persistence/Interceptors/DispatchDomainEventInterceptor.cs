@@ -1,7 +1,7 @@
 using System;
+using EcommerceProject.Core.Common.Abstractions.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using EcommerceProject.Core.Abstractions.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Persistence.Interceptors;

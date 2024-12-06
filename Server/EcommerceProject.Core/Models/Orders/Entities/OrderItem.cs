@@ -1,5 +1,5 @@
 using System;
-using EcommerceProject.Core.Abstractions.Classes;
+using EcommerceProject.Core.Common.Abstractions.Classes;
 using EcommerceProject.Core.Models.Orders.ValueObjects;
 using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Products.ValueObjects;

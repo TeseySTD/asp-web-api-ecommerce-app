@@ -1,6 +1,7 @@
 ﻿using EcommerceProject.Application.Common.Classes.Validation;
 using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Common.Interfaces.Repositories;
+using EcommerceProject.Core.Common;
 
 namespace EcommerceProject.Application.Products.Commands.DeleteProduct;
 

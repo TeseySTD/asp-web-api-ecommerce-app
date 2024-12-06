@@ -1,5 +1,5 @@
 using System;
-using EcommerceProject.Core.Abstractions.Interfaces;
+using EcommerceProject.Core.Common.Abstractions.Interfaces;
 using EcommerceProject.Core.Models.Products.ValueObjects;
 
 namespace EcommerceProject.Core.Models.Products.Events;

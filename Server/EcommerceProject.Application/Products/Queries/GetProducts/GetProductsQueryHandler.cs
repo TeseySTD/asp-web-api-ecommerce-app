@@ -2,6 +2,8 @@
 using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Application.Dto;
+using EcommerceProject.Application.Dto.Product;
+using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Products;
 
 namespace EcommerceProject.Application.Products.Queries.GetProducts;

@@ -1,17 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using EcommerceProject.Core;
-using EcommerceProject.Core.Models;
-using System.Drawing;
-using System.Reflection.Metadata.Ecma335;
-using EcommerceProject.API.Contracts;
 using EcommerceProject.API.Contracts.Requests;
-using EcommerceProject.Application.Dto;
+using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Application.Products.Commands.CreateProduct;
 using EcommerceProject.Application.Products.Commands.DeleteProduct;
 using EcommerceProject.Application.Products.Commands.UpdateProduct;
 using EcommerceProject.Application.Products.Queries.GetProductById;
 using EcommerceProject.Application.Products.Queries.GetProducts;
-using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Products.ValueObjects;
 using MediatR;
 

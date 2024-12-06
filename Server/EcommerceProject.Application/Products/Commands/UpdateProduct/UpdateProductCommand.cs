@@ -1,6 +1,7 @@
 ﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Dto;
+using EcommerceProject.Application.Dto.Product;
 
 namespace EcommerceProject.Application.Products.Commands.UpdateProduct;
 
-public record UpdateProductCommand(ProductDto dto) : ICommand;
+public record UpdateProductCommand(ProductDto Dto) : ICommand;

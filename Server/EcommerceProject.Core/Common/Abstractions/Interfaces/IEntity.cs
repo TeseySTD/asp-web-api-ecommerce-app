@@ -1,6 +1,4 @@
-using System;
-
-namespace EcommerceProject.Core.Abstractions.Interfaces;
+namespace EcommerceProject.Core.Common.Abstractions.Interfaces;
 
 public interface IEntity<TId> : IEntity
 {

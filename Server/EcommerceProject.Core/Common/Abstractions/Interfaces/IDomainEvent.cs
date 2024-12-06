@@ -1,7 +1,6 @@
-using System;
 using MediatR;
 
-namespace EcommerceProject.Core.Abstractions.Interfaces;
+namespace EcommerceProject.Core.Common.Abstractions.Interfaces;
 
 public interface IDomainEvent : INotification
 {

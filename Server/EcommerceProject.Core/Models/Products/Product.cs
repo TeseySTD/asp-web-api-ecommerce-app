@@ -1,4 +1,4 @@
-using EcommerceProject.Core.Abstractions.Classes;
+using EcommerceProject.Core.Common.Abstractions.Classes;
 using EcommerceProject.Core.Models.Categories;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
 using EcommerceProject.Core.Models.Products.Events;

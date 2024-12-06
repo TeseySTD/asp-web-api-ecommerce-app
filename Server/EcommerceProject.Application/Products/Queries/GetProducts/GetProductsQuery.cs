@@ -1,5 +1,6 @@
 ﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Dto;
+using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Core.Models.Products;
 
 namespace EcommerceProject.Application.Products.Queries.GetProducts;

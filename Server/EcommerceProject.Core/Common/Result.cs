@@ -1,6 +1,6 @@
-﻿namespace EcommerceProject.Application.Common.Classes.Validation;
+﻿namespace EcommerceProject.Core.Common;
 
-public class Result 
+public class Result
 {
     protected Result(bool isSuccess, Error error)
     {
