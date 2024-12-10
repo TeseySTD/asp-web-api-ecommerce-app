@@ -5,6 +5,8 @@ namespace EcommerceProject.Application.Common.Classes.Validation;
 
 public static class CustomValidators
 {
+    
+    // To validate using factory method
     public static IRuleBuilderOptionsConditions<T, TElement> MustBeCreatedWith<T, TElement, TObject>(
         this IRuleBuilder<T, TElement> ruleBuilder,
         Func<TElement, Result<TObject>> factoryMethod) 
@@ -18,7 +20,7 @@ public static class CustomValidators
                 return;
             
             context.AddFailure(string.Join("\n",
-                                result.Errors.Select(x => x.Message + "\n" + x.Description)));
+                                result.Errors.Select(x => x.Message+ ":" + x.Description)));
         });
     }
         

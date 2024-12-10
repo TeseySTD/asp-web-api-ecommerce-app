@@ -25,7 +25,7 @@ public class Result
     public static Result Success() => new(true, [Error.None]);
     public static Result Failure(IEnumerable<Error> errors) => new(false, errors);
     public void Fail() => this.IsSuccess = false;
-    public new static ResultBuilder<Result> TryFail() => new(
+    public static ResultBuilder<Result> TryFail() => new(
         new Result(true, Array.Empty<Error>()));
     
     public Result AddError(Error error)
@@ -75,9 +75,9 @@ public class ResultBuilder<TResult>
         _result = result;
     }
     
-    public ResultBuilder<TResult> CheckError(bool condition, Error error)
+    public ResultBuilder<TResult> CheckError(bool errorCondition, Error error)
     {
-        if(!condition)
+        if(errorCondition)
         {
             _result.Fail();
             _result.AddError(error);

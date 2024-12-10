@@ -17,7 +17,7 @@ public record ProductTitle
     {
         var result = Result<ProductTitle>.TryFail()
             .CheckError(string.IsNullOrEmpty(title), 
-                new Error("Title is required", ""))
+                new Error("Title is required", "Title must be not empty"))
             .CheckError(title.Length > MaxTitleLength || title.Length < MinTitleLength,
                 new Error("Title is too long", $"Product title must be between {MinTitleLength} and {MaxTitleLength} characters"))
             .Build();

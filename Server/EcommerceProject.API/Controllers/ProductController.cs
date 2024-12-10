@@ -37,7 +37,7 @@ public class ProductController : ControllerBase
     [HttpGet("{id:guid}")] 
     public async Task<ActionResult<ProductDto>> GetProductById(Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetProductByIdQuery(ProductId.Create(id));
+        var query = new GetProductByIdQuery(ProductId.Create(id).Value);
         var result = await _sender.Send(query, cancellationToken);
         
         if(result.IsFailure)
@@ -79,7 +79,7 @@ public class ProductController : ControllerBase
     [HttpDelete("{id:guid}")] 
     public async Task<ActionResult> DeleteProduct(Guid id)
     {
-        var cmd = new DeleteProductCommand(ProductId.Create(id));
+        var cmd = new DeleteProductCommand(ProductId.Create(id).Value);
         
         var result = await _sender.Send(cmd);
         

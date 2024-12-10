@@ -2,11 +2,11 @@
 using EcommerceProject.Core.Models.Products.ValueObjects;
 using FluentValidation;
 
-namespace EcommerceProject.Application.Products.Commands.CreateProduct;
+namespace EcommerceProject.Application.Products.Commands.UpdateProduct;
 
-public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+public class UpdateProductCommandValidator: AbstractValidator<UpdateProductCommand>
 {
-    public CreateProductCommandValidator()
+    public UpdateProductCommandValidator()
     {
         RuleFor(x => x.Value.Id).MustBeCreatedWith(ProductId.Create);
         

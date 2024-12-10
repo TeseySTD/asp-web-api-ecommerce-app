@@ -96,7 +96,7 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             oib.Property(o => o.ProductId)
                 .HasConversion(
                     id => id.Value,
-                    value => ProductId.Create(value));
+                    value => ProductId.Create(value).Value);
 
             oib.HasOne<Product>()
                 .WithMany()
@@ -114,7 +114,7 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             oib.Property(o => o.Price)
                 .HasConversion(
                     price => price.Value,
-                    value => ProductPrice.Create(value));
+                    value => ProductPrice.Create(value).Value);
         });
     }
 }

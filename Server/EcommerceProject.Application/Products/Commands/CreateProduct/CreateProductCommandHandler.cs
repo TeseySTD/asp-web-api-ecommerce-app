@@ -22,9 +22,9 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
         {
             Product product;
             product = Product.Create(
-                title: ProductTitle.Create(request.Value.Title),
-                description: ProductDescription.Create(request.Value.Description),
-                price: ProductPrice.Create(request.Value.Price),
+                title: ProductTitle.Create(request.Value.Title).Value,
+                description: ProductDescription.Create(request.Value.Description).Value,
+                price: ProductPrice.Create(request.Value.Price).Value,
                 null);
             product.StockQuantity = StockQuantity.Create(request.Value.Quantity);
             
