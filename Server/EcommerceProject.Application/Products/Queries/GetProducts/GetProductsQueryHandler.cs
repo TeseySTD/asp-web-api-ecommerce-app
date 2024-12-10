@@ -21,7 +21,7 @@ public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, Ge
     {
         var products = await _productsRepository.Get(cancellationToken);
         if (!products.Any())
-            return Result<GetProductsResponse>.Failure(Error.NotFound);
+            return Result<GetProductsResponse>.Failure([Error.NotFound]);
         else
         {
             var response = new GetProductsResponse(

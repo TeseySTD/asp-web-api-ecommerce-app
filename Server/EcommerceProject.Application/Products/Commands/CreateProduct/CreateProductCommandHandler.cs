@@ -33,7 +33,7 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
         }
         catch (Exception e)
         {
-            return Result.Failure(new Error(e.Message, e.StackTrace ?? string.Empty));
+            return Result.Failure([new Error(e.Message, e.StackTrace ?? string.Empty)]);
         }
     }
 }

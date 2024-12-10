@@ -1,5 +1,5 @@
+using EcommerceProject.API.Http.Product.Requests;
 using Microsoft.AspNetCore.Mvc;
-using EcommerceProject.API.Contracts.Requests;
 using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Application.Products.Commands.CreateProduct;
 using EcommerceProject.Application.Products.Commands.DeleteProduct;
@@ -29,7 +29,7 @@ public class ProductController : ControllerBase
         var result = await _sender.Send(query, cancellationToken);
 
         if (result.IsFailure)
-            return NotFound(result.Error);
+            return NotFound(result.Errors);
         else
             return Ok(result.Value);
     }
@@ -41,9 +41,9 @@ public class ProductController : ControllerBase
         var result = await _sender.Send(query, cancellationToken);
         
         if(result.IsFailure)
-            return NotFound(result.Error);
+            return NotFound(result.Errors);
         else
-            return Ok(result.Value);
+            return Ok(result.Value.Value);
     }
     
     [HttpPost]
@@ -60,7 +60,7 @@ public class ProductController : ControllerBase
         var result = await _sender.Send(cmd, cancellationToken);
         
         if (result.IsFailure)
-            return NotFound(result.Error);
+            return NotFound(result.Errors);
         else
             return Ok();
     }
@@ -72,7 +72,7 @@ public class ProductController : ControllerBase
         var result = await _sender.Send(cmd, cancellationToken);
         
         if(result.IsFailure)
-            return BadRequest(result.Error);
+            return BadRequest(result.Errors);
         return Ok();
     }
     
@@ -84,7 +84,7 @@ public class ProductController : ControllerBase
         var result = await _sender.Send(cmd);
         
         if(result.IsFailure)
-            return NotFound(result.Error);
+            return NotFound(result.Errors);
         else
             return Ok();
     }

@@ -18,7 +18,7 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
         if(!await _productsRepository.Exists(ProductId.Create(request.Dto.Id), cancellationToken))
-            return Result.Failure(Error.NotFound);
+            return Result.Failure([Error.NotFound]);
         try
         {
             await _productsRepository.Update(
@@ -31,7 +31,7 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
         }
         catch (Exception e)
         {
-            return Result.Failure(new Error(e.Message, e.StackTrace ?? string.Empty));
+            return Result.Failure([new Error(e.Message, e.StackTrace ?? string.Empty)]);
         }
     }
 }

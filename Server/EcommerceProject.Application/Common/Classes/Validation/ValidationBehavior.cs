@@ -31,12 +31,11 @@ public class ValidationBehaviour<TRequest, TResponse>
         var errors = validationResults
             .Where(x => x.Errors.Count != 0)
             .SelectMany(x => x.Errors)
+            .Select(x => new Error(
+                x.PropertyName,
+                x.ErrorMessage))
             .ToList();
-
-        var implementedError = new Error(
-            "Validation error",
-            string.Join("\n", errors.Select(x => x.ErrorMessage))
-        );
+        
         
         if (errors.Any())
         {
@@ -45,12 +44,12 @@ public class ValidationBehaviour<TRequest, TResponse>
             {
                 var genericArgument = typeof(TResponse).GetGenericArguments()[0]; 
                 var resultType = typeof(Result<>).MakeGenericType(genericArgument); 
-                var errorResult = Activator.CreateInstance(resultType, false, implementedError, null);
+                var errorResult = Activator.CreateInstance(resultType, false, errors, null);
                 return (TResponse)errorResult!;
             }
             else if (typeof(TResponse) == typeof(Result))
             {
-                return (TResponse)(object)Result.Failure(implementedError);
+                return (TResponse)Result.Failure(errors);
             }
         }
 

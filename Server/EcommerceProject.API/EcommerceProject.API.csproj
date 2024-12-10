@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts\Responses\" />
+    <Folder Include="Http\Product\Responses\" />
   </ItemGroup>
 
 </Project>

@@ -4,13 +4,14 @@ using EcommerceProject.Persistence.Extensions;
 using EcommerceProject.Application.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+var services = builder.Services;
 
 // Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+services.AddControllers();
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen();
 //From extensions
-builder.Services
+services
     .AddApplicationLayerServices()
     .AddPersistenceLayerServices(builder.Configuration);
 

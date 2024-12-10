@@ -17,9 +17,4 @@
     <ProjectReference Include="..\EcommerceProject.Core\EcommerceProject.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Dto\Product\Requests\" />
-    <Folder Include="Dto\Product\Responses\" />
-  </ItemGroup>
-
 </Project>

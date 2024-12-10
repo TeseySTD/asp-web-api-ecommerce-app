@@ -8,12 +8,10 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
     public CreateProductCommandValidator()
     {
         RuleFor(x => x.Value.Id)
-            .NotNull()
             .NotEmpty()
             .WithMessage("Id is required.");
 
         RuleFor(x => x.Value.Title)
-            .NotNull()
             .NotEmpty()
             .WithMessage("Title is required.");
         
@@ -24,13 +22,9 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
                          $"and {ProductTitle.MaxTitleLength} characters.");
 
         RuleFor(x => x.Value.Description)
-            .NotNull()
             .NotEmpty()
-            .WithMessage("Description is required.");
-            
-        RuleFor(x => x.Value.Description)  
-            .MinimumLength(ProductDescription.MinDescriptionLength)
-            .MaximumLength(ProductDescription.MaxDescriptionLength)
+            .WithMessage("Description is required.")
+            .Length(ProductDescription.MinDescriptionLength, ProductDescription.MaxDescriptionLength)
             .WithMessage($"Description must be between {ProductDescription.MinDescriptionLength} " +
                          $"and {ProductDescription.MaxDescriptionLength} characters.");
         
@@ -40,7 +34,7 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
             .WithMessage($"Price must be between {ProductPrice.MinPrice} and {ProductPrice.MaxPrice}.");
 
         RuleFor(x => x.Value.Quantity)
-            .NotNull()
+            .NotEmpty()
             .WithMessage("Quantity is required.");
     }
 }

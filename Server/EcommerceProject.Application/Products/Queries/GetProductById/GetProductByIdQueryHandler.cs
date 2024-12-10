@@ -22,7 +22,7 @@ public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, Get
     {
         var product = await _productsRepository.FindById(request.Id, cancellationToken);
         if (product == null)
-            return Result<GetProductByIdResponse>.Failure(Error.NotFound);
+            return Result<GetProductByIdResponse>.Failure([Error.NotFound]);
         else
         {
             var response = new GetProductByIdResponse(
