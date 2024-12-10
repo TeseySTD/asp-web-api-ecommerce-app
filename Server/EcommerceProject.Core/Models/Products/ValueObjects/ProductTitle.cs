@@ -1,3 +1,5 @@
+using EcommerceProject.Core.Common;
+
 namespace EcommerceProject.Core.Models.Products.ValueObjects;
 
 public record ProductTitle
@@ -11,10 +13,17 @@ public record ProductTitle
         Value = title;
     }
 
-    public static ProductTitle Create(string title){
-        ArgumentNullException.ThrowIfNull(title, nameof(title));
-        if(title.Length > MaxTitleLength || title.Length < MinTitleLength)
-            throw new ArgumentException($"Product title must be between {MinTitleLength} and {MaxTitleLength} characters.");
+    public static Result<ProductTitle> Create(string title)
+    {
+        var result = Result<ProductTitle>.TryFail()
+            .CheckError(string.IsNullOrEmpty(title), 
+                new Error("Title is required", ""))
+            .CheckError(title.Length > MaxTitleLength || title.Length < MinTitleLength,
+                new Error("Title is too long", $"Product title must be between {MinTitleLength} and {MaxTitleLength} characters"))
+            .Build();
+        
+        if(result.IsFailure)
+            return result;
         return new ProductTitle(title);
     }
 

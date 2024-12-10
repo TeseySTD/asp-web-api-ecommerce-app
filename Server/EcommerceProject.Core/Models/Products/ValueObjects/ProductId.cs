@@ -10,10 +10,15 @@ public record ProductId
     {
         Value = value;
     }
-    public static ProductId Create(Guid productId)
+    public static Result<ProductId> Create(Guid productId)
     {
-        if (productId == Guid.Empty)
-            throw new ArgumentNullException(nameof(productId));
+        var result = Result<ProductId>.TryFail()
+                .CheckError(productId == Guid.Empty,
+                    new Error("Product Id cannot be empty", "ProductId value object failure"))
+                .Build();
+        
+        if(result.IsFailure)
+            return result;
         return new ProductId(productId);
     }
 }

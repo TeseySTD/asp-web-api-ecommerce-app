@@ -13,7 +13,7 @@ public class Result
         Errors = errors.ToList();
     }
 
-    public bool IsSuccess { get; }
+    public bool IsSuccess { get; private set; }
     public bool IsFailure => !IsSuccess;
 
     public IReadOnlyCollection<Error> Errors
@@ -24,12 +24,14 @@ public class Result
 
     public static Result Success() => new(true, [Error.None]);
     public static Result Failure(IEnumerable<Error> errors) => new(false, errors);
-    public new static FailResultBuilder<Result> Fail() => new(
-        new Result(false, Array.Empty<Error>()));
+    public void Fail() => this.IsSuccess = false;
+    public new static ResultBuilder<Result> TryFail() => new(
+        new Result(true, Array.Empty<Error>()));
     
     public Result AddError(Error error)
     {
-        _errors.Add(error);
+        if(IsFailure)
+            _errors.Add(error);
         return this;
     }
 }
@@ -49,8 +51,11 @@ public class Result<TResponse> : Result
     public new static Result<TResponse> Failure(IEnumerable<Error> errors) =>
         new(false, errors.ToList(), default!);
 
-    public new static FailResultBuilder<Result<TResponse>> Fail() => new(
-        new Result<TResponse>(false, Array.Empty<Error>(), default!));
+    public new static ResultBuilder<Result<TResponse>> TryFail() => new(
+        new Result<TResponse>(true, Array.Empty<Error>(), default!));
+    
+    public new static ResultBuilder<Result<TResponse>> TryFail(TResponse value) => new(
+        new Result<TResponse>(true, Array.Empty<Error>(), value));
 
     public static implicit operator Result<TResponse>(TResponse response) => Success(response);
 
@@ -60,19 +65,23 @@ public class Result<TResponse> : Result
     }
 }
 
-public class FailResultBuilder<TResult>
+public class ResultBuilder<TResult>
     where TResult : Result
 {
     private TResult _result;
 
-    public FailResultBuilder(TResult result)
+    public ResultBuilder(TResult result)
     {
         _result = result;
     }
-
-    public FailResultBuilder<TResult> AddError(Error error)
+    
+    public ResultBuilder<TResult> CheckError(bool condition, Error error)
     {
-        _result.AddError(error);
+        if(!condition)
+        {
+            _result.Fail();
+            _result.AddError(error);
+        }
         return this;
     }
     

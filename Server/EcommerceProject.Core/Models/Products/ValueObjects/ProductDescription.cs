@@ -1,3 +1,5 @@
+using EcommerceProject.Core.Common;
+
 namespace EcommerceProject.Core.Models.Products.ValueObjects;
 
 public record ProductDescription
@@ -11,10 +13,17 @@ public record ProductDescription
         Value = description;
     }
     
-    public static ProductDescription Create(string description){
-        ArgumentNullException.ThrowIfNull(description, nameof(description));
-        if(description.Length < MinDescriptionLength || description.Length > MaxDescriptionLength)
-            throw new ArgumentException($"Product description must be between {MinDescriptionLength} and {MaxDescriptionLength} characters.");
+    public static Result<ProductDescription> Create(string description){
+        var result = Result<ProductDescription>.TryFail()
+            .CheckError(string.IsNullOrEmpty(description),
+                new Error("Description is required", nameof(description)))
+            .CheckError(description.Length < MinDescriptionLength || description.Length > MaxDescriptionLength,
+                new Error("Product description is out of length",
+                    $"Product description must be between {MinDescriptionLength} and {MaxDescriptionLength} characters."))
+            .Build();
+            
+        if(result.IsFailure)
+            return result;
         return new ProductDescription(description);
     }
 
