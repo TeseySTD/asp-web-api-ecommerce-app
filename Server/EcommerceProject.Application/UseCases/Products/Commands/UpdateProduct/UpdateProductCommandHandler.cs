@@ -18,19 +18,13 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
     {
         if(!await _productsRepository.Exists(ProductId.Create(request.Value.Id).Value, cancellationToken))
             return Result.Failure([Error.NotFound]);
-        try
-        {
-            await _productsRepository.Update(
+
+        return await _productsRepository.Update(
                 id: ProductId.Create(request.Value.Id).Value,
                 title: ProductTitle.Create(request.Value.Title).Value,
                 description: ProductDescription.Create(request.Value.Description).Value,
                 price: ProductPrice.Create(request.Value.Price).Value,
-                categoryId: null);
-            return Result.Success();
-        }
-        catch (Exception e)
-        {
-            return Result.Failure([new Error(e.Message, e.StackTrace ?? string.Empty)]);
-        }
+                categoryId: request.CategoryId);
+
     }
 }

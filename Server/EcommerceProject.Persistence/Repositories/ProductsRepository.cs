@@ -1,4 +1,5 @@
 using EcommerceProject.Application.Common.Interfaces.Repositories;
+using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
 using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Products.ValueObjects;
@@ -27,11 +28,14 @@ public class ProductsRepository : IProductsRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, CategoryId categoryId)
+    public async Task<Result> Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, CategoryId categoryId)
     {
         if(!await _context.Products.AnyAsync(p => p.Id == id))
-            throw new Exception("Product not found, incorrect id");
+            return new Error("Product not found",$"Product not found, incorrect id:{id}");
 
+        if(!await _context.Categories.AnyAsync(p => p.Id == categoryId))
+            return new Error("Category not found",$"Category not found, incorrect id:{id}");
+        
         await _context.Products
             .Where(p => p.Id == id)
                 .ExecuteUpdateAsync(p => p
@@ -39,6 +43,7 @@ public class ProductsRepository : IProductsRepository
                     .SetProperty(p => p.Description, description)
                     .SetProperty(p => p.Price, price)
                     .SetProperty(p => p.CategoryId, categoryId));
+        return Result.Success();
     }
 
     public async Task Delete(ProductId id)

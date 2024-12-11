@@ -1,4 +1,5 @@
 ﻿using EcommerceProject.Application.Common.Classes.Validation;
+using EcommerceProject.Core.Models.Categories.ValueObjects;
 using EcommerceProject.Core.Models.Products.ValueObjects;
 using FluentValidation;
 
@@ -19,5 +20,7 @@ public class UpdateProductCommandValidator: AbstractValidator<UpdateProductComma
         RuleFor(x => x.Value.Quantity)
             .NotEmpty()
             .WithMessage("Quantity is required.");
+        
+        RuleFor(x => x.CategoryId.Value).MustBeCreatedWith(CategoryId.Create);
     }
 }

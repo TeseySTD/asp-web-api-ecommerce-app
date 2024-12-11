@@ -5,6 +5,8 @@ using EcommerceProject.Application.UseCases.Products.Commands.DeleteProduct;
 using EcommerceProject.Application.UseCases.Products.Commands.UpdateProduct;
 using EcommerceProject.Application.UseCases.Products.Queries.GetProductById;
 using EcommerceProject.Application.UseCases.Products.Queries.GetProducts;
+using EcommerceProject.Core.Common;
+using EcommerceProject.Core.Models.Categories.ValueObjects;
 using EcommerceProject.Core.Models.Products.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -48,21 +50,30 @@ public class ProductController : ApiController
             request.Title,
             request.Description,
             request.Price,
-            request.Quantity
+            request.Quantity,
+            null
         );
-        var cmd = new CreateProductCommand(dto);
+        var cmd = new CreateProductCommand(dto, CategoryId.Create(request.CategoryId).Value);
         var result = await Sender.Send(cmd, cancellationToken);
-        
-        if (result.IsFailure)
-            return BadRequest(result.Errors);
-        else
-            return Ok();
+
+        return result.Map<ActionResult<Guid>>(
+            onSuccess: () => Ok(dto.Id),
+            onFailure: errors => BadRequest(errors));
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult> UpdateProduct(ProductDto productDto, CancellationToken cancellationToken)
+    public async Task<ActionResult> UpdateProduct([FromBody] UpdateProductRequest request, CancellationToken cancellationToken)
     {
-        var cmd = new UpdateProductCommand(productDto);
+        ProductDto dto = new ProductDto(
+            Id: request.Id,
+            Title: request.Title,
+            Description: request.Description,
+            Price: request.Price,
+            Quantity: request.Quantity,
+            Category: null
+        );
+        
+        var cmd = new UpdateProductCommand(dto, CategoryId.Create(request.CategoryId).Value);
         var result = await Sender.Send(cmd, cancellationToken);
         
         if(result.IsFailure)

@@ -73,4 +73,10 @@ public class CategoriesRepository : ICategoriesRepository
         await _context.Categories.Where(p => p.Id == id).ExecuteDeleteAsync();
         return Result.Success();
     }
+
+    public async Task<bool> Exists(CategoryId id, CancellationToken cancellationToken)
+    {
+        return await _context.Categories.AnyAsync(p => p.Id == id, cancellationToken);
+    }
+
 }
