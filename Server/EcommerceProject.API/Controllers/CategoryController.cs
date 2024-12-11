@@ -5,29 +5,22 @@ using EcommerceProject.Application.UseCases.Categories.Commands.DeleteCategory;
 using EcommerceProject.Application.UseCases.Categories.Commands.UpdateCategory;
 using EcommerceProject.Application.UseCases.Categories.Queries.GetCategories;
 using EcommerceProject.Application.UseCases.Categories.Queries.GetCategoryById;
-using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceProject.API.Controllers;
 
-[ApiController]
 [Route("api/categories")]
-public class CategoryController : ControllerBase
+public class CategoryController : ApiController
 {
-    private readonly ISender _sender;
-
-    public CategoryController(ISender sender)
-    {
-        _sender = sender;
-    }
+    public CategoryController(ISender sender):base(sender){}
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
     {
         var query = new GetCategoriesQuery();
-        var result = await _sender.Send(query);
+        var result = await Sender.Send(query);
 
         if (result.IsFailure)
             return NotFound(result.Errors);
@@ -40,7 +33,7 @@ public class CategoryController : ControllerBase
     {
         var query = new GetCategoryByIdQuery(CategoryId.Create(id).Value);
 
-        var result = await _sender.Send(query);
+        var result = await Sender.Send(query);
 
         if (result.IsFailure)
             return NotFound(result.Errors);
@@ -54,7 +47,7 @@ public class CategoryController : ControllerBase
             request.Name, request.Description
         );
 
-        var result = await _sender.Send(cmd);
+        var result = await Sender.Send(cmd);
 
         if (result.IsFailure)
             return BadRequest(result.Errors);
@@ -66,7 +59,7 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> UpdateCategory(CategoryDto request, CancellationToken cancellationToken)
     {
         var cmd = new UpdateCategoryCommand(request);
-        var result = await _sender.Send(cmd, cancellationToken);
+        var result = await Sender.Send(cmd, cancellationToken);
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
@@ -79,7 +72,7 @@ public class CategoryController : ControllerBase
     {
         var cmd = new DeleteCategoryCommand(CategoryId.Create(id).Value);
         
-        var result = await _sender.Send(cmd, cancellationToken);
+        var result = await Sender.Send(cmd, cancellationToken);
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),

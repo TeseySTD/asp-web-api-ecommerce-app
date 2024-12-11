@@ -1,5 +1,4 @@
 using EcommerceProject.API.Http.Product.Requests;
-using Microsoft.AspNetCore.Mvc;
 using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Application.UseCases.Products.Commands.CreateProduct;
 using EcommerceProject.Application.UseCases.Products.Commands.DeleteProduct;
@@ -8,25 +7,20 @@ using EcommerceProject.Application.UseCases.Products.Queries.GetProductById;
 using EcommerceProject.Application.UseCases.Products.Queries.GetProducts;
 using EcommerceProject.Core.Models.Products.ValueObjects;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceProject.API.Controllers;
 
-[ApiController]
 [Route("api/products")]
-public class ProductController : ControllerBase
+public class ProductController : ApiController
 {
-    private readonly ISender _sender;
-    
-    public ProductController(ISender sender)
-    {
-        _sender = sender;
-    }
+    public ProductController(ISender sender) : base(sender){}
     
     [HttpGet]
     public async Task<ActionResult<GetProductsResponse>> GetProducts(CancellationToken cancellationToken)
     {
         var query = new GetProductsQuery();
-        var result = await _sender.Send(query, cancellationToken);
+        var result = await Sender.Send(query, cancellationToken);
 
         if (result.IsFailure)
             return NotFound(result.Errors);
@@ -38,7 +32,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ProductDto>> GetProductById(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetProductByIdQuery(ProductId.Create(id).Value);
-        var result = await _sender.Send(query, cancellationToken);
+        var result = await Sender.Send(query, cancellationToken);
         
         if(result.IsFailure)
             return NotFound(result.Errors);
@@ -57,7 +51,7 @@ public class ProductController : ControllerBase
             request.Quantity
         );
         var cmd = new CreateProductCommand(dto);
-        var result = await _sender.Send(cmd, cancellationToken);
+        var result = await Sender.Send(cmd, cancellationToken);
         
         if (result.IsFailure)
             return BadRequest(result.Errors);
@@ -69,7 +63,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> UpdateProduct(ProductDto productDto, CancellationToken cancellationToken)
     {
         var cmd = new UpdateProductCommand(productDto);
-        var result = await _sender.Send(cmd, cancellationToken);
+        var result = await Sender.Send(cmd, cancellationToken);
         
         if(result.IsFailure)
             return BadRequest(result.Errors);
@@ -81,7 +75,7 @@ public class ProductController : ControllerBase
     {
         var cmd = new DeleteProductCommand(ProductId.Create(id).Value);
         
-        var result = await _sender.Send(cmd);
+        var result = await Sender.Send(cmd);
         
         if(result.IsFailure)
             return NotFound(result.Errors);
