@@ -77,10 +77,16 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         
         builder
             .Property(p => p.Name)
-            .HasMaxLength(Category.MaxNameLength);
+            .HasConversion(
+                c => c.Value,
+                value => CategoryName.Create(value).Value)
+            .HasMaxLength(CategoryName.MaxNameLength);
 
         builder
             .Property(p => p.Description)
-            .HasMaxLength(Category.MaxDescriptionLength);
+            .HasConversion(
+                c => c.Value,
+                value => CategoryDescription.Create(value).Value)
+            .HasMaxLength(CategoryDescription.MaxDescriptionLength);
     }
 }

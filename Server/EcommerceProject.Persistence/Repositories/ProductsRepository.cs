@@ -45,6 +45,7 @@ public class ProductsRepository : IProductsRepository
     {
         if(!await _context.Products.AnyAsync(p => p.Id == id))
             throw new Exception("Product not found, incorrect id");
+        
         await _context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
     }
 

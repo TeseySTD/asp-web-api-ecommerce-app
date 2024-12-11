@@ -1,11 +1,11 @@
 using EcommerceProject.API.Http.Product.Requests;
 using Microsoft.AspNetCore.Mvc;
 using EcommerceProject.Application.Dto.Product;
-using EcommerceProject.Application.Products.Commands.CreateProduct;
-using EcommerceProject.Application.Products.Commands.DeleteProduct;
-using EcommerceProject.Application.Products.Commands.UpdateProduct;
-using EcommerceProject.Application.Products.Queries.GetProductById;
-using EcommerceProject.Application.Products.Queries.GetProducts;
+using EcommerceProject.Application.UseCases.Products.Commands.CreateProduct;
+using EcommerceProject.Application.UseCases.Products.Commands.DeleteProduct;
+using EcommerceProject.Application.UseCases.Products.Commands.UpdateProduct;
+using EcommerceProject.Application.UseCases.Products.Queries.GetProductById;
+using EcommerceProject.Application.UseCases.Products.Queries.GetProducts;
 using EcommerceProject.Core.Models.Products.ValueObjects;
 using MediatR;
 
@@ -60,7 +60,7 @@ public class ProductController : ControllerBase
         var result = await _sender.Send(cmd, cancellationToken);
         
         if (result.IsFailure)
-            return NotFound(result.Errors);
+            return BadRequest(result.Errors);
         else
             return Ok();
     }
