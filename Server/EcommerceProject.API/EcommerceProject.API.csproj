@@ -20,8 +20,4 @@
     <ProjectReference Include="..\EcommerceProject.Application\EcommerceProject.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Http\Product\Responses\" />
-  </ItemGroup>
-
 </Project>

@@ -15,12 +15,6 @@ public class DeleteProductCommandHandler : ICommandHandler<DeleteProductCommand>
 
     public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
     {
-        if (!await _productsRepository.Exists(request.ProductId, cancellationToken))
-            return Result.Failure([Error.NotFound]);
-        else
-        {
-            await _productsRepository.Delete(request.ProductId);
-            return Result.Success();
-        }
+        return await _productsRepository.Delete(request.ProductId);
     }
 }

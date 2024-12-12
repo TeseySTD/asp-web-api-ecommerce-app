@@ -5,7 +5,7 @@ using EcommerceProject.Core.Common;
 
 namespace EcommerceProject.Application.UseCases.Products.Queries.GetProducts;
 
-public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, GetProductsResponse>
+public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, IReadOnlyList<ProductReadDto>>
 {
     private readonly IProductsRepository _productsRepository;
     private readonly ICategoriesRepository _categoriesRepository;
@@ -16,14 +16,14 @@ public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, Ge
         _categoriesRepository = categoriesRepository;
     }
 
-    public async Task<Result<GetProductsResponse>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<ProductReadDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = await _productsRepository.Get(cancellationToken);
+        var products = (await _productsRepository.Get(cancellationToken)).ToList();
         if (!products.Any())
-            return Result<GetProductsResponse>.Failure([Error.NotFound]);
+            return Result<IReadOnlyList<ProductReadDto>>.Failure(Error.NotFound);
 
 
-        var productDtos = new List<ProductDto>();
+        var productDtos = new List<ProductReadDto>();
 
         foreach (var product in products)
         {
@@ -35,7 +35,7 @@ public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, Ge
                     Description: category.Description.Value
                 );
 
-            productDtos.Add(new ProductDto(
+            productDtos.Add(new ProductReadDto(
                 Id: product.Id.Value,
                 Title: product.Title.Value,
                 Description: product.Description.Value,
@@ -44,10 +44,8 @@ public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, Ge
                 Category: categoryDto
             ));
         }
-
-        var response = new GetProductsResponse(productDtos);
-
-        return Result<GetProductsResponse>.Success(response);
+        
+        return productDtos.ToList().AsReadOnly();
 
     }
 }

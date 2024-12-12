@@ -3,10 +3,11 @@ using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories;
+using EcommerceProject.Core.Models.Products;
 
 namespace EcommerceProject.Application.UseCases.Products.Queries.GetProductById;
 
-public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, GetProductByIdResponse>
+public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, ProductReadDto>
 {
     private readonly IProductsRepository _productsRepository;
     private readonly ICategoriesRepository _categoriesRepository;
@@ -18,35 +19,33 @@ public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, Get
         _categoriesRepository = categoriesRepository;
     }
 
-    public async Task<Result<GetProductByIdResponse>> Handle(GetProductByIdQuery request,
+    public async Task<Result<ProductReadDto>> Handle(GetProductByIdQuery request,
         CancellationToken cancellationToken)
     {
         var product = await _productsRepository.FindById(request.Id, cancellationToken);
         if (product == null)
-            return Result<GetProductByIdResponse>.Failure([Error.NotFound]);
-        else
-        {
-            var category = await _categoriesRepository.FindById(product.CategoryId, cancellationToken);
-            if (category == null)
-                return new Error("Category doesn't exist", $"Category with id: {product.CategoryId.Value} does not exist");
-            
+            return Error.NotFound;
 
-            var response = new GetProductByIdResponse(
-                new ProductDto(
-                    Id: product.Id.Value,
-                    Title: product.Title.Value,
-                    Description: product.Description.Value,
-                    Price: product.Price.Value,
-                    Quantity: product.StockQuantity.Value,
-                    Category: new CategoryDto(
-                        Id: category.Id.Value,
-                        Name: category.Name.Value,
-                        Description: category.Description.Value
-                    )
-                )
+        var category =  await _categoriesRepository.FindById(product.CategoryId, cancellationToken);
+
+        var categoryDto = category == null
+            ? null
+            : new CategoryDto(
+                Id: category.Id.Value,
+                Name: category.Name.Value,
+                Description: category.Description.Value
             );
 
-            return response;
-        }
+        var response =
+            new ProductReadDto(
+                Id: product.Id.Value,
+                Title: product.Title.Value,
+                Description: product.Description.Value,
+                Price: product.Price.Value,
+                Quantity: product.StockQuantity.Value,
+                Category: categoryDto 
+            );
+
+        return response;
     }
 }

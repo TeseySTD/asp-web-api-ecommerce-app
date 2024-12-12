@@ -7,10 +7,10 @@ namespace EcommerceProject.Application.Common.Interfaces.Repositories;
 
 public interface IProductsRepository
 {
-    Task Add(Product product);
-    Task<List<Product>> Get(CancellationToken cancellationToken);
-    Task<Result> Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, CategoryId categoryId);
-    Task Delete(ProductId productId);
+    Task<IEnumerable<Product>> Get(CancellationToken cancellationToken);
     Task<Product?> FindById(ProductId productId, CancellationToken cancellationToken);
+    Task<Result> Add(Product product);
+    Task<Result> Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, StockQuantity quantity,  CategoryId categoryId);
+    Task<Result> Delete(ProductId productId);
     Task<bool> Exists(ProductId productId, CancellationToken cancellationToken);
 }

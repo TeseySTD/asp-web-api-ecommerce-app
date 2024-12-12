@@ -3,6 +3,5 @@ using EcommerceProject.Application.Dto.Product;
 
 namespace EcommerceProject.Application.UseCases.Products.Queries.GetProducts;
 
-public sealed record GetProductsQuery : IQuery<GetProductsResponse>;
+public sealed record GetProductsQuery : IQuery<IReadOnlyList<ProductReadDto>>;
 
-public sealed record GetProductsResponse(IReadOnlyList<ProductDto> Products);

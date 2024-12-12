@@ -25,7 +25,7 @@ public class Result
     public static Result Success() => new(true, [Error.None]);
     public static Result Failure(IEnumerable<Error> errors) => new(false, errors);
     public static Result Failure(Error error) => new(false, [error]);
-    public void Fail() => this.IsSuccess = false;
+    public void Fail() => IsSuccess = false;
     public static ResultBuilder<Result> TryFail() => new(
         new Result(true, Array.Empty<Error>()));
     

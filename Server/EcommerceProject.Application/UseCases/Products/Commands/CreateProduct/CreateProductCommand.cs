@@ -4,6 +4,6 @@ using EcommerceProject.Core.Models.Categories.ValueObjects;
 
 namespace EcommerceProject.Application.UseCases.Products.Commands.CreateProduct;
 
-public sealed record CreateProductCommand(ProductDto Value, CategoryId CategoryId) : ICommand;
+public sealed record CreateProductCommand(ProductWriteDto Value) : ICommand;
 
 
