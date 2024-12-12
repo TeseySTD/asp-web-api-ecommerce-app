@@ -24,7 +24,7 @@ public class User : AggregateRoot<UserId>
 
     public static User Create(UserName name, Email email, Password password, PhoneNumber phoneNumber, UserRole role,
         UserId? id = null) =>
-        new User(id ?? UserId.Create(Guid.NewGuid()), name, email, password, phoneNumber, role);
+        new User(id ?? UserId.Create(Guid.NewGuid()).Value, name, email, password, phoneNumber, role);
 
     public enum UserRole
     {

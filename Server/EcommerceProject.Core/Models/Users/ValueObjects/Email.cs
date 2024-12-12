@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using EcommerceProject.Core.Common;
 
 namespace EcommerceProject.Core.Models.Users.ValueObjects;
 
@@ -10,14 +11,14 @@ public record Email
 
     private Email(string email) => Value = email;
 
-    public static Email Create(string email)
+    public static Result<Email> Create(string email)
     {
-        ArgumentException.ThrowIfNullOrEmpty(email);
-        if(Regex.IsMatch(email, RegexEmail))
-            return new Email(email);
-        else
-        {
-            throw new FormatException("Email is not valid");
-        }
+        return Result<Email>.TryFail(new Email(email))
+            .CheckError(string.IsNullOrEmpty(email),
+                new Error("Email is required", "Email cannot be null or empty"))
+            .DropIfFailed()
+            .CheckError(Regex.IsMatch(email, RegexEmail),
+                new Error("Email is not a valid email", "Email is not a valid email"))
+            .Build();
     }
 }

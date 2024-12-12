@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using EcommerceProject.Core.Common;
 
 namespace EcommerceProject.Core.Models.Users.ValueObjects;
 
@@ -10,13 +11,14 @@ public record PhoneNumber
 
     private PhoneNumber(string phoneNumber) => Value = phoneNumber;
 
-    public static PhoneNumber Create(string phoneNumber)
+    public static Result<PhoneNumber> Create(string phoneNumber)
     {
-        if(Regex.IsMatch(phoneNumber, RegexPhoneNumber))
-            return new PhoneNumber(phoneNumber);
-        else
-        {
-            throw new FormatException("Invalid phone number");
-        }
+        return Result<PhoneNumber>.TryFail(new PhoneNumber(phoneNumber))
+            .CheckError(string.IsNullOrEmpty(phoneNumber),
+                new Error("Phone number is required", "Phone number must be not null or empty."))
+            .DropIfFailed()
+            .CheckError(!Regex.IsMatch(phoneNumber, RegexPhoneNumber),
+                new Error("Phone number is incorrect.", "Phone number is not a valid phone number."))
+            .Build();
     }
 }

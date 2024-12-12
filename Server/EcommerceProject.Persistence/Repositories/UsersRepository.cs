@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Persistence.Repositories;
 
-public class UserRepository : IUserRepository
+public class UsersRepository : IUsersRepository
 {
     private readonly StoreDbContext _context;
 
-    public UserRepository(StoreDbContext context)
+    public UsersRepository(StoreDbContext context)
     {
         _context = context;
     }

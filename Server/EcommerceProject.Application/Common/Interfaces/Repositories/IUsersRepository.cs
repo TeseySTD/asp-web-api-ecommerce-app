@@ -4,7 +4,7 @@ using EcommerceProject.Core.Models.Users.ValueObjects;
 
 namespace EcommerceProject.Application.Common.Interfaces.Repositories;
 
-public interface IUserRepository
+public interface IUsersRepository
 {
     Task<IEnumerable<User>> Get(CancellationToken cancellationToken);
     Task<User?> FindById(UserId userId, CancellationToken cancellationToken);

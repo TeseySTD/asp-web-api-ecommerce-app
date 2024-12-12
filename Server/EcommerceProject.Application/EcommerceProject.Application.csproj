@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UseCases\" />
+    <Folder Include="UseCases\Users\Queries\GetUsers\" />
   </ItemGroup>
 
 </Project>

@@ -40,7 +40,7 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             .ValueGeneratedNever()
             .HasConversion(
                 userId => userId.Value,
-                value => UserId.Create(value));
+                value => UserId.Create(value).Value);
         
         builder.Property(o => o.OrderDate);
 
