@@ -52,12 +52,12 @@ public class ProductsRepository : IProductsRepository
         
         await _context.Products
             .Where(p => p.Id == id)
-                .ExecuteUpdateAsync(p => p
-                    .SetProperty(pr => pr.Title, title)
-                    .SetProperty(pr => pr.Description, description)
-                    .SetProperty(pr => pr.Price, price)
-                    .SetProperty(pr => pr.StockQuantity, quantity)
-                    .SetProperty(pr => pr.CategoryId, categoryId));
+            .ExecuteUpdateAsync(p => p
+                .SetProperty(pr => pr.Title, title)
+                .SetProperty(pr => pr.Description, description)
+                .SetProperty(pr => pr.Price, price)
+                .SetProperty(pr => pr.StockQuantity, quantity)
+                .SetProperty(pr => pr.CategoryId, categoryId));
         
         return Result.Success();
     }
