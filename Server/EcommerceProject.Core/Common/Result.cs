@@ -97,6 +97,13 @@ public class ResultBuilder<TResult>
         return this;
     }
 
+    public ResultBuilder<TResult> CheckErrorIf(bool checkCondition, bool errorCondition, Error error)
+    {
+        if(checkCondition)
+            return CheckError(errorCondition, error);
+        return this;
+    }
+
     public ResultBuilder<TResult> DropIfFailed()
     {
         if(_result.IsFailure)

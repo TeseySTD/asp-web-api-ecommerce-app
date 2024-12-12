@@ -1,4 +1,5 @@
 using System;
+using EcommerceProject.Core.Common;
 
 namespace EcommerceProject.Core.Models.Orders.ValueObjects;
 
@@ -11,9 +12,11 @@ public record OrderItemId
 
     public Guid Value { get; set; }
 
-    public static OrderItemId Create(Guid orderItemId)
+    public static Result<OrderItemId> Create(Guid orderItemId)
     {
-        return new(orderItemId);
+        if (orderItemId == Guid.Empty)
+            return new Error("OrderItemId is required","OrderItemId cannot be empty");
+        return new OrderItemId(orderItemId);
     }
 }
 

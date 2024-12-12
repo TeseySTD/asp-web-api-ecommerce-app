@@ -29,7 +29,7 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                value => OrderId.Create(value));
+                value => OrderId.Create(value).Value);
         
         builder.HasOne<User>()
             .WithMany()
@@ -91,7 +91,7 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             oib.Property(o => o.Id)
                 .HasConversion(
                     id => id.Value,
-                    value => OrderItemId.Create(value));
+                    value => OrderItemId.Create(value).Value);
 
             oib.Property(o => o.ProductId)
                 .HasConversion(
@@ -109,7 +109,7 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
             oib.Property(o => o.Quantity)
                 .HasConversion(
                     q => q.Value,
-                    value => OrderItemQuantity.Create(value));
+                    value => OrderItemQuantity.Create(value).Value);
 
             oib.Property(o => o.Price)
                 .HasConversion(

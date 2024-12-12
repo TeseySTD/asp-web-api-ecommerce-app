@@ -1,4 +1,6 @@
-﻿namespace EcommerceProject.Core.Models.Orders.ValueObjects;
+﻿using EcommerceProject.Core.Common;
+
+namespace EcommerceProject.Core.Models.Orders.ValueObjects;
 
 public record OrderItemQuantity
 {
@@ -9,9 +11,10 @@ public record OrderItemQuantity
         Value = quantity;
     }
 
-    public static OrderItemQuantity Create(uint quantity)
+    public static Result<OrderItemQuantity> Create(uint quantity)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan<uint>(1, quantity, nameof(quantity));
+        if (quantity < 1)
+            return new Error("Quantity must be greater than zero", nameof(quantity));
         return new OrderItemQuantity(quantity);
     }
     

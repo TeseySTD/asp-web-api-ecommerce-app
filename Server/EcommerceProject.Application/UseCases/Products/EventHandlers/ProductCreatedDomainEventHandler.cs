@@ -7,6 +7,7 @@ public class ProductCreatedDomainEventHandler : INotificationHandler<ProductCrea
 {
     public Task Handle(ProductCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
+        Console.WriteLine($"ProductCreatedDomainEvent: {notification}");
         return Task.CompletedTask;
     }
 }

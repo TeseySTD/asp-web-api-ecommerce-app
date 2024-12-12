@@ -1,3 +1,5 @@
+using EcommerceProject.Core.Common;
+
 namespace EcommerceProject.Core.Models.Orders.ValueObjects;
 
 public record Payment
@@ -27,13 +29,18 @@ public record Payment
         PaymentMethod = paymentMethod;
     }
 
-    public static Payment Create(string cardName, string cardNumber, string expiration, string cvv, string paymentMethod)
+    public static Result<Payment> Create(string cardName, string cardNumber, string expiration, string cvv, string paymentMethod)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(cardName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(cardNumber);
-        ArgumentException.ThrowIfNullOrWhiteSpace(cvv);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(cvv.Length, CVVLength);
-
-        return new Payment(cardName, cardNumber, expiration, cvv, paymentMethod);
+        return Result<Payment>.TryFail(new Payment(cardName, cardNumber, expiration, cvv, paymentMethod))
+            .CheckError(string.IsNullOrWhiteSpace(cardName),
+                new Error("Card name is required", "Card name is required"))
+            .CheckError(string.IsNullOrWhiteSpace(cardNumber),
+                new Error("Card number is required", "Card number is required"))
+            .CheckError(string.IsNullOrWhiteSpace(cvv),
+                new Error("CVV is required", "CVV is required"))
+            .DropIfFailed()
+            .CheckError(cvv.Length != CVVLength,
+                new Error("CVV is out of range", $"CVV must be of length {CVVLength}"))
+            .Build();
     }
 }
