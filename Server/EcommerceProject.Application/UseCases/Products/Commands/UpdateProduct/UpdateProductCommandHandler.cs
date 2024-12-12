@@ -18,12 +18,11 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
         return await _productsRepository.Update(
-                id: ProductId.Create(request.Value.Id).Value,
-                title: ProductTitle.Create(request.Value.Title).Value,
-                description: ProductDescription.Create(request.Value.Description).Value,
-                price: ProductPrice.Create(request.Value.Price).Value,
-                quantity: StockQuantity.Create(request.Value.Quantity),
-                categoryId: CategoryId.Create(request.Value.CategoryId).Value);
-
+            id: ProductId.Create(request.Value.Id).Value,
+            title: ProductTitle.Create(request.Value.Title).Value,
+            description: ProductDescription.Create(request.Value.Description).Value,
+            price: ProductPrice.Create(request.Value.Price).Value,
+            quantity: StockQuantity.Create(request.Value.Quantity),
+            categoryId: request.Value.CategoryId == null ? null : CategoryId.Create((Guid)request.Value.CategoryId).Value);
     }
 }

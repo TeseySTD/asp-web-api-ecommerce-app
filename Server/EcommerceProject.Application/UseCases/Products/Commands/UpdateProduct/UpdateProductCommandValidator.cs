@@ -29,8 +29,6 @@ public class UpdateProductCommandValidator: AbstractValidator<UpdateProductComma
             .NotNull()
             .WithMessage("Quantity is required");
         
-        RuleFor(x => x.Value.CategoryId)
-            .NotNull()
-            .MustBeCreatedWith(CategoryId.Create);
+        RuleFor(x => x.Value.CategoryId).NotEqual(Guid.Empty);
     }
 }

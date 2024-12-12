@@ -44,8 +44,8 @@ public class ProductsRepository : IProductsRepository
         var result = Result.TryFail()
             .CheckError(!await _context.Products.AnyAsync(p => p.Id == id),
                 new Error("Product not found", $"Product not found, incorrect id:{id}"))
-            .CheckError(!await _context.Categories.AnyAsync(p => p.Id == categoryId),
-                new Error("Category not found", $"Category not found, incorrect id:{id}"))
+            .CheckError(!await _context.Categories.AnyAsync(p => p.Id == categoryId) && categoryId != null,
+                new Error("Category not found", $"Category not found, incorrect id:{categoryId}"))
             .Build();
         if(result.IsFailure)
             return result;

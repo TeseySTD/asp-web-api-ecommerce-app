@@ -66,7 +66,7 @@ public class ProductController : ApiController
     public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductRequest request,
         CancellationToken cancellationToken)
     {
-        ProductWriteDto writeDto = new ProductWriteDto(
+        ProductUpdateDto writeDto = new ProductUpdateDto(
             Id: id,
             Title: request.Title,
             Description: request.Description,
