@@ -7,7 +7,7 @@ public record UserId
 {
     private UserId(Guid userId)
     {
-        Value = Guid.NewGuid();
+        Value = userId;
     }
 
     public Guid Value { get; set; }

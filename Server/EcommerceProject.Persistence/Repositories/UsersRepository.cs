@@ -36,6 +36,10 @@ public class UsersRepository : IUsersRepository
         var result = Result.TryFail()
             .CheckError(await _context.Users.AnyAsync(u => u.Id == user.Id, cancellationToken),
                 new Error("User already exists.", $"User with id: {user.Id} already exists."))
+            .CheckError(await _context.Users.AnyAsync(u => u.Email == user.Email, cancellationToken),
+                new Error("User already exists.", $"User with email: {user.Email} already exists."))
+            .CheckError(await _context.Users.AnyAsync(u => u.PhoneNumber == user.PhoneNumber, cancellationToken),
+                new Error("User already exists.", $"User with number: {user.PhoneNumber} already exists."))
             .Build();
 
         if (result.IsSuccess)
@@ -52,7 +56,13 @@ public class UsersRepository : IUsersRepository
         var result = Result.TryFail()
             .CheckError(!await _context.Users.AnyAsync(u => u.Id == user.Id, cancellationToken),
                 new Error("User not exists.", $"User with id: {user.Id} not exists."))
+            .DropIfFailed()
+            .CheckError(await _context.Users.AnyAsync(u => u.Email == user.Email && u.Id != user.Id, cancellationToken),
+                new Error("Incorrect email.", $"User with email: {user.Email} already exists."))
+            .CheckError(await _context.Users.AnyAsync(u => u.PhoneNumber == user.PhoneNumber && u.Id != user.Id, cancellationToken),
+                new Error("Incorrect phone number.", $"User with number: {user.PhoneNumber} already exists."))
             .Build();
+        
         if (result.IsFailure)
             return result;
 

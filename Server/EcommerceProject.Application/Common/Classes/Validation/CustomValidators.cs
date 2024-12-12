@@ -5,7 +5,6 @@ namespace EcommerceProject.Application.Common.Classes.Validation;
 
 public static class CustomValidators
 {
-    
     // To validate using factory method
     public static IRuleBuilderOptionsConditions<T, TElement> MustBeCreatedWith<T, TElement, TObject>(
         this IRuleBuilder<T, TElement> ruleBuilder,

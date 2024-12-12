@@ -17,7 +17,7 @@ public record UserName
             .CheckError(string.IsNullOrEmpty(name),
                 new Error("Name is required", "Name cannot be null or empty."))
             .DropIfFailed()
-            .CheckError(name.Length < MaxNameLength || name.Length > MinNameLength,
+            .CheckError(name.Length < MinNameLength || name.Length > MaxNameLength,
                 new Error("Name is out of range.", $"Name must be between {MinNameLength} and {MaxNameLength}"))
             .Build();
     }

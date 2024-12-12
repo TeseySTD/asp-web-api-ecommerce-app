@@ -19,8 +19,9 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
         builder.HasKey(x => x.Id);
         
         builder.Property(x => x.Id)
+            .ValueGeneratedNever()
             .HasConversion(
-                x => x.Value,
+                id => id.Value,
                 value  => UserId.Create(value).Value);
 
         builder.Property(u => u.Name)

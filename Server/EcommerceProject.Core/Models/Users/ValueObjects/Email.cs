@@ -17,7 +17,7 @@ public record Email
             .CheckError(string.IsNullOrEmpty(email),
                 new Error("Email is required", "Email cannot be null or empty"))
             .DropIfFailed()
-            .CheckError(Regex.IsMatch(email, RegexEmail),
+            .CheckError(!Regex.IsMatch(email, RegexEmail),
                 new Error("Email is not a valid email", "Email is not a valid email"))
             .Build();
     }
