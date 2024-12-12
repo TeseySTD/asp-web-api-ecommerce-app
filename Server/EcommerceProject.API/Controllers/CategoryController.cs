@@ -58,9 +58,14 @@ public class CategoryController : ApiController
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateCategory(CategoryDto request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] UpdateCategoryRequest request,
+        CancellationToken cancellationToken)
     {
-        var cmd = new UpdateCategoryCommand(request);
+        var categoryDto = new CategoryDto(
+            Id: id,
+            Name: request.Name,
+            Description: request.Description);
+        var cmd = new UpdateCategoryCommand(categoryDto);
         var result = await Sender.Send(cmd, cancellationToken);
 
         return result.Map<IActionResult>(

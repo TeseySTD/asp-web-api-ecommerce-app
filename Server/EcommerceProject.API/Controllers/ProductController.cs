@@ -63,11 +63,11 @@ public class ProductController : ApiController
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductRequest request,
+    public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductRequest request,
         CancellationToken cancellationToken)
     {
         ProductWriteDto writeDto = new ProductWriteDto(
-            Id: request.Id,
+            Id: id,
             Title: request.Title,
             Description: request.Description,
             Price: request.Price,
