@@ -10,17 +10,17 @@ public record Payment
     public const int CVVLength = 3;
     
     
-    public string? CardName { get; init; } = default!;
-    public string? CardNumber { get; init; } = default!;
+    public string CardName { get; init; } = default!;
+    public string CardNumber { get; init; } = default!;
     public string? Expiration { get; init; } = default!;
-    public string? CVV { get; init; } = default!;
+    public string CVV { get; init; } = default!;
     public string? PaymentMethod { get; init; } = default!;
 
     protected Payment()
     {
     }
 
-    private Payment(string? cardName, string? cardNumber, string? expiration, string? cvv, string? paymentMethod)
+    private Payment(string cardName, string cardNumber, string? expiration, string cvv, string? paymentMethod)
     {
         CardName = cardName;
         CardNumber = cardNumber;
