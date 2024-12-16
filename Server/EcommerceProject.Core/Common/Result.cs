@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Runtime.InteropServices.JavaScript;
 
 namespace EcommerceProject.Core.Common;
 
@@ -63,7 +62,7 @@ public class Result<TResponse> : Result
     public new static ResultBuilder<Result<TResponse>> TryFail() => new(
         new Result<TResponse>(true, Array.Empty<Error>(), default!));
     
-    public new static ResultBuilder<Result<TResponse>> TryFail(TResponse value) => new(
+    public static ResultBuilder<Result<TResponse>> TryFail(TResponse value) => new(
         new Result<TResponse>(true, Array.Empty<Error>(), value));
 
     public static implicit operator Result<TResponse>(TResponse response) => Success(response);

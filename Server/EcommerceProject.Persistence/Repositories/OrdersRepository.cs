@@ -34,8 +34,8 @@ public class OrdersRepository : IOrdersRepository
                 .ThenInclude(oi => oi.Product)
             .Include(o => o.User)
             .ToListAsync(cancellationToken);
-        
-        return orders;  
+
+        return orders;
     }
 
     public async Task<Order?> FindById(OrderId orderId, CancellationToken cancellationToken)
@@ -54,7 +54,9 @@ public class OrdersRepository : IOrdersRepository
             .CheckError(await _context.Orders.AnyAsync(o => o.Id == order.Id, cancellationToken),
                 new Error(nameof(Order), $"Order with id: {order.Id} already exists"))
             .CheckError(!await _context.Users.AnyAsync(u => u.Id == order.UserId, cancellationToken),
-                new Error(nameof(User), $"User with id: {order.UserId} not exists"));
+                new Error(nameof(User), $"User with id: {order.UserId} not exists"))
+            .CheckError(order.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
+                new Error("Order items error", "Each order item must be unique."));
 
         foreach (var item in order.OrderItems)
             resultBuilder.CheckError(!await _context.Products.AnyAsync(p => p.Id == item.ProductId, cancellationToken),
@@ -67,7 +69,7 @@ public class OrdersRepository : IOrdersRepository
 
         await _context.Orders.AddAsync(order, cancellationToken);
         await _context.SaveChangesAsync();
-        
+
         return Result.Success();
     }
 
@@ -77,28 +79,30 @@ public class OrdersRepository : IOrdersRepository
             .CheckError(!await _context.Orders.AnyAsync(o => o.Id == order.Id, cancellationToken),
                 new Error(nameof(Order), $"Order with id: {order.Id} not exists"))
             .CheckError(!await _context.Users.AnyAsync(u => u.Id == order.UserId, cancellationToken),
-                new Error(nameof(User), $"User with id: {order.UserId} not exists"));
+                new Error(nameof(User), $"User with id: {order.UserId} not exists"))
+            .CheckError(order.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
+                new Error("Order items error", "Each order item must be unique."));
 
         foreach (var item in order.OrderItems)
             resultBuilder.CheckError(!await _context.Products.AnyAsync(p => p.Id == item.ProductId, cancellationToken),
                 new Error(nameof(Product), $"Product with id: {item.ProductId} not exists"));
 
-
         var result = resultBuilder.Build();
         if (result.IsFailure)
             return result;
-        
+
         var orderToUpdate = await _context.Orders
             .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.Id == order.Id, cancellationToken);
-        
+
         orderToUpdate!.Update(
             orderItems: order.OrderItems,
             payment: order.Payment,
-            destinationAddress: order.DestinationAddress);
-        
+            destinationAddress: order.DestinationAddress
+        );
+
         await _context.SaveChangesAsync();
-        
+
         return Result.Success();
     }
 
