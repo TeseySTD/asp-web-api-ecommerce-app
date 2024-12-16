@@ -8,13 +8,13 @@
             "name": "C#: EcommerceProject.API Debug",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/EcommerceProject.API/EcommerceProject.API.csproj"
+            "projectPath": "${workspaceFolder}/Server/EcommerceProject.API/EcommerceProject.API.csproj"
         },
         {
             "name": "C#: EcommerceProject.Core Debug",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/EcommerceProject.Core/EcommerceProject.Core.csproj"
+            "projectPath": "${workspaceFolder}/Server/EcommerceProject.Core/EcommerceProject.Core.csproj"
         },
     ],
     "compounds": [

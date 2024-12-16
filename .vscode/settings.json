@@ -10,5 +10,9 @@
             "database": "ecommercedb",
             "password": "123"
         }
+    ],
+    "cSpell.words": [
+        "Ecommerce",
+        "Mediat"
     ]
 }
