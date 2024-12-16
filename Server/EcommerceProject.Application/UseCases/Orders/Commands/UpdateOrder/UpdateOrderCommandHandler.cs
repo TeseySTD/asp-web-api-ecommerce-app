@@ -5,22 +5,23 @@ using EcommerceProject.Core.Models.Orders;
 using EcommerceProject.Core.Models.Orders.Entities;
 using EcommerceProject.Core.Models.Orders.ValueObjects;
 using EcommerceProject.Core.Models.Products.ValueObjects;
-using EcommerceProject.Core.Models.Users.ValueObjects;
 
-namespace EcommerceProject.Application.UseCases.Orders.Commands.CreateOrder;
+namespace EcommerceProject.Application.UseCases.Orders.Commands.UpdateOrder;
 
-public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Guid>
+public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
 {
     private readonly IOrdersRepository _ordersRepository;
 
-    public CreateOrderCommandHandler(IOrdersRepository ordersRepository)
+    public UpdateOrderCommandHandler(IOrdersRepository ordersRepository)
     {
         _ordersRepository = ordersRepository;
     }
 
-    public async Task<Result<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
-        var orderId = OrderId.Create(Guid.NewGuid()).Value;
+        var order = await _ordersRepository.FindById(request.OrderId, cancellationToken);
+        if (order == null)
+            return new Error("Order for update not found", $"There is no order with this id {request.OrderId} ");
 
         var payment = Payment.Create(
             cvv: request.Value.Payment.cvv,
@@ -30,18 +31,18 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
             paymentMethod: request.Value.Payment.paymentMethod
         ).Value;
 
-        var destinationAddress = Address.Create(
+        var destiantionAddress = Address.Create(
             addressLine: request.Value.DestinationAddress.addressLine,
-            state: request.Value.DestinationAddress.state,
             country: request.Value.DestinationAddress.country,
+            state: request.Value.DestinationAddress.state,
             zipCode: request.Value.DestinationAddress.zipCode
-        ).Value;
-
+        ).Value; 
+        
         var orderItems = new List<OrderItem>();
         foreach (var item in request.Value.OrderItems)
         {
             var orderItem = OrderItem.Create(
-                orderId: orderId,
+                orderId: order.Id,
                 productId: ProductId.Create(item.ProductId).Value,
                 quantity: OrderItemQuantity.Create(item.Quantity).Value,
                 price: ProductPrice.Create(item.Price).Value
@@ -49,20 +50,9 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
 
             orderItems.Add(orderItem);
         }
-
-        var order = Order.Create(
-            id: orderId,
-            payment: payment,
-            destinationAddress: destinationAddress,
-            orderItems: orderItems,
-            userId: UserId.Create(request.Value.UserId).Value
-        );
-
-        return (await _ordersRepository.Add(order, cancellationToken))
-            .Map<Result<Guid>>
-            (
-                onSuccess: () => Result<Guid>.Success(order.Id.Value),
-                onFailure: errors => Result<Guid>.Failure(errors)
-            );
+        
+        order.Update(orderItems, payment, destiantionAddress);
+        
+        return  await _ordersRepository.Update(order, cancellationToken);
     }
 }

@@ -11,15 +11,15 @@ public record class Address
     public string State { get; init; } = default!;
     public string ZipCode { get; init; } = default!;
 
-    private Address(string addressLine, string country, string state, string zipCode)
+    private Address(string addressLine, string? country, string? state, string? zipCode)
     {
         AddressLine = addressLine;
-        Country = country;
-        State = state;
-        ZipCode = zipCode;
+        Country = country ?? "Unknown";
+        State = state ?? "Unknown";
+        ZipCode = zipCode ?? "Unknown";
     }
 
-    public static Result<Address> Create(string addressLine, string country, string state, string zipCode)
+    public static Result<Address> Create(string addressLine, string? country, string? state, string? zipCode)
     {
         return Result<Address>.TryFail(new Address(addressLine, country, state, zipCode))
             .CheckError(string.IsNullOrWhiteSpace(addressLine),

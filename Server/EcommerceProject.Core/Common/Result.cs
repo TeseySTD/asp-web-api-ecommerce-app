@@ -103,7 +103,7 @@ public class ResultBuilder<TResult>
             return CheckError(errorCondition, error);
         return this;
     }
-
+    
     public ResultBuilder<TResult> DropIfFailed()
     {
         if(_result.IsFailure)

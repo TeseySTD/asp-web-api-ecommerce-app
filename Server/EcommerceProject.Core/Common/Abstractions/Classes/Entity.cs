@@ -14,4 +14,6 @@ public abstract class Entity<TId> : IEntity<TId>
     {
         Id = id;
     }
+    
+    protected Entity(){}
 }

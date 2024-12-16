@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
@@ -83,5 +84,19 @@ public class ProductsRepository : IProductsRepository
     public async Task<bool> Exists(ProductId id, CancellationToken cancellationToken = default)
     {
         return await _context.Products.AnyAsync(p => p.Id == id);
+    }
+
+    public async Task<Result<IEnumerable<Product>>> SelectWithCondition(Expression<Func<Product, bool>> condition,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _context.Products.Where(condition).ToListAsync(cancellationToken);
+            return result;
+        }
+        catch (Exception e)
+        {
+            return new Error("Error occured while selecting products", $"{e.Message} \n {e.StackTrace}");
+        }
     }
 }

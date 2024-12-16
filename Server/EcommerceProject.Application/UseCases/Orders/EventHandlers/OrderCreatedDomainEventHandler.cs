@@ -7,6 +7,7 @@ public class OrderCreatedDomainEventHandler : INotificationHandler<OrderCreatedD
 {
     Task INotificationHandler<OrderCreatedDomainEvent>.Handle(OrderCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
+        Console.WriteLine("OrderCreatedDomainEventHandler");
         return Task.CompletedTask;
     }
 }

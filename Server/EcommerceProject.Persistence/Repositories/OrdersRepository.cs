@@ -1,6 +1,7 @@
 ﻿using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Orders;
+using EcommerceProject.Core.Models.Orders.Entities;
 using EcommerceProject.Core.Models.Orders.ValueObjects;
 using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Users;
@@ -25,11 +26,25 @@ public class OrdersRepository : IOrdersRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<Order>> GetAll(CancellationToken cancellationToken)
+    {
+        var orders = await _context.Orders
+            .AsNoTracking()
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+            .Include(o => o.User)
+            .ToListAsync(cancellationToken);
+        
+        return orders;  
+    }
+
     public async Task<Order?> FindById(OrderId orderId, CancellationToken cancellationToken)
     {
         return await _context.Orders
-            .Include(o => o.OrderItems)
             .AsNoTracking()
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+            .Include(o => o.User)
             .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
     }
 
@@ -51,7 +66,8 @@ public class OrdersRepository : IOrdersRepository
             return result;
 
         await _context.Orders.AddAsync(order, cancellationToken);
-
+        await _context.SaveChangesAsync();
+        
         return Result.Success();
     }
 
@@ -71,29 +87,32 @@ public class OrdersRepository : IOrdersRepository
         var result = resultBuilder.Build();
         if (result.IsFailure)
             return result;
-
-        await _context.Orders
-            .Where(o => o.Id == order.Id)
-            .ExecuteUpdateAsync(p => p
-                .SetProperty(pr => pr.OrderItems, order.OrderItems)
-                .SetProperty(pr => pr.DestinationAddress, order.DestinationAddress)
-                .SetProperty(pr => pr.Payment, order.Payment)
-                .SetProperty(pr => pr.UserId, order.UserId));
-
+        
+        var orderToUpdate = await _context.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.Id == order.Id, cancellationToken);
+        
+        orderToUpdate!.Update(
+            orderItems: order.OrderItems,
+            payment: order.Payment,
+            destinationAddress: order.DestinationAddress);
+        
+        await _context.SaveChangesAsync();
+        
         return Result.Success();
     }
 
-    public async Task<Result> Delete(Order order, CancellationToken cancellationToken)
+    public async Task<Result> Delete(OrderId orderId, CancellationToken cancellationToken)
     {
         var result = Result.TryFail()
-            .CheckError(!await _context.Orders.AnyAsync(o => o.Id == order.Id, cancellationToken),
-                new Error(nameof(Order), $"Order with id: {order.Id} does not exist"))
+            .CheckError(!await _context.Orders.AnyAsync(o => o.Id == orderId, cancellationToken),
+                new Error(nameof(Order), $"Order with id: {orderId} does not exist"))
             .Build();
 
         if (result.IsFailure)
             return result;
 
-        await _context.Orders.Where(o => o.Id == order.Id).ExecuteDeleteAsync(cancellationToken);
+        await _context.Orders.Where(o => o.Id == orderId).ExecuteDeleteAsync(cancellationToken);
 
         return Result.Success();
     }

@@ -12,9 +12,9 @@ public record Payment
     
     public string CardName { get; init; } = default!;
     public string CardNumber { get; init; } = default!;
-    public string? Expiration { get; init; } = default!;
+    public string Expiration { get; init; } = default!;
     public string CVV { get; init; } = default!;
-    public string? PaymentMethod { get; init; } = default!;
+    public string PaymentMethod { get; init; } = default!;
 
     protected Payment()
     {
@@ -24,12 +24,12 @@ public record Payment
     {
         CardName = cardName;
         CardNumber = cardNumber;
-        Expiration = expiration;
+        Expiration = expiration ?? "Unknown";
         CVV = cvv;
-        PaymentMethod = paymentMethod;
+        PaymentMethod = paymentMethod ?? "Unknown";
     }
 
-    public static Result<Payment> Create(string cardName, string cardNumber, string expiration, string cvv, string paymentMethod)
+    public static Result<Payment> Create(string cardName, string cardNumber, string? expiration, string cvv, string? paymentMethod)
     {
         return Result<Payment>.TryFail(new Payment(cardName, cardNumber, expiration, cvv, paymentMethod))
             .CheckError(string.IsNullOrWhiteSpace(cardName),

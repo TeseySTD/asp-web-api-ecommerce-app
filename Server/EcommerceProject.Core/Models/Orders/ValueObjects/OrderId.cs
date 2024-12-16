@@ -1,4 +1,3 @@
-using System;
 using EcommerceProject.Core.Common;
 
 namespace EcommerceProject.Core.Models.Orders.ValueObjects;
@@ -7,7 +6,7 @@ public record OrderId
 {
     private OrderId(Guid orderId)
     {
-        Value = Guid.NewGuid();
+        Value = orderId;
     }
 
     public Guid Value { get; private set; }

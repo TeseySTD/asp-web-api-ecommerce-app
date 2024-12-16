@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
 using EcommerceProject.Core.Models.Products;
@@ -13,4 +14,5 @@ public interface IProductsRepository
     Task<Result> Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, StockQuantity quantity,  CategoryId categoryId);
     Task<Result> Delete(ProductId productId);
     Task<bool> Exists(ProductId productId, CancellationToken cancellationToken);
+    Task<Result<IEnumerable<Product>>> SelectWithCondition(Expression<Func<Product, bool>> condition, CancellationToken cancellationToken);
 }
