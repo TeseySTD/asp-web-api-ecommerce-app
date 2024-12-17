@@ -3,8 +3,7 @@ using EcommerceProject.Core.Common;
 using FluentValidation;
 using MediatR;
 
-
-namespace EcommerceProject.Application.Common.Classes.Validation;
+namespace EcommerceProject.Application.Common.Classes.Behaviour;
 
 public class ValidationBehaviour<TRequest, TResponse> 
     : IPipelineBehavior<TRequest, TResponse>
