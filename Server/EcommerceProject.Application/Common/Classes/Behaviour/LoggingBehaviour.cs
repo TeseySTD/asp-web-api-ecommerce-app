@@ -34,19 +34,17 @@ public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest,
 
         try
         {
-            _logger.LogInformation(
-                $"[PROPS] {JsonSerializer.Serialize(request, new JsonSerializerOptions { WriteIndented = true })}");
+            _logger.LogInformation("[PROPS] {Props}",
+                JsonSerializer.Serialize(request, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true }));
         }
         catch (Exception)
         {
-            _logger.LogInformation(
-                $"[Serialization props ERROR] {typeof(TRequest).Name} Could not serialize the request.");
+            _logger.LogInformation($"[Serialization props ERROR] {requestName} Could not serialize the request.");
         }
 
         response = await next();
 
         timer.Stop();
-
         var timeTaken = timer.Elapsed;
         if (timeTaken.Milliseconds > MaximalPerformanceTimeInMs)
         {
@@ -59,7 +57,7 @@ public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest,
             var res = response as Result;
             if (res!.IsFailure)
                 _logger.LogWarning("[ERROR] Handler returned Result object with errors: {Errors}",
-                    JsonSerializer.Serialize(res.Errors, new JsonSerializerOptions { WriteIndented = true }));
+                    JsonSerializer.Serialize(res.Errors, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true}));
         }
 
         _logger.LogInformation("[END] Handler {Request} with response type: {Response}; Excecution time: {Time}ms.",

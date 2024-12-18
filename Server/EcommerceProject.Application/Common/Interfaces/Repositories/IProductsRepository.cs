@@ -11,7 +11,7 @@ public interface IProductsRepository
     Task<IEnumerable<Product>> Get(CancellationToken cancellationToken);
     Task<Product?> FindById(ProductId productId, CancellationToken cancellationToken);
     Task<Result> Add(Product product);
-    Task<Result> Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, StockQuantity quantity,  CategoryId categoryId);
+    Task<Result> Update(Product product, CancellationToken cancellationToken);
     Task<Result> Delete(ProductId productId);
     Task<bool> Exists(ProductId productId, CancellationToken cancellationToken);
     Task<Result<IEnumerable<Product>>> SelectWithCondition(Expression<Func<Product, bool>> condition, CancellationToken cancellationToken);

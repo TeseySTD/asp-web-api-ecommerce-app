@@ -24,6 +24,6 @@ public class UpdateCategoryCommandHandler : ICommandHandler<UpdateCategoryComman
             description: CategoryDescription.Create(request.Value.Description).Value
         );
         
-        return _categoriesRepository.Update(updatedCategoryId, updatedCategory, cancellationToken);
+        return _categoriesRepository.Update(updatedCategory, cancellationToken);
     }
 }

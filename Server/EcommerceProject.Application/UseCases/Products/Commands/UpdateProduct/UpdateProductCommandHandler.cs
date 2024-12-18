@@ -17,12 +17,19 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        return await _productsRepository.Update(
-            id: ProductId.Create(request.Value.Id).Value,
+        var product = await _productsRepository.FindById(ProductId.Create(request.Value.Id).Value, cancellationToken);
+        if (product == null)
+            return new Error("Product not found", $"Product to update with id: {request.Value.Id} not found");
+
+        product.Update(
             title: ProductTitle.Create(request.Value.Title).Value,
             description: ProductDescription.Create(request.Value.Description).Value,
             price: ProductPrice.Create(request.Value.Price).Value,
             quantity: StockQuantity.Create(request.Value.Quantity),
-            categoryId: request.Value.CategoryId == null ? null : CategoryId.Create((Guid)request.Value.CategoryId).Value);
+            categoryId: request.Value.CategoryId == null
+                ? null
+                : CategoryId.Create((Guid)request.Value.CategoryId).Value);
+        
+        return await _productsRepository.Update(product, cancellationToken);
     }
 }

@@ -65,17 +65,18 @@ public class UsersRepository : IUsersRepository
         
         if (result.IsFailure)
             return result;
-
-        await _context.Users
-            .Where(u => u.Id == user.Id)
-            .ExecuteUpdateAsync(u => u
-                .SetProperty(pr => pr.Name, user.Name)
-                .SetProperty(pr => pr.Email, user.Email)
-                .SetProperty(pr => pr.Password, user.Password)
-                .SetProperty(pr => pr.PhoneNumber, user.PhoneNumber)
-                .SetProperty(pr => pr.Role, user.Role)
-            , cancellationToken);
-
+        
+        var userToUpdate = await _context.Users.FindAsync([user.Id], cancellationToken);
+        userToUpdate!.Update(
+            name: user.Name,
+            email: user.Email,
+            phoneNumber: user.PhoneNumber,
+            password: user.Password,
+            role: user.Role
+        );
+        
+        await _context.SaveChangesAsync(cancellationToken);
+        
         return Result.Success();
     }
 

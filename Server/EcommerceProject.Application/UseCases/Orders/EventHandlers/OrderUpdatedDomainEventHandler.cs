@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using EcommerceProject.Core.Common.Abstractions.Interfaces;
 using EcommerceProject.Core.Models.Orders.Events;
 using MediatR;
@@ -6,16 +6,16 @@ using Microsoft.Extensions.Logging;
 
 namespace EcommerceProject.Application.UseCases.Orders.EventHandlers;
 
-public class OrderCreatedDomainEventHandler : INotificationHandler<OrderCreatedDomainEvent>
+public class OrderUpdatedDomainEventHandler : INotificationHandler<OrderUpdatedDomainEvent>
 {
-    private readonly ILogger<OrderCreatedDomainEventHandler> _logger;
+    private readonly ILogger<OrderUpdatedDomainEventHandler> _logger;
 
-    public OrderCreatedDomainEventHandler(ILogger<OrderCreatedDomainEventHandler> logger)
+    public OrderUpdatedDomainEventHandler(ILogger<OrderUpdatedDomainEventHandler> logger)
     {
         _logger = logger;
     }
 
-    Task INotificationHandler<OrderCreatedDomainEvent>.Handle(OrderCreatedDomainEvent notification, CancellationToken cancellationToken)
+    public Task Handle(OrderUpdatedDomainEvent notification, CancellationToken cancellationToken)
     {
         var domainEvent = notification as IDomainEvent;
         _logger.LogInformation("Domain event {Type} on {Time} handled: {DomainEvent}",

@@ -1,21 +1,21 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using EcommerceProject.Core.Common.Abstractions.Interfaces;
-using EcommerceProject.Core.Models.Products.Events;
+using EcommerceProject.Core.Models.Categories.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace EcommerceProject.Application.UseCases.Products.EventHandlers;
+namespace EcommerceProject.Application.UseCases.Categories.EventHandlers;
 
-public class ProductCreatedDomainEventHandler : INotificationHandler<ProductCreatedDomainEvent>
+public class CategoryCreatedDomainEventHandler : INotificationHandler<CategoryCreatedDomainEvent>
 {
-    private readonly ILogger<ProductCreatedDomainEventHandler> _logger;
+    private ILogger<CategoryCreatedDomainEventHandler> _logger;
 
-    public ProductCreatedDomainEventHandler(ILogger<ProductCreatedDomainEventHandler> logger)
+    public CategoryCreatedDomainEventHandler(ILogger<CategoryCreatedDomainEventHandler> logger)
     {
         _logger = logger;
     }
 
-    public Task Handle(ProductCreatedDomainEvent notification, CancellationToken cancellationToken)
+    public Task Handle(CategoryCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         var domainEvent = notification as IDomainEvent;
         _logger.LogInformation("Domain event {Type} on {Time} handled: {DomainEvent}",

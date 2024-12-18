@@ -11,6 +11,7 @@ namespace EcommerceProject.Persistence.Repositories;
 public class ProductsRepository : IProductsRepository
 {
     private readonly StoreDbContext _context;
+
     public ProductsRepository(StoreDbContext context)
     {
         _context = context;
@@ -24,12 +25,13 @@ public class ProductsRepository : IProductsRepository
             .CheckError(!await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
                 new Error("Category not found", $"Category not found, incorrect id:{product.CategoryId}"))
             .Build();
-        
-        if(result.IsSuccess)
+
+        if (result.IsSuccess)
         {
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
         }
+
         return result;
     }
 
@@ -40,43 +42,48 @@ public class ProductsRepository : IProductsRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Result> Update(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price, StockQuantity quantity, CategoryId categoryId)
+    public async Task<Result> Update(Product product, CancellationToken cancellationToken = default)
     {
         var result = Result.TryFail()
-            .CheckError(!await _context.Products.AnyAsync(p => p.Id == id),
-                new Error("Product not found", $"Product not found, incorrect id:{id}"))
-            .CheckError(!await _context.Categories.AnyAsync(p => p.Id == categoryId) && categoryId != null,
-                new Error("Category not found", $"Category not found, incorrect id:{categoryId}"))
+            .CheckError(!await _context.Products.AnyAsync(p => p.Id == product.Id),
+                new Error("Product not found", $"Product not found, incorrect id:{product.Id}"))
+            .CheckErrorIf(
+                product.CategoryId != null,
+                !await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
+                new Error("Category not found", $"Category not found, incorrect id:{product.CategoryId}"))
             .Build();
-        if(result.IsFailure)
+        if (result.IsFailure)
             return result;
-        
-        await _context.Products
-            .Where(p => p.Id == id)
-            .ExecuteUpdateAsync(p => p
-                .SetProperty(pr => pr.Title, title)
-                .SetProperty(pr => pr.Description, description)
-                .SetProperty(pr => pr.Price, price)
-                .SetProperty(pr => pr.StockQuantity, quantity)
-                .SetProperty(pr => pr.CategoryId, categoryId));
-        
+
+        var productToUpdate = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
+        productToUpdate!.Update(
+            title: product.Title,
+            description: product.Description,
+            price: product.Price,
+            quantity: product.StockQuantity,
+            categoryId: product.CategoryId!
+        );
+
+        await _context.SaveChangesAsync();
+
         return Result.Success();
     }
 
     public async Task<Result> Delete(ProductId id)
     {
-        if(!await _context.Products.AnyAsync(p => p.Id == id))
+        if (!await _context.Products.AnyAsync(p => p.Id == id))
             return new Error("Product not found, incorrect id", $"Product not found, incorrect id:{id}");
-        
+
         await _context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
         return Result.Success();
     }
 
     public async Task<Product?> FindById(ProductId id, CancellationToken cancellationToken = default)
     {
-        var product = await _context.Products.Where(p => p.Id == id)
-                                            .AsNoTracking()
-                                            .FirstOrDefaultAsync(cancellationToken);
+        var product = await _context.Products
+            .Where(p => p.Id == id)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken);
 
         return product;
     }

@@ -44,18 +44,20 @@ public class CategoriesRepository : ICategoriesRepository
         
     }
 
-    public async Task<Result> Update(CategoryId id, Category category, CancellationToken cancellationToken = default)
+    public async Task<Result> Update( Category category, CancellationToken cancellationToken = default)
     {
-        if(!await _context.Categories.AnyAsync(p => p.Id == id, cancellationToken))
+        if(!await _context.Categories.AnyAsync(p => p.Id == category.Id, cancellationToken))
             return Error.NotFound;
 
         try
         {
-            await _context.Categories
-                .Where(c => c.Id == id)
-                    .ExecuteUpdateAsync(c => c
-                        .SetProperty(p => p.Name, category.Name)
-                        .SetProperty(p => p.Description, category.Description));
+            var categoryToUpdate = await _context.Categories.FindAsync(category.Id, cancellationToken);
+            categoryToUpdate!.Update(
+                name: category.Name,
+                description: category.Description);
+            
+            await _context.SaveChangesAsync();
+            
             return Result.Success();
         }
         catch (Exception e)
