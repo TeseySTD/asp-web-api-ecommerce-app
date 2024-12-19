@@ -63,8 +63,8 @@ public class UserController : ApiController
             PhoneNumber: request.PhoneNumber,
             Role: request.Role
         );
-        var cmd = new UpdateUserCommand(id, dto);
         
+        var cmd = new UpdateUserCommand(id, dto);
         var result = await Sender.Send(cmd);
 
         return result.Map<IActionResult>(
@@ -76,7 +76,6 @@ public class UserController : ApiController
     public async Task<ActionResult> DeleteUser(Guid id)
     {
         var cmd = new DeleteUserCommand(id);
-        
         var result = await Sender.Send(cmd);
 
         return result.Map<ActionResult>(

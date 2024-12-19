@@ -56,6 +56,7 @@ public class ProductController : ApiController
             Quantity: request.Quantity,
             CategoryId: request.CategoryId
         );
+        
         var cmd = new CreateProductCommand(writeDto);
         var result = await Sender.Send(cmd, cancellationToken);
         
@@ -89,7 +90,6 @@ public class ProductController : ApiController
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
         var cmd = new DeleteProductCommand(ProductId.Create(id).Value);
-
         var result = await Sender.Send(cmd);
 
         return result.Map<IActionResult>(

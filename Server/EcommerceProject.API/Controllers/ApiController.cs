@@ -14,5 +14,5 @@ public abstract class ApiController : ControllerBase
         _sender = sender;
     }
 
-    public ISender Sender { get => _sender; }
+    public ISender Sender => _sender;
 }

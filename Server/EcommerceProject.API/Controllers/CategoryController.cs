@@ -48,9 +48,9 @@ public class CategoryController : ApiController
         CancellationToken cancellationToken)
     {
         var cmd = new CreateCategoryCommand(
-            request.Name, request.Description
+            request.Name,
+            request.Description
         );
-
         var result = await Sender.Send(cmd);
 
         return result.Map<ActionResult<Guid>>(
@@ -65,7 +65,9 @@ public class CategoryController : ApiController
         var categoryDto = new CategoryDto(
             Id: id,
             Name: request.Name,
-            Description: request.Description);
+            Description: request.Description
+        );
+
         var cmd = new UpdateCategoryCommand(categoryDto);
         var result = await Sender.Send(cmd, cancellationToken);
 
@@ -78,7 +80,6 @@ public class CategoryController : ApiController
     public async Task<IActionResult> DeleteCategory(Guid id, CancellationToken cancellationToken)
     {
         var cmd = new DeleteCategoryCommand(CategoryId.Create(id).Value);
-
         var result = await Sender.Send(cmd, cancellationToken);
 
         return result.Map<IActionResult>(

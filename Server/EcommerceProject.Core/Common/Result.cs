@@ -24,6 +24,7 @@ public class Result
     public static Result Success() => new(true, [Error.None]);
     public static Result Failure(IEnumerable<Error> errors) => new(false, errors);
     public static Result Failure(Error error) => new(false, [error]);
+    
     public void Fail() => IsSuccess = false;
     public static ResultBuilder<Result> TryFail() => new(
         new Result(true, Array.Empty<Error>()));
@@ -35,11 +36,11 @@ public class Result
         return this;
     }
     
+    public TResult Map<TResult>(Func<TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure) => IsSuccess 
+        ? onSuccess() 
+        : onFailure(Errors!);
+    
     public static implicit operator Result(Error error) => Failure(error); 
-    public TResult Map<TResult>(Func<TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure)
-    {
-        return IsSuccess ? onSuccess() : onFailure(Errors!);
-    }
 }
 
 public class Result<TResponse> : Result

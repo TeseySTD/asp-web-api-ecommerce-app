@@ -46,18 +46,18 @@ public class OrderController : ApiController
     public async Task<ActionResult<Guid>> MakeOrder([FromBody] MakeOrderRequest request)
     {
         var payment = (
-            request.cardName,
-            request.cardNumber,
-            request.expiration,
-            request.cvv,
-            request.paymentMethod
+            cardName: request.CardName,
+            cardNumber: request.CardNumber,
+            expiration: request.Expiration,
+            cvv: request.CVV,
+            paymentMethod: request.PaymentMethod
         );
 
         var address = (
-            request.addressLine,
-            request.country,
-            request.state,
-            request.zipCode
+            addressLine: request.AddressLine,
+            country: request.Country,
+            state: request.State,
+            zipCode: request.ZipCode
         );
 
         var orderItems = request.OrderItems.Select(i =>
@@ -88,18 +88,18 @@ public class OrderController : ApiController
     public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] UpdateOrderRequest request)
     {
         var payment = (
-            request.cardName,
-            request.cardNumber,
-            request.expiration,
-            request.cvv,
-            request.paymentMethod
+            request.CardName,
+            request.CardNumber,
+            request.Expiration,
+            request.CVV,
+            request.PaymentMethod
         );
 
         var address = (
-            request.addressLine,
-            request.country,
-            request.state,
-            request.zipCode
+            request.AddressLine,
+            request.Country,
+            request.State,
+            request.ZipCode
         );
 
         var orderItems = request.OrderItems.Select(i =>
