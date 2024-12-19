@@ -49,7 +49,7 @@ public class User : AggregateRoot<UserId>
     public enum UserRole
     {
         Default = 1,
-        Admin,
         Seller,
+        Admin
     }
 }

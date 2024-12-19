@@ -1,7 +1,6 @@
 ﻿using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Orders;
-using EcommerceProject.Core.Models.Orders.Entities;
 using EcommerceProject.Core.Models.Orders.ValueObjects;
 using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Users;

@@ -1,4 +1,5 @@
-﻿using EcommerceProject.API.Http.Category.Requests;
+﻿using EcommerceProject.API.Http;
+using EcommerceProject.API.Http.Category.Requests;
 using EcommerceProject.API.Http.Category.Responses;
 using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Application.UseCases.Categories.Commands.CreateCategory;
@@ -27,7 +28,7 @@ public class CategoryController : ApiController
 
         return result.Map<ActionResult<GetCategoriesResponse>>(
             onSuccess: value => Ok(new GetCategoriesResponse(value)),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
 
@@ -39,7 +40,7 @@ public class CategoryController : ApiController
 
         return result.Map<ActionResult<CategoryDto>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
     [HttpPost]
@@ -54,7 +55,7 @@ public class CategoryController : ApiController
 
         return result.Map<ActionResult<Guid>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
     [HttpPut("{id:guid}")]
@@ -70,7 +71,7 @@ public class CategoryController : ApiController
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
     }
 
     [HttpDelete("{id:guid}")]
@@ -82,6 +83,6 @@ public class CategoryController : ApiController
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
     }
 }

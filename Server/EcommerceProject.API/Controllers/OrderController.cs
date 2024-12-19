@@ -1,3 +1,4 @@
+using EcommerceProject.API.Http;
 using EcommerceProject.API.Http.Order.Requests;
 using EcommerceProject.API.Http.Order.Responses;
 using EcommerceProject.Application.Dto.Order;
@@ -27,7 +28,7 @@ public class OrderController : ApiController
 
         return result.Map<ActionResult<GetOrdersResponse>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
     [HttpGet("{id:guid}")]
@@ -38,7 +39,7 @@ public class OrderController : ApiController
 
         return result.Map<ActionResult<OrderReadDto>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
     [HttpPost]
@@ -79,7 +80,7 @@ public class OrderController : ApiController
 
         return result.Map<ActionResult<Guid>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => BadRequest(errors)
+            onFailure: errors => BadRequest(Envelope.Of(errors))
         );
     }
 
@@ -118,9 +119,10 @@ public class OrderController : ApiController
         var cmd = new UpdateOrderCommand(OrderId.Create(id).Value, dto);
         var result = await Sender.Send(cmd);
 
+        
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
 
     }
     
@@ -132,6 +134,6 @@ public class OrderController : ApiController
         
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
     }
 }

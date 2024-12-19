@@ -10,7 +10,7 @@ namespace EcommerceProject.Core.Models.Orders;
 
 public class Order : AggregateRoot<OrderId>
 {
-    public Order()
+    private Order()
     {
     }
 

@@ -73,7 +73,7 @@ public class ProductsRepository : IProductsRepository
     {
         if (!await _context.Products.AnyAsync(p => p.Id == id))
             return new Error("Product not found, incorrect id", $"Product not found, incorrect id:{id}");
-
+    
         await _context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
         return Result.Success();
     }

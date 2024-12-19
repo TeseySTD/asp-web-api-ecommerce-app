@@ -1,3 +1,4 @@
+using EcommerceProject.API.Http;
 using EcommerceProject.API.Http.Product.Requests;
 using EcommerceProject.API.Http.Product.Responses;
 using EcommerceProject.Application.Dto.Product;
@@ -6,6 +7,7 @@ using EcommerceProject.Application.UseCases.Products.Commands.DeleteProduct;
 using EcommerceProject.Application.UseCases.Products.Commands.UpdateProduct;
 using EcommerceProject.Application.UseCases.Products.Queries.GetProductById;
 using EcommerceProject.Application.UseCases.Products.Queries.GetProducts;
+using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Products.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +29,7 @@ public class ProductController : ApiController
 
         return result.Map<ActionResult<GetProductsResponse>>(
             onSuccess: value => Ok(new GetProductsResponse(value)),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
     [HttpGet(template: "{id:guid}")]
@@ -38,7 +40,7 @@ public class ProductController : ApiController
 
         return result.Map<ActionResult<ProductReadDto>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(value: errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
 
     }
 
@@ -56,10 +58,10 @@ public class ProductController : ApiController
         );
         var cmd = new CreateProductCommand(writeDto);
         var result = await Sender.Send(cmd, cancellationToken);
-
+        
         return result.Map<ActionResult<Guid>>(
             onSuccess: () => Ok(writeDto.Id),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
     }
 
     [HttpPut("{id:guid}")]
@@ -80,7 +82,7 @@ public class ProductController : ApiController
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
     }
 
     [HttpDelete("{id:guid}")]
@@ -92,6 +94,6 @@ public class ProductController : ApiController
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
     }
 }

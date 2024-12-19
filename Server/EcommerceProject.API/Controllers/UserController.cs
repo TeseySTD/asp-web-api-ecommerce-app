@@ -1,3 +1,4 @@
+using EcommerceProject.API.Http;
 using EcommerceProject.API.Http.User.Requests;
 using EcommerceProject.API.Http.User.Responses;
 using EcommerceProject.Application.Dto.User;
@@ -26,7 +27,7 @@ public class UserController : ApiController
         
         return result.Map<ActionResult<GetUsersResponse>>(
             onSuccess: value => Ok(new GetUsersResponse(value)),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
     [HttpGet(template: "{id:guid}")]
@@ -37,7 +38,7 @@ public class UserController : ApiController
 
         return result.Map<ActionResult<UserReadDto>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
     
     [HttpPost]
@@ -48,7 +49,7 @@ public class UserController : ApiController
 
         return result.Map<ActionResult<Guid>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(errors)
+            onFailure: errors => NotFound(Envelope.Of(errors))
         );
     }
 
@@ -68,7 +69,7 @@ public class UserController : ApiController
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
     
     [HttpDelete("{id:guid}")]
@@ -80,7 +81,7 @@ public class UserController : ApiController
 
         return result.Map<ActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 }
 

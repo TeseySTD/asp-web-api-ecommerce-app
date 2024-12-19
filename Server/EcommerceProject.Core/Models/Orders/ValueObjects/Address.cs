@@ -3,7 +3,7 @@ using EcommerceProject.Core.Common;
 
 namespace EcommerceProject.Core.Models.Orders.ValueObjects;
 
-public record class Address
+public record Address
 {
     public const string RegexZipCode = "^[0-9]{5}(?:-[0-9]{4})?$";
     public string AddressLine { get; init; } = default!;
