@@ -1,7 +1,7 @@
-using EcommerceProject.Persistence;
-using Microsoft.EntityFrameworkCore;
+using EcommerceProject.API.Extensions;
 using EcommerceProject.Persistence.Extensions;
 using EcommerceProject.Application.Extensions;
+using EcommerceProject.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -9,11 +9,15 @@ var services = builder.Services;
 // Add services to the container.
 services.AddControllers();
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+services.AddSwaggerGenWithAuthScheme();
 //From extensions
 services
     .AddApplicationLayerServices()
+    .AddInfrastructureLayerServices()
     .AddPersistenceLayerServices(builder.Configuration);
+
+services.AddAuthentication(builder.Configuration);
+services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -21,16 +25,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.InjectStylesheet("/swagger-ui/_base.css");
-        c.InjectStylesheet("/swagger-ui/theme.css");
-    });
+    app.UseSwaggerDarkThemeUi();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

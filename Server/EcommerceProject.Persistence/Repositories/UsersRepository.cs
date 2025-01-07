@@ -30,6 +30,15 @@ public class UsersRepository : IUsersRepository
 
         return user;
     }
+    
+    public Task<User?> FindByEmail(Email email, CancellationToken cancellationToken)
+    {
+        var user = _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+        return user;
+    }
 
     public async Task<Result> Add(User user, CancellationToken cancellationToken)
     {
@@ -97,5 +106,15 @@ public class UsersRepository : IUsersRepository
     public async Task<bool> Exists(UserId id, CancellationToken cancellationToken)
     {
         return await _context.Users.AnyAsync(u => u.Id == id, cancellationToken);
+    }
+    
+    public async Task<bool> Exists(Email email, CancellationToken cancellationToken)
+    {
+        return await _context.Users.AnyAsync(u => u.Email == email, cancellationToken);
+    }
+
+    public async Task<bool> CheckPassword(Email email, Password password, CancellationToken cancellationToken)
+    {
+        return await _context.Users.AnyAsync(u => u.Email == email && u.Password == password, cancellationToken);
     }
 }

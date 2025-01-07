@@ -41,17 +41,17 @@ public class UserController : ApiController
             onFailure: errors => NotFound(Envelope.Of(errors)));
     }
     
-    [HttpPost]
-    public async Task<ActionResult<Guid>> AddUser(UserWriteDto request)
-    {
-        var cmd = new CreateUserCommand(request);
-        var result = await Sender.Send(cmd);
-
-        return result.Map<ActionResult<Guid>>(
-            onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(Envelope.Of(errors))
-        );
-    }
+    // [HttpPost]
+    // public async Task<ActionResult<Guid>> AddUser(UserWriteDto request)
+    // {
+    //     var cmd = new CreateUserCommand(request);
+    //     var result = await Sender.Send(cmd);
+    //
+    //     return result.Map<ActionResult<Guid>>(
+    //         onSuccess: value => Ok(value),
+    //         onFailure: errors => NotFound(Envelope.Of(errors))
+    //     );
+    // }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequest request)

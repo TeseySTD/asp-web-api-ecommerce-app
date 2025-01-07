@@ -6,7 +6,7 @@ using EcommerceProject.Core.Models.Users.ValueObjects;
 
 namespace EcommerceProject.Application.UseCases.Users.Commands.CreateUser;
 
-public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Guid>
+public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, User>
 {
     private readonly IUsersRepository _usersRepository;
 
@@ -15,7 +15,7 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Guid>
         _usersRepository = usersRepository;
     }
 
-    public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         var user = User.Create(
             name: UserName.Create(request.Value.Name).Value,
@@ -25,8 +25,8 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Guid>
             role: Enum.Parse<User.UserRole>(request.Value.Role)
         );
         
-        return (await _usersRepository.Add(user, cancellationToken)).Map<Result<Guid>>(
-            onSuccess: () => Result<Guid>.Success(user.Id.Value),
-            onFailure: errors => Result<Guid>.Failure(errors));
+        return (await _usersRepository.Add(user, cancellationToken)).Map<Result<User>>(
+            onSuccess: () => Result<User>.Success(user),
+            onFailure: errors => Result<User>.Failure(errors));
     }
 }

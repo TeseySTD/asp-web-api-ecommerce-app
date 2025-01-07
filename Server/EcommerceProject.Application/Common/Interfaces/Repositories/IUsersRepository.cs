@@ -8,8 +8,12 @@ public interface IUsersRepository
 {
     Task<IEnumerable<User>> Get(CancellationToken cancellationToken);
     Task<User?> FindById(UserId userId, CancellationToken cancellationToken);
+    Task<User?> FindByEmail(Email email, CancellationToken cancellationToken);
     Task<Result> Add(User user, CancellationToken cancellationToken);
     Task<Result> Update(User user, CancellationToken cancellationToken);
     Task<Result> Delete(UserId user, CancellationToken cancellationToken);
     Task<bool> Exists(UserId user, CancellationToken cancellationToken);
+    Task<bool> Exists(Email email, CancellationToken cancellationToken);
+    Task<bool> CheckPassword(Email email, Password password, CancellationToken cancellationToken);
+    
 }
