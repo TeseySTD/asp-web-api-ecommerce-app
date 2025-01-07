@@ -17,8 +17,8 @@ public static class Authentication
     {
         var jwtSettings = new JwtSettings();
         configuration.Bind(JwtSettings.SectionName, jwtSettings);
-        
         services.AddSingleton(Options.Create(jwtSettings));
+        
         services.AddScoped<IJwtTokenProvider,JwtTokenProvider>();
         
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
@@ -27,6 +27,7 @@ public static class Authentication
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),

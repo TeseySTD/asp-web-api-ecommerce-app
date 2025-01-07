@@ -2,6 +2,7 @@
 using EcommerceProject.Application.Dto.User;
 using EcommerceProject.Application.UseCases.Authentication.Commands.Login;
 using EcommerceProject.Application.UseCases.Authentication.Commands.Register;
+using EcommerceProject.Infrastructure.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;

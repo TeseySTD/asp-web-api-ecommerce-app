@@ -17,7 +17,7 @@ services
     .AddPersistenceLayerServices(builder.Configuration);
 
 services.AddAuthentication(builder.Configuration);
-services.AddAuthorization();
+services.AddAuthrorizationWithRoleHierarchyPolicies();
 
 var app = builder.Build();
 
