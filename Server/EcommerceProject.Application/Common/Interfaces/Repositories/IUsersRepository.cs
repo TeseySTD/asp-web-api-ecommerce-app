@@ -18,4 +18,5 @@ public interface IUsersRepository
     Task<RefreshToken?> GetRefreshToken(string refreshToken, CancellationToken cancellationToken);
     Task<Result> AddRefreshToken(User user, RefreshToken refreshToken, CancellationToken cancellationToken);
     Task<Result> RemoveRefreshToken(string refreshToken, CancellationToken cancellationToken);
-}
+    Task<Result> RemoveUserRefreshTokens(UserId userId, CancellationToken cancellationToken);
+ }

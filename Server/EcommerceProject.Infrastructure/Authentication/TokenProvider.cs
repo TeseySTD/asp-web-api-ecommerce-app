@@ -17,7 +17,7 @@ public class TokenProvider(IOptions<JwtSettings> jwtSettings, IOptions<RefreshTo
     {
         var claims = new List<Claim>
         {
-            new("id", user.Id.Value.ToString()),
+            new("userId", user.Id.Value.ToString()),
             new("role", user.Role.ToString()),
         };
 

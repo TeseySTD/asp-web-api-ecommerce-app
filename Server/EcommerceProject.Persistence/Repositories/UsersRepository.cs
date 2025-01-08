@@ -161,4 +161,22 @@ public class UsersRepository : IUsersRepository
 
         return result;
     }
+
+    public async Task<Result> RemoveUserRefreshTokens(UserId userId, CancellationToken cancellationToken)
+    {
+        var result = Result.TryFail()
+            .CheckError(!await _context.Users.AnyAsync(u => u.Id == userId, cancellationToken),
+                new Error("User does not exists",
+                    $"User with id {userId.Value} does not exists."))
+            .Build();
+        
+        if (result.IsSuccess)
+        {
+            await _context.RefreshTokens
+                .Where(r => r.UserId == userId)
+                .ExecuteDeleteAsync(cancellationToken);
+        }
+
+        return result;
+    }
 }
