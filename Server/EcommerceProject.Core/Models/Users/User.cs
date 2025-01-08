@@ -11,35 +11,35 @@ public class User : AggregateRoot<UserId>
     {
     }
 
-    private User(UserId id, UserName name, Email email, Password password, PhoneNumber phoneNumber,
+    private User(UserId id, UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber,
         UserRole role) : base(id)
     {
         Name = name;
         Email = email;
-        Password = password;
+        HashedPassword = hashedPassword;
         PhoneNumber = phoneNumber;
         Role = role;
     }
 
     public UserName Name { get; private set; }
     public Email Email { get; private set; }
-    public Password Password { get; private set; }
+    public HashedPassword HashedPassword { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
     public UserRole Role { get; private set; }
 
-    public static User Create(UserName name, Email email, Password password, PhoneNumber phoneNumber, UserRole role,
+    public static User Create(UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber, UserRole role,
         UserId? id = null)
     {
-        var user = new User(id ?? UserId.Create(Guid.NewGuid()).Value, name, email, password, phoneNumber, role);
+        var user = new User(id ?? UserId.Create(Guid.NewGuid()).Value, name, email, hashedPassword, phoneNumber, role);
         user.AddDomainEvent(new UserCreatedDomainEvent(user.Id));
         return user;
     }
 
-    public void Update(UserName name, Email email, Password password, PhoneNumber phoneNumber, UserRole role)
+    public void Update(UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber, UserRole role)
     {
         Name = name;
         Email = email;
-        Password = password;
+        HashedPassword = hashedPassword;
         PhoneNumber = phoneNumber;
         Role = role;
         

@@ -1,4 +1,5 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Users;
@@ -9,18 +10,22 @@ namespace EcommerceProject.Application.UseCases.Users.Commands.CreateUser;
 public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, User>
 {
     private readonly IUsersRepository _usersRepository;
+    private readonly IPasswordHelper _passwordHelper;
 
-    public CreateUserCommandHandler(IUsersRepository usersRepository)
+    public CreateUserCommandHandler(IUsersRepository usersRepository, IPasswordHelper passwordHelper)
     {
         _usersRepository = usersRepository;
+        _passwordHelper = passwordHelper;
     }
 
     public async Task<Result<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        var hashedPassword = _passwordHelper.HashPassword(request.Value.Password);
+        
         var user = User.Create(
             name: UserName.Create(request.Value.Name).Value,
             email: Email.Create(request.Value.Email).Value,
-            password: Password.Create(request.Value.Password).Value,
+            hashedPassword: HashedPassword.Create(hashedPassword).Value,
             phoneNumber: PhoneNumber.Create(request.Value.PhoneNumber).Value,
             role: Enum.Parse<User.UserRole>(request.Value.Role)
         );

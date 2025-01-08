@@ -25,7 +25,7 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, IReadOnlyCollec
                 Id: u.Id.Value,
                 Name: u.Name.Value,
                 Email: u.Email.Value,
-                Password: u.Password.Value,
+                Password: u.HashedPassword.Value,
                 PhoneNumber: u.PhoneNumber.Value,
                 Role: u.Role.ToString()
             )

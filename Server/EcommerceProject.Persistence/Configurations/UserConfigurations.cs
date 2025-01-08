@@ -35,10 +35,10 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
                 e => e.Value,
                 value => Email.Create(value).Value);
         
-        builder.Property(u => u.Password)
+        builder.Property(u => u.HashedPassword)
             .HasConversion(
                 p => p.Value,
-                value => Password.Create(value).Value);
+                value => HashedPassword.Create(value).Value);
         
         builder.Property(u => u.PhoneNumber)
             .HasConversion(

@@ -26,16 +26,27 @@ public class PasswordHelper : IPasswordHelper
 
     public bool VerifyPassword(string hashedPassword, string password)
     {
-        var salt = Convert.FromHexString(hashedPassword.Substring(0, SaltSize));
-        var hash = Convert.FromHexString(hashedPassword.Substring(SaltSize + 1, HashSize));
-        
-        var inputHash = Rfc2898DeriveBytes.Pbkdf2(
-            Encoding.UTF8.GetBytes(password),
-            salt,
-            HashingIterations,
-            HashAlgorithm,
-            HashSize);
-        
-        return CryptographicOperations.FixedTimeEquals(inputHash, hash );
+        var parts = hashedPassword.Split('-');
+        if (parts.Length != 2)
+            return false;
+
+        try
+        {
+            var hash = Convert.FromHexString(parts[0]);
+            var salt = Convert.FromHexString(parts[1]);
+
+            var inputHash = Rfc2898DeriveBytes.Pbkdf2(
+                Encoding.UTF8.GetBytes(password),
+                salt,
+                HashingIterations,
+                HashAlgorithm,
+                HashSize);
+
+            return CryptographicOperations.FixedTimeEquals(inputHash, hash);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

@@ -83,7 +83,7 @@ public class UsersRepository : IUsersRepository
             name: user.Name,
             email: user.Email,
             phoneNumber: user.PhoneNumber,
-            password: user.Password,
+            hashedPassword: user.HashedPassword,
             role: user.Role
         );
 
@@ -114,11 +114,6 @@ public class UsersRepository : IUsersRepository
     public async Task<bool> Exists(Email email, CancellationToken cancellationToken)
     {
         return await _context.Users.AnyAsync(u => u.Email == email, cancellationToken);
-    }
-
-    public async Task<bool> CheckPassword(Email email, Password password, CancellationToken cancellationToken)
-    {
-        return await _context.Users.AnyAsync(u => u.Email == email && u.Password == password, cancellationToken);
     }
 
     public async Task<RefreshToken?> GetRefreshToken(string refreshToken, CancellationToken cancellationToken)

@@ -15,7 +15,6 @@ public interface IUsersRepository
     Task<Result> Delete(UserId user, CancellationToken cancellationToken);
     Task<bool> Exists(UserId user, CancellationToken cancellationToken);
     Task<bool> Exists(Email email, CancellationToken cancellationToken);
-    Task<bool> CheckPassword(Email email, Password password, CancellationToken cancellationToken);
     Task<RefreshToken?> GetRefreshToken(string refreshToken, CancellationToken cancellationToken);
     Task<Result> AddRefreshToken(User user, RefreshToken refreshToken, CancellationToken cancellationToken);
     Task<Result> RemoveRefreshToken(string refreshToken, CancellationToken cancellationToken);
