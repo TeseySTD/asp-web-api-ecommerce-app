@@ -1,6 +1,7 @@
 ﻿using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Users;
+using EcommerceProject.Core.Models.Users.Entities;
 using EcommerceProject.Core.Models.Users.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +31,7 @@ public class UsersRepository : IUsersRepository
 
         return user;
     }
-    
+
     public Task<User?> FindByEmail(Email email, CancellationToken cancellationToken)
     {
         var user = _context.Users
@@ -68,13 +69,15 @@ public class UsersRepository : IUsersRepository
             .DropIfFailed()
             .CheckError(await _context.Users.AnyAsync(u => u.Email == user.Email && u.Id != user.Id, cancellationToken),
                 new Error("Incorrect email.", $"User with email: {user.Email} already exists."))
-            .CheckError(await _context.Users.AnyAsync(u => u.PhoneNumber == user.PhoneNumber && u.Id != user.Id, cancellationToken),
+            .CheckError(
+                await _context.Users.AnyAsync(u => u.PhoneNumber == user.PhoneNumber && u.Id != user.Id,
+                    cancellationToken),
                 new Error("Incorrect phone number.", $"User with number: {user.PhoneNumber} already exists."))
             .Build();
-        
+
         if (result.IsFailure)
             return result;
-        
+
         var userToUpdate = await _context.Users.FindAsync([user.Id], cancellationToken);
         userToUpdate!.Update(
             name: user.Name,
@@ -83,9 +86,9 @@ public class UsersRepository : IUsersRepository
             password: user.Password,
             role: user.Role
         );
-        
+
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         return Result.Success();
     }
 
@@ -99,7 +102,7 @@ public class UsersRepository : IUsersRepository
             return result;
 
         await _context.Users.Where(u => u.Id == id).ExecuteDeleteAsync(cancellationToken);
-        
+
         return Result.Success();
     }
 
@@ -107,7 +110,7 @@ public class UsersRepository : IUsersRepository
     {
         return await _context.Users.AnyAsync(u => u.Id == id, cancellationToken);
     }
-    
+
     public async Task<bool> Exists(Email email, CancellationToken cancellationToken)
     {
         return await _context.Users.AnyAsync(u => u.Email == email, cancellationToken);
@@ -116,5 +119,51 @@ public class UsersRepository : IUsersRepository
     public async Task<bool> CheckPassword(Email email, Password password, CancellationToken cancellationToken)
     {
         return await _context.Users.AnyAsync(u => u.Email == email && u.Password == password, cancellationToken);
+    }
+
+    public async Task<RefreshToken?> GetRefreshToken(string refreshToken, CancellationToken cancellationToken)
+    {
+        return await _context.RefreshTokens
+            .Include(r => r.User)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Token == refreshToken, cancellationToken);
+    }
+
+    public async Task<Result> AddRefreshToken(User user, RefreshToken refresh, CancellationToken cancellationToken)
+    {
+        var result = Result.TryFail()
+            .CheckError(!await _context.Users.AnyAsync(u => u.Id == user.Id, cancellationToken),
+                new Error("User not exists.", $"User with id: {user.Id.Value} not exists."))
+            .DropIfFailed()
+            .CheckError(user.Id != refresh.UserId,
+                new Error("Incorrect userId in refresh token.",
+                    $"User id doesent match with refresh token user id."))
+            .Build();
+
+        if (result.IsSuccess)
+        {
+            await _context.RefreshTokens.AddAsync(refresh, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return result;
+    }
+
+    public async Task<Result> RemoveRefreshToken(string refreshToken, CancellationToken cancellationToken)
+    {
+        var result = Result.TryFail()
+            .CheckError(!await _context.RefreshTokens.AnyAsync(u => u.Token == refreshToken, cancellationToken),
+                new Error("Refresh token does not exists",
+                    $"Refresh token with id {refreshToken} does not exists."))
+            .Build();
+
+        if (result.IsSuccess)
+        {
+            await _context.RefreshTokens
+                .Where(r => r.Token == refreshToken)
+                .ExecuteDeleteAsync(cancellationToken);
+        }
+
+        return result;
     }
 }

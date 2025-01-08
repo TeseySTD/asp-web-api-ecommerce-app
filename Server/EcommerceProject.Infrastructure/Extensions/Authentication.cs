@@ -19,7 +19,12 @@ public static class Authentication
         configuration.Bind(JwtSettings.SectionName, jwtSettings);
         services.AddSingleton(Options.Create(jwtSettings));
         
-        services.AddScoped<IJwtTokenProvider,JwtTokenProvider>();
+        services.AddOptions<RefreshTokenSettings>()
+            .BindConfiguration(RefreshTokenSettings.SectionName)
+            .ValidateOnStart()
+            .ValidateDataAnnotations();
+        
+        services.AddScoped<ITokenProvider,TokenProvider>();
         
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters

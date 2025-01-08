@@ -4,6 +4,7 @@ using EcommerceProject.Core.Models.Orders;
 using EcommerceProject.Core.Models.Orders.Entities;
 using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Users;
+using EcommerceProject.Core.Models.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Persistence;
@@ -15,6 +16,7 @@ public class StoreDbContext : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public StoreDbContext(DbContextOptions options) : base(options)
     {

@@ -1,6 +1,8 @@
 ﻿using EcommerceProject.API.Http.Auth.Requests;
+using EcommerceProject.API.Http.Auth.Responses;
 using EcommerceProject.Application.Dto.User;
 using EcommerceProject.Application.UseCases.Authentication.Commands.Login;
+using EcommerceProject.Application.UseCases.Authentication.Commands.RefreshToken;
 using EcommerceProject.Application.UseCases.Authentication.Commands.Register;
 using EcommerceProject.Infrastructure.Authorization;
 using MediatR;
@@ -24,7 +26,7 @@ public class AuthenticationController : ApiController
         var result = await Sender.Send(cmd);
         
         return result.Map<IActionResult>(
-            onSuccess: value => Ok(value),
+            onSuccess: value => Ok(new TokensResponse(value.AccessToken, value.RefreshToken)),
             onFailure: errors => BadRequest(errors));
     }
 
@@ -43,7 +45,18 @@ public class AuthenticationController : ApiController
         var result = await Sender.Send(cmd);
 
         return result.Map<IActionResult>(
-            onSuccess: value => Ok(value),
+            onSuccess: value => Ok(new TokensResponse(value.AccessToken, value.RefreshToken)),
+            onFailure: errors => BadRequest(errors));
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh(string refreshToken)
+    {
+        var cmd = new RefreshTokenCommand(refreshToken);
+        var result = await Sender.Send(cmd);
+
+        return result.Map<IActionResult>(
+            onSuccess: value => Ok(new TokensResponse(value.AccessToken, value.RefreshToken)),
             onFailure: errors => BadRequest(errors));
     }
 }
