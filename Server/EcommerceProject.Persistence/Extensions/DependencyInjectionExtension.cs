@@ -1,4 +1,5 @@
 using System;
+using EcommerceProject.Application.Common.Interfaces;
 using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Persistence.Interceptors;
 using EcommerceProject.Persistence.Repositories;
@@ -17,7 +18,7 @@ public static class DependencyInjectionExtension
         services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventInterceptor>();
 
         //Add db context
-        services.AddDbContext<StoreDbContext>((serviceProvider, options) =>
+        services.AddDbContext<IApplicationDbContext,StoreDbContext>((serviceProvider, options) =>
         {
             options.AddInterceptors(serviceProvider.GetServices<ISaveChangesInterceptor>());
             options.UseNpgsql(configuration.GetConnectionString(nameof(StoreDbContext)));

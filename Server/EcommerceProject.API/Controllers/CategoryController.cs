@@ -54,7 +54,7 @@ public class CategoryController : ApiController
         var result = await Sender.Send(cmd);
 
         return result.Map<ActionResult<Guid>>(
-            onSuccess: value => Ok(value),
+            onSuccess: value => Ok(value.Value),
             onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 

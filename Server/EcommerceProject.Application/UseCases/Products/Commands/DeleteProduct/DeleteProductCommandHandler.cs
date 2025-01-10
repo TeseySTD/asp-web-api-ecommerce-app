@@ -1,20 +1,27 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Products.Commands.DeleteProduct;
 
 public class DeleteProductCommandHandler : ICommandHandler<DeleteProductCommand>
 {
-    private readonly IProductsRepository _productsRepository;
+    private readonly IApplicationDbContext _context;
 
-    public DeleteProductCommandHandler(IProductsRepository productsRepository)
+    public DeleteProductCommandHandler(IApplicationDbContext context)
     {
-        _productsRepository = productsRepository;
+        _context = context;
     }
 
     public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
     {
-        return await _productsRepository.Delete(request.ProductId);
+        if (!await _context.Products.AnyAsync(p => p.Id == request.ProductId))
+            return new Error("Product not found, incorrect id",
+                $"Product not found, incorrect id:{request.ProductId.Value}");
+
+        await _context.Products.Where(p => p.Id == request.ProductId).ExecuteDeleteAsync();
+        return Result.Success();
     }
 }

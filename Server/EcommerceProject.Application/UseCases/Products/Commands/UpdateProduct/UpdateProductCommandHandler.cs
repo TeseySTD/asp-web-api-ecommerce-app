@@ -1,23 +1,29 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
+using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Products.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Products.Commands.UpdateProduct;
 
 public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 {
-    private IProductsRepository _productsRepository;
+    private IApplicationDbContext _context;
 
-    public UpdateProductCommandHandler(IProductsRepository productsRepository)
+    public UpdateProductCommandHandler(IApplicationDbContext context)
     {
-        _productsRepository = productsRepository;
+        _context = context;
     }
 
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        var product = await _productsRepository.FindById(ProductId.Create(request.Value.Id).Value, cancellationToken);
+        var product = await _context.Products
+            .Where(p => p.Id == ProductId.Create(request.Value.Id).Value)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken);
         if (product == null)
             return new Error("Product not found", $"Product to update with id: {request.Value.Id} not found");
 
@@ -29,7 +35,32 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
             categoryId: request.Value.CategoryId == null
                 ? null
                 : CategoryId.Create((Guid)request.Value.CategoryId).Value);
-        
-        return await _productsRepository.Update(product, cancellationToken);
+
+        return await Update(product, cancellationToken);
+    }
+
+    private async Task<Result> Update(Product product, CancellationToken cancellationToken = default)
+    {
+        var result = Result.TryFail()
+            .CheckErrorIf(
+                product.CategoryId != null,
+                !await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
+                new Error("Category not found", $"Category not found, incorrect id:{product.CategoryId}"))
+            .Build();
+        if (result.IsFailure)
+            return result;
+
+        var productToUpdate = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
+        productToUpdate!.Update(
+            title: product.Title,
+            description: product.Description,
+            price: product.Price,
+            quantity: product.StockQuantity,
+            categoryId: product.CategoryId!
+        );
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 }

@@ -1,51 +1,53 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Core.Common;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Products.Queries.GetProducts;
 
 public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, IReadOnlyList<ProductReadDto>>
 {
-    private readonly IProductsRepository _productsRepository;
-    private readonly ICategoriesRepository _categoriesRepository;
+    private readonly IApplicationDbContext _context;
 
-    public GetProductsQueryHandler(IProductsRepository productsRepository, ICategoriesRepository categoriesRepository)
+    public GetProductsQueryHandler(IApplicationDbContext context)
     {
-        _productsRepository = productsRepository;
-        _categoriesRepository = categoriesRepository;
+        _context = context;
     }
 
-    public async Task<Result<IReadOnlyList<ProductReadDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<ProductReadDto>>> Handle(GetProductsQuery request,
+        CancellationToken cancellationToken)
     {
-        var products = (await _productsRepository.Get(cancellationToken)).ToList();
-        if (!products.Any())
+        if (!_context.Products.Any())
             return Result<IReadOnlyList<ProductReadDto>>.Failure(Error.NotFound);
 
+        var products = await _context.Products
+            .Include(p => p.Category)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
-        var productDtos = new List<ProductReadDto>();
-
-        foreach (var product in products)
+        var productDtos = products.Select(p =>
         {
-            var category = await _categoriesRepository.FindById(product.CategoryId, cancellationToken);
-            var categoryDto = category == null ? null
+            var categoryDto = p.Category == null
+                ? null
                 : new CategoryDto(
-                    Id: category.Id.Value,
-                    Name: category.Name.Value,
-                    Description: category.Description.Value
+                    Id: p.Category.Id.Value,
+                    Name: p.Category.Name.Value,
+                    Description: p.Category.Description.Value
                 );
 
-            productDtos.Add(new ProductReadDto(
-                Id: product.Id.Value,
-                Title: product.Title.Value,
-                Description: product.Description.Value,
-                Price: product.Price.Value,
-                Quantity: product.StockQuantity.Value,
+            return new ProductReadDto(
+                Id: p.Id.Value,
+                Title: p.Title.Value,
+                Description: p.Description.Value,
+                Price: p.Price.Value,
+                Quantity: p.StockQuantity.Value,
                 Category: categoryDto
-            ));
-        }
-        
-        return productDtos.ToList().AsReadOnly();
+            );
+        }).ToList();
 
+        return productDtos.ToList().AsReadOnly();
     }
 }

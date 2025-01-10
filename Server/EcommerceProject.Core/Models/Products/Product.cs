@@ -24,6 +24,7 @@ public class Product : AggregateRoot<ProductId>
     public ProductTitle Title { get; private set; }
     public ProductDescription Description { get; private set; }
     public CategoryId? CategoryId { get; private set; }
+    public Category? Category { get; private set; }
     public ProductPrice Price { get; private set; }
     public StockQuantity StockQuantity { get; set; } = default!;
 

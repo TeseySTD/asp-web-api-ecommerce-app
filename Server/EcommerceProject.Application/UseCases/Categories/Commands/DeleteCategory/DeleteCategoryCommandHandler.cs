@@ -1,20 +1,25 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Core.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Categories.Commands.DeleteCategory;
 
 public class DeleteCategoryCommandHandler : ICommandHandler<DeleteCategoryCommand>
 {
-    private readonly ICategoriesRepository _categoriesRepository;
+    private readonly IApplicationDbContext _context;
 
-    public DeleteCategoryCommandHandler(ICategoriesRepository categoriesRepository)
+    public DeleteCategoryCommandHandler(IApplicationDbContext context)
     {
-        _categoriesRepository = categoriesRepository;
+        _context = context;
     }
 
     public async Task<Result> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
-        return await _categoriesRepository.Delete(request.Id, cancellationToken);
+        if(!await _context.Categories.AnyAsync(c => c.Id == request.Id))
+            return Error.NotFound;
+        
+        await _context.Categories.Where(p => p.Id == request.Id).ExecuteDeleteAsync();
+        return Result.Success();
     }
 }

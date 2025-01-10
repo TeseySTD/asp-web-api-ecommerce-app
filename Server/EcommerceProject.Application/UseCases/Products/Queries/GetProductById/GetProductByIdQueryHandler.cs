@@ -1,32 +1,35 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Core.Common;
-using EcommerceProject.Core.Models.Categories;
-using EcommerceProject.Core.Models.Products;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Products.Queries.GetProductById;
 
 public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, ProductReadDto>
 {
-    private readonly IProductsRepository _productsRepository;
-    private readonly ICategoriesRepository _categoriesRepository;
+    private readonly IApplicationDbContext _context;
 
-    public GetProductByIdQueryHandler(IProductsRepository productsRepository,
-        ICategoriesRepository categoriesRepository)
+    public GetProductByIdQueryHandler(IApplicationDbContext context)
     {
-        _productsRepository = productsRepository;
-        _categoriesRepository = categoriesRepository;
+        _context = context;
     }
 
     public async Task<Result<ProductReadDto>> Handle(GetProductByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var product = await _productsRepository.FindById(request.Id, cancellationToken);
+        var product = await _context.Products
+            .Where(p => p.Id == request.Id)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken);
+
         if (product == null)
             return Error.NotFound;
 
-        var category =  await _categoriesRepository.FindById(product.CategoryId, cancellationToken);
+        var category = await _context.Categories
+            .AsNoTracking()
+            .Where(c => c.Id == product.CategoryId)
+            .FirstOrDefaultAsync(cancellationToken);
 
         var categoryDto = category == null
             ? null
@@ -43,7 +46,7 @@ public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, Pro
                 Description: product.Description.Value,
                 Price: product.Price.Value,
                 Quantity: product.StockQuantity.Value,
-                Category: categoryDto 
+                Category: categoryDto
             );
 
         return response;
