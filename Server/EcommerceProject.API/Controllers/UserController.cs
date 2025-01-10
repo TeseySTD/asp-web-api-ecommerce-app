@@ -7,6 +7,7 @@ using EcommerceProject.Application.UseCases.Users.Commands.DeleteUser;
 using EcommerceProject.Application.UseCases.Users.Commands.UpdateUser;
 using EcommerceProject.Application.UseCases.Users.Queries.GetUserById;
 using EcommerceProject.Application.UseCases.Users.Queries.GetUsers;
+using EcommerceProject.Core.Models.Users.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

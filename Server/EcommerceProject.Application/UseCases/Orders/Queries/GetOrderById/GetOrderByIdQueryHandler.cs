@@ -1,28 +1,33 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Dto.Order;
 using EcommerceProject.Core.Common;
-using EcommerceProject.Core.Models.Orders.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Orders.Queries.GetOrderById;
 
 public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, OrderReadDto>
 {
-    private readonly IOrdersRepository _ordersRepository;
+    private readonly IApplicationDbContext _context;
 
-    public GetOrderByIdQueryHandler(IOrdersRepository ordersRepository)
+    public GetOrderByIdQueryHandler(IApplicationDbContext context)
     {
-        _ordersRepository = ordersRepository;
+        _context = context;
     }
 
     public async Task<Result<OrderReadDto>> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
     {
-        var order = await _ordersRepository.FindById(request.OrderId, cancellationToken);
-        if (order == null)
+        if (!await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken))
             return new Error("No orders found", "There are no orders in the database.");
 
+        var order = await _context.Orders
+            .AsNoTracking()
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+            .Include(o => o.User)
+            .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
-        var products = order.OrderItems.Select(oi =>
+        var products = order!.OrderItems.Select(oi =>
             new OrderReadItemDto(
                 ProductId: oi.Product.Id.Value,
                 ProductTitle: oi.Product.Title.Value,

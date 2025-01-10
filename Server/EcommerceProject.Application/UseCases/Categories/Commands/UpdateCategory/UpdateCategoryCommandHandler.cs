@@ -1,6 +1,5 @@
 ﻿using EcommerceProject.Application.Common.Interfaces;
 using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories;
 using EcommerceProject.Core.Models.Categories.ValueObjects;

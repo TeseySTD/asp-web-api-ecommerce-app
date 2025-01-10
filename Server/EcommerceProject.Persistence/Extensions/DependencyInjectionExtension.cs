@@ -1,8 +1,6 @@
 using System;
 using EcommerceProject.Application.Common.Interfaces;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Persistence.Interceptors;
-using EcommerceProject.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -23,12 +21,6 @@ public static class DependencyInjectionExtension
             options.AddInterceptors(serviceProvider.GetServices<ISaveChangesInterceptor>());
             options.UseNpgsql(configuration.GetConnectionString(nameof(StoreDbContext)));
         });
-        
-        //Add repositories
-        services.AddScoped<IProductsRepository, ProductsRepository>();
-        services.AddScoped<ICategoriesRepository, CategoriesRepository>();
-        services.AddScoped<IUsersRepository, UsersRepository>();
-        services.AddScoped<IOrdersRepository, OrdersRepository>();
         
         return services;
     }

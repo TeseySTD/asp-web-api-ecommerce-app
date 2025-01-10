@@ -63,6 +63,13 @@ public static class ResultBuilderExtensions
         return await resultBuilderAfter.CheckErrorIfAsync(checkCondition, errorConditionFunc, error);
     }
 
+    public static async Task<ResultBuilder<TResult>> DropIfFailed<TResult>(this Task<ResultBuilder<TResult>> resultBuilder)
+        where TResult : Result
+    {
+        var resultBuilderAfter = await resultBuilder;
+        return resultBuilderAfter.DropIfFailed();
+    }
+
     public static async Task<TResult> BuildAsync<TResult>(this Task<ResultBuilder<TResult>> resultBuilder)
         where TResult : Result
     {

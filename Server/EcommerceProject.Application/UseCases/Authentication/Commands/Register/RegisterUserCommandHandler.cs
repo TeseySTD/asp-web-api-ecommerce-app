@@ -1,10 +1,8 @@
 ﻿using EcommerceProject.Application.Common.Interfaces;
 using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Application.Dto;
 using EcommerceProject.Application.UseCases.Users.Commands.CreateUser;
 using EcommerceProject.Core.Common;
-using EcommerceProject.Core.Models.Users.Entities;
 using MediatR;
 
 namespace EcommerceProject.Application.UseCases.Authentication.Commands.Register;
@@ -13,13 +11,13 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, T
 {
     private readonly ISender _sender;
     private readonly ITokenProvider _tokenProvider;
-    private readonly IUsersRepository _usersRepository;
+    private readonly IApplicationDbContext _context;
 
-    public RegisterUserCommandHandler(ISender sender, ITokenProvider tokenProvider, IUsersRepository usersRepository)
+    public RegisterUserCommandHandler(ISender sender, ITokenProvider tokenProvider, IApplicationDbContext context)
     {
         _sender = sender;
         _tokenProvider = tokenProvider;
-        _usersRepository = usersRepository;
+        _context = context;
     }
 
     public async Task<Result<TokensDto>> Handle(RegisterUserCommand request,
@@ -36,10 +34,9 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, T
         var refreshToken = _tokenProvider.GenerateRefreshToken(user);
         var jwtToken = _tokenProvider.GenerateJwtToken(user);
         
-        var result = await _usersRepository.AddRefreshToken(user, refreshToken, cancellationToken);
+        await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
-        return result.Map<Result<TokensDto>>(
-            onSuccess: () => new TokensDto(jwtToken, refreshToken.Token),
-            onFailure: errors => Result<TokensDto>.Failure(errors));
+        return new TokensDto(jwtToken, refreshToken.Token);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using EcommerceProject.Application.Common.Interfaces;
 using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Core.Common;
 using Microsoft.EntityFrameworkCore;

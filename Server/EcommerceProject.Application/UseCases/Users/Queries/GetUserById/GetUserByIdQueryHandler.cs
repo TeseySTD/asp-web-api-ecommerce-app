@@ -1,5 +1,5 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Dto.User;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Users.ValueObjects;
@@ -8,16 +8,16 @@ namespace EcommerceProject.Application.UseCases.Users.Queries.GetUserById;
 
 public class GetUserByIdQueryHandler : IQueryHandler<GetUserByIdQuery, UserReadDto>
 {
-    private readonly IUsersRepository _usersRepository;
-
-    public GetUserByIdQueryHandler(IUsersRepository usersRepository)
+    private readonly IApplicationDbContext _context;
+    
+    public GetUserByIdQueryHandler(IApplicationDbContext context)
     {
-        _usersRepository = usersRepository;
+        _context = context;
     }
 
     public async Task<Result<UserReadDto>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.FindById(UserId.Create(request.Id).Value, cancellationToken);
+        var user = await _context.Users.FindAsync([UserId.Create(request.Id).Value], cancellationToken);
         if (user == null)
             return Error.NotFound;
 

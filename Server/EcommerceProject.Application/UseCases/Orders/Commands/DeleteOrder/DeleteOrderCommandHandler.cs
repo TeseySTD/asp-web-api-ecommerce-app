@@ -1,21 +1,32 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Core.Common;
-using EcommerceProject.Core.Models.Orders.ValueObjects;
+using EcommerceProject.Core.Models.Orders;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Orders.Commands.DeleteOrder;
 
 public class DeleteOrderCommandHandler : ICommandHandler<DeleteOrderCommand>
 {
-    private readonly IOrdersRepository _ordersRepository;
+    private readonly IApplicationDbContext _context;
 
-    public DeleteOrderCommandHandler(IOrdersRepository ordersRepository)
+    public DeleteOrderCommandHandler(IApplicationDbContext context)
     {
-        _ordersRepository = ordersRepository;
+        _context = context;
     }
 
     public async Task<Result> Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
     {
-        return await _ordersRepository.Delete(request.OrderId, cancellationToken);
+        var result = Result.TryFail()
+            .CheckError(!await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken),
+                new Error(nameof(Order), $"Order with id: {request.OrderId.Value} does not exist"))
+            .Build();
+
+        if (result.IsFailure)
+            return result;
+
+        await _context.Orders.Where(o => o.Id == request.OrderId).ExecuteDeleteAsync(cancellationToken);
+
+        return Result.Success();
     }
 }

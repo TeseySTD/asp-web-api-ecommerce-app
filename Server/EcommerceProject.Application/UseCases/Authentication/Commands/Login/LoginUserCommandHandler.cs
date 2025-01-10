@@ -1,25 +1,25 @@
 ﻿using EcommerceProject.Application.Common.Interfaces;
 using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Application.Dto;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Users;
 using EcommerceProject.Core.Models.Users.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Authentication.Commands.Login;
 
 public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, TokensDto>
 {
-    private readonly IUsersRepository _usersRepository;
+    private readonly IApplicationDbContext _context;
     private readonly IPasswordHelper _passwordHelper;
     private readonly ITokenProvider _tokenProvider;
 
-    public LoginUserCommandHandler(IUsersRepository usersRepository, ITokenProvider tokenProvider,
-        IPasswordHelper passwordHelper)
+    public LoginUserCommandHandler(ITokenProvider tokenProvider,
+        IPasswordHelper passwordHelper, IApplicationDbContext context)
     {
-        _usersRepository = usersRepository;
         _tokenProvider = tokenProvider;
         _passwordHelper = passwordHelper;
+        _context = context;
     }
 
     public async Task<Result<TokensDto>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
@@ -28,12 +28,15 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, TokensD
         User user = default!;
 
         var result = await Result<TokensDto>.TryFail()
-            .CheckError(!await _usersRepository.Exists(email, cancellationToken),
+            .CheckError(!await _context.Users.AnyAsync(u => u.Email == email),
                 new Error("Incorrect email", $"User with email {request.Email} does not exist"))
             .DropIfFailed()
             .CheckErrorAsync(async () =>
                 {
-                    user = await _usersRepository.FindByEmail(email, cancellationToken) ?? default!;
+                    user = await _context.Users
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(u => u.Email == email, cancellationToken) ?? default!;
+
                     return !_passwordHelper.VerifyPassword(user!.HashedPassword.Value, request.Password);
                 },
                 new Error("Incorrect password",
@@ -46,10 +49,9 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, TokensD
         var refreshToken = _tokenProvider.GenerateRefreshToken(user!);
         var jwtToken = _tokenProvider.GenerateJwtToken(user!);
 
-        var resultRefresh = await _usersRepository.AddRefreshToken(user!, refreshToken, cancellationToken);
+        await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
-        return resultRefresh.Map<Result<TokensDto>>(
-            onSuccess: () => new TokensDto(jwtToken, refreshToken.Token),
-            onFailure: errors => Result<TokensDto>.Failure(errors));
+        return new TokensDto(jwtToken, refreshToken.Token);
     }
 }

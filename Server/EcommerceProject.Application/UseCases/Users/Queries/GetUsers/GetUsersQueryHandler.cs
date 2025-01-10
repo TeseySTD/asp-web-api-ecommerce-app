@@ -1,36 +1,37 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Application.Dto.User;
 using EcommerceProject.Core.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Users.Queries.GetUsers;
 
 public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, IReadOnlyCollection<UserReadDto>>
 {
-    private readonly IUsersRepository _usersRepository;
+    private readonly IApplicationDbContext _context;
 
-    public GetUsersQueryHandler(IUsersRepository usersRepository)
+    public GetUsersQueryHandler(IApplicationDbContext context)
     {
-        _usersRepository = usersRepository;
+        _context = context;
     }
 
-    public async Task<Result<IReadOnlyCollection<UserReadDto>>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<UserReadDto>>> Handle(GetUsersQuery request,
+        CancellationToken cancellationToken)
     {
-        var users = (await _usersRepository.Get(cancellationToken)).ToList();
-        if(!users.Any())
+        if (!_context.Users.Any())
             return new Error("Users not found", "There is no users in the database.");
 
-        var userDtos = users.Select(u =>
+        var userDtos = await _context.Users.AsNoTracking().Select(u =>
             new UserReadDto(
-                Id: u.Id.Value,
-                Name: u.Name.Value,
-                Email: u.Email.Value,
-                Password: u.HashedPassword.Value,
-                PhoneNumber: u.PhoneNumber.Value,
-                Role: u.Role.ToString()
+                u.Id.Value,
+                u.Name.Value,
+                u.Email.Value,
+                u.HashedPassword.Value,
+                u.PhoneNumber.Value,
+                u.Role.ToString()
             )
-        );
-        
+        ).ToListAsync();
+
         return userDtos.ToList().AsReadOnly();
     }
 }

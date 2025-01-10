@@ -1,11 +1,9 @@
 ﻿using EcommerceProject.Application.Common.Interfaces;
 using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
 using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Products.ValueObjects;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Products.Commands.CreateProduct;
