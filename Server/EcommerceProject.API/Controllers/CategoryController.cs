@@ -1,4 +1,5 @@
-﻿using EcommerceProject.API.Http.Category.Requests;
+﻿using EcommerceProject.API.Http;
+using EcommerceProject.API.Http.Category.Requests;
 using EcommerceProject.API.Http.Category.Responses;
 using EcommerceProject.Application.Dto.Product;
 using EcommerceProject.Application.UseCases.Categories.Commands.CreateCategory;
@@ -27,7 +28,7 @@ public class CategoryController : ApiController
 
         return result.Map<ActionResult<GetCategoriesResponse>>(
             onSuccess: value => Ok(new GetCategoriesResponse(value)),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
 
@@ -39,7 +40,7 @@ public class CategoryController : ApiController
 
         return result.Map<ActionResult<CategoryDto>>(
             onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(errors));
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
     [HttpPost]
@@ -47,14 +48,14 @@ public class CategoryController : ApiController
         CancellationToken cancellationToken)
     {
         var cmd = new CreateCategoryCommand(
-            request.Name, request.Description
+            request.Name,
+            request.Description
         );
-
         var result = await Sender.Send(cmd);
 
         return result.Map<ActionResult<Guid>>(
-            onSuccess: value => Ok(value),
-            onFailure: errors => NotFound(errors));
+            onSuccess: value => Ok(value.Value),
+            onFailure: errors => NotFound(Envelope.Of(errors)));
     }
 
     [HttpPut("{id:guid}")]
@@ -64,24 +65,25 @@ public class CategoryController : ApiController
         var categoryDto = new CategoryDto(
             Id: id,
             Name: request.Name,
-            Description: request.Description);
+            Description: request.Description
+        );
+
         var cmd = new UpdateCategoryCommand(categoryDto);
         var result = await Sender.Send(cmd, cancellationToken);
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteCategory(Guid id, CancellationToken cancellationToken)
     {
         var cmd = new DeleteCategoryCommand(CategoryId.Create(id).Value);
-
         var result = await Sender.Send(cmd, cancellationToken);
 
         return result.Map<IActionResult>(
             onSuccess: () => Ok(),
-            onFailure: errors => BadRequest(errors));
+            onFailure: errors => BadRequest(Envelope.Of(errors)));
     }
 }

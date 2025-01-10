@@ -24,6 +24,7 @@ public class Result
     public static Result Success() => new(true, [Error.None]);
     public static Result Failure(IEnumerable<Error> errors) => new(false, errors);
     public static Result Failure(Error error) => new(false, [error]);
+    
     public void Fail() => IsSuccess = false;
     public static ResultBuilder<Result> TryFail() => new(
         new Result(true, Array.Empty<Error>()));
@@ -35,11 +36,11 @@ public class Result
         return this;
     }
     
+    public TResult Map<TResult>(Func<TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure) => IsSuccess 
+        ? onSuccess() 
+        : onFailure(Errors!);
+    
     public static implicit operator Result(Error error) => Failure(error); 
-    public TResult Map<TResult>(Func<TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure)
-    {
-        return IsSuccess ? onSuccess() : onFailure(Errors!);
-    }
 }
 
 public class Result<TResponse> : Result
@@ -73,42 +74,4 @@ public class Result<TResponse> : Result
     }
 }
 
-public class ResultBuilder<TResult>
-    where TResult : Result
-{
-    private TResult _result;
-    private bool _continueValidation = true;
 
-    public ResultBuilder(TResult result)
-    {
-        if(result.IsFailure)
-            throw new ArgumentException($"ResultBuilder cannot be created with failed result.");
-        _result = result;
-    }
-    
-    public ResultBuilder<TResult> CheckError(bool errorCondition, Error error)
-    {
-        if(errorCondition && _continueValidation)
-        {
-            _result.Fail();
-            _result.AddError(error);
-        }
-        return this;
-    }
-
-    public ResultBuilder<TResult> CheckErrorIf(bool checkCondition, bool errorCondition, Error error)
-    {
-        if(checkCondition)
-            return CheckError(errorCondition, error);
-        return this;
-    }
-    
-    public ResultBuilder<TResult> DropIfFailed()
-    {
-        if(_result.IsFailure)
-            _continueValidation = false;
-        return this;
-    }
-    
-    public TResult Build() => _result;
-}

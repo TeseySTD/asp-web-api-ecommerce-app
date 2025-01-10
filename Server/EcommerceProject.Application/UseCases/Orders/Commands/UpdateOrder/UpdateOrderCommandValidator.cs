@@ -5,9 +5,9 @@ using FluentValidation;
 
 namespace EcommerceProject.Application.UseCases.Orders.Commands.UpdateOrder;
 
-public class UpdateCommandValidator : AbstractValidator<UpdateOrderCommand>
+public class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderCommand>
 {
-    public UpdateCommandValidator()
+    public UpdateOrderCommandValidator()
     {
         RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
             (e) => ProductId.Create(e.ProductId)

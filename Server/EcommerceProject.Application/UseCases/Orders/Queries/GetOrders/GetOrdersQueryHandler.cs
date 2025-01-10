@@ -1,30 +1,32 @@
-﻿using System.Globalization;
+﻿using EcommerceProject.Application.Common.Interfaces;
 using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
 using EcommerceProject.Application.Dto.Order;
 using EcommerceProject.Core.Common;
-using EcommerceProject.Core.Models.Orders;
-using EcommerceProject.Core.Models.Products;
-using EcommerceProject.Core.Models.Products.ValueObjects;
-using EcommerceProject.Core.Models.Users.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Orders.Queries.GetOrders;
 
 public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, IEnumerable<OrderReadDto>>
 {
-    private readonly IOrdersRepository _ordersRepository;
+    private readonly IApplicationDbContext _context;
 
-    public GetOrdersQueryHandler(IOrdersRepository ordersRepository)
+    public GetOrdersQueryHandler(IApplicationDbContext context)
     {
-        _ordersRepository = ordersRepository;
+        _context = context;
     }
 
     public async Task<Result<IEnumerable<OrderReadDto>>> Handle(GetOrdersQuery request,
         CancellationToken cancellationToken)
     {
-        var orders = await _ordersRepository.GetAll(cancellationToken);
-        if (!orders.Any())
+        if (!await _context.Orders.AnyAsync())
             return new Error("No orders found", "There are no orders in the database.");
+
+        var orders = await _context.Orders
+            .AsNoTracking()
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+            .Include(o => o.User)
+            .ToListAsync(cancellationToken);
 
         var orderDtos = orders.Select(o =>
         {

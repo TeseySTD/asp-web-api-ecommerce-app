@@ -1,4 +1,5 @@
 ﻿using EcommerceProject.Core.Common.Abstractions.Classes;
+using EcommerceProject.Core.Models.Categories.Events;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
 
 namespace EcommerceProject.Core.Models.Categories;
@@ -10,10 +11,28 @@ public class Category : AggregateRoot<CategoryId>
         Name = name;
         Description = description;
     }
-    
+
     public CategoryName Name { get; private set; }
     public CategoryDescription Description { get; private set; }
+
+    public static Category Create(CategoryId id, CategoryName name, CategoryDescription description)
+    {
+        var category = new Category(id, name, description);
+        category.AddDomainEvent(new CategoryCreatedDomainEvent(category.Id));
+        
+        return category;
+    }
+
+    public static Category Create(CategoryName name, CategoryDescription description) =>
+        Create(CategoryId.Create(Guid.NewGuid()).Value, name, description);
+
+    public void Update(CategoryName name, CategoryDescription description)
+    {
+        Name = name;
+        Description = description;
+        
+        AddDomainEvent(new CategoryUpdatedDomainEvent(this));
+    }
     
-    public static Category Create(CategoryId id, CategoryName name, CategoryDescription description) => new (id, name, description);
-    public static Category Create(CategoryName name, CategoryDescription description) => new(CategoryId.Create(Guid.NewGuid()).Value, name, description);
+    
 }

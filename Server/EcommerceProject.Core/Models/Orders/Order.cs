@@ -10,7 +10,7 @@ namespace EcommerceProject.Core.Models.Orders;
 
 public class Order : AggregateRoot<OrderId>
 {
-    public Order()
+    private Order()
     {
     }
 
@@ -66,6 +66,8 @@ public class Order : AggregateRoot<OrderId>
         _orderItems = orderItems!.ToList();
         Payment = payment!;
         DestinationAddress = destinationAddress!;
+        
+        AddDomainEvent(new OrderUpdatedDomainEvent(this));
     }
 }
 

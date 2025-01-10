@@ -1,21 +1,24 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Orders;
 using EcommerceProject.Core.Models.Orders.Entities;
 using EcommerceProject.Core.Models.Orders.ValueObjects;
+using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Products.ValueObjects;
+using EcommerceProject.Core.Models.Users;
 using EcommerceProject.Core.Models.Users.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Guid>
 {
-    private readonly IOrdersRepository _ordersRepository;
+    private readonly IApplicationDbContext _context;
 
-    public CreateOrderCommandHandler(IOrdersRepository ordersRepository)
+    public CreateOrderCommandHandler(IApplicationDbContext context)
     {
-        _ordersRepository = ordersRepository;
+        _context = context;
     }
 
     public async Task<Result<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -58,11 +61,36 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
             userId: UserId.Create(request.Value.UserId).Value
         );
 
-        return (await _ordersRepository.Add(order, cancellationToken))
+        return (await Add(order, cancellationToken))
             .Map<Result<Guid>>
             (
                 onSuccess: () => Result<Guid>.Success(order.Id.Value),
                 onFailure: errors => Result<Guid>.Failure(errors)
             );
+    }
+    
+    public async Task<Result> Add(Order order, CancellationToken cancellationToken)
+    {
+        var resultBuilder = Result.TryFail()
+            .CheckError(await _context.Orders.AnyAsync(o => o.Id == order.Id, cancellationToken),
+                new Error(nameof(Order), $"Order with id: {order.Id} already exists"))
+            .CheckError(!await _context.Users.AnyAsync(u => u.Id == order.UserId, cancellationToken),
+                new Error(nameof(User), $"User with id: {order.UserId} not exists"))
+            .CheckError(order.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
+                new Error("Order items error", "Each order item must be unique."));
+
+        foreach (var item in order.OrderItems)
+            resultBuilder.CheckError(!await _context.Products.AnyAsync(p => p.Id == item.ProductId, cancellationToken),
+                new Error(nameof(Product), $"Product with id: {item.ProductId} not exists"));
+
+
+        var result = resultBuilder.Build();
+        if (result.IsFailure)
+            return result;
+
+        await _context.Orders.AddAsync(order, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 }

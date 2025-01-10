@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using EcommerceProject.Application.Common.Classes.Behaviour;
 using EcommerceProject.Application.Common.Classes.Validation;
 using FluentValidation;
 using MediatR;
@@ -12,11 +13,9 @@ public static class DependencyInjectionExtension
         services.AddMediatR( cfg => 
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddOpenBehavior(typeof(LoggingBehaviour<,>));
+            cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
         });
-
-        services.AddScoped(
-                        typeof(IPipelineBehavior<,>),
-                        typeof(ValidationBehaviour<,>));
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         return services;

@@ -54,7 +54,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 c => c.Value,
                 value => CategoryId.Create(value).Value);
 
-        builder.HasOne<Category>()
+        builder.HasOne(p => p.Category)
             .WithMany()
             .HasForeignKey(p => p.CategoryId)
             .HasPrincipalKey(c => c.Id)

@@ -1,32 +1,37 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Core.Common;
 using EcommerceProject.Core.Models.Categories;
 using EcommerceProject.Core.Models.Categories.ValueObjects;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace EcommerceProject.Application.UseCases.Categories.Commands.CreateCategory;
 
-public class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand, Guid>
+public class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand, CategoryId>
 {
-    private readonly ICategoriesRepository _categoriesRepository;
+    private readonly IApplicationDbContext _context;
 
-    public CreateCategoryCommandHandler(ICategoriesRepository categoriesRepository)
+    public CreateCategoryCommandHandler(IApplicationDbContext context)
     {
-        _categoriesRepository = categoriesRepository;
+        _context = context;
     }
 
-    public async Task<Result<Guid>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CategoryId>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
         var newCategory = Category.Create(
             name: CategoryName.Create(request.Name).Value,
             description: CategoryDescription.Create(request.Description).Value
         );
 
-        var result = await _categoriesRepository.Add(newCategory, cancellationToken);
-        
-        return result.Map<Result<Guid>>(
-            onSuccess: () => Result<Guid>.Success(newCategory.Id.Value),
-            onFailure: errors => Result<Guid>.Failure(errors));
+        try
+        {
+            await _context.Categories.AddAsync(newCategory, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            return newCategory.Id;
+        }
+        catch (Exception e)
+        {
+            return new Error(e.Message, e.StackTrace ?? string.Empty);
+        }
+
     }
 }

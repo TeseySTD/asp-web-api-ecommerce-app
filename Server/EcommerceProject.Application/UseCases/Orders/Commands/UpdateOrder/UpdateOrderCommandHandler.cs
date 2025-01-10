@@ -1,27 +1,45 @@
-﻿using EcommerceProject.Application.Common.Interfaces.Messaging;
-using EcommerceProject.Application.Common.Interfaces.Repositories;
+﻿using EcommerceProject.Application.Common.Interfaces;
+using EcommerceProject.Application.Common.Interfaces.Messaging;
 using EcommerceProject.Core.Common;
-using EcommerceProject.Core.Models.Orders;
 using EcommerceProject.Core.Models.Orders.Entities;
 using EcommerceProject.Core.Models.Orders.ValueObjects;
+using EcommerceProject.Core.Models.Products;
 using EcommerceProject.Core.Models.Products.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceProject.Application.UseCases.Orders.Commands.UpdateOrder;
 
 public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
 {
-    private readonly IOrdersRepository _ordersRepository;
+    private readonly IApplicationDbContext _context;
 
-    public UpdateOrderCommandHandler(IOrdersRepository ordersRepository)
+    public UpdateOrderCommandHandler(IApplicationDbContext context)
     {
-        _ordersRepository = ordersRepository;
+        _context = context;
     }
 
     public async Task<Result> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
-        var order = await _ordersRepository.FindById(request.OrderId, cancellationToken);
-        if (order == null)
-            return new Error("Order for update not found", $"There is no order with this id {request.OrderId} ");
+        var resultBuilder = await Result.TryFail()
+            .CheckErrorAsync( async () => !await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken),
+                new Error("Order for update not found", $"There is no order with this id {request.OrderId} "))
+            .DropIfFailed()
+            .CheckError(request.Value.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
+                new Error("Order items error", "Each order item must be unique."));
+
+        foreach (var item in request.Value.OrderItems)
+           await resultBuilder.CheckErrorAsync(
+                async () => !await _context.Products.AnyAsync(p => p.Id == ProductId.Create(item.ProductId).Value),
+                new Error(nameof(Product), $"Product with id: {item.ProductId} not exists"));
+
+        var result = resultBuilder.Build();
+        
+        if(result.IsFailure)
+            return result;
+        
+        var orderToUpdate = await _context.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         var payment = Payment.Create(
             cvv: request.Value.Payment.cvv,
@@ -36,13 +54,13 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
             country: request.Value.DestinationAddress.country,
             state: request.Value.DestinationAddress.state,
             zipCode: request.Value.DestinationAddress.zipCode
-        ).Value; 
-        
+        ).Value;
+
         var orderItems = new List<OrderItem>();
         foreach (var item in request.Value.OrderItems)
         {
             var orderItem = OrderItem.Create(
-                orderId: order.Id,
+                orderId: orderToUpdate!.Id,
                 productId: ProductId.Create(item.ProductId).Value,
                 quantity: OrderItemQuantity.Create(item.Quantity).Value,
                 price: ProductPrice.Create(item.Price).Value
@@ -50,9 +68,11 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
 
             orderItems.Add(orderItem);
         }
-        
-        order.Update(orderItems, payment, destiantionAddress);
-        
-        return  await _ordersRepository.Update(order, cancellationToken);
+
+        orderToUpdate!.Update(orderItems, payment, destiantionAddress);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return result;
     }
 }

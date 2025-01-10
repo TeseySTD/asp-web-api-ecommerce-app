@@ -8,7 +8,10 @@ namespace EcommerceProject.Core.Models.Products;
 
 public class Product : AggregateRoot<ProductId>
 {
-    private Product() : base(default!){}
+    private Product() : base(default!)
+    {
+    }
+
     private Product(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price,
         CategoryId? category) : base(id)
     {
@@ -21,6 +24,7 @@ public class Product : AggregateRoot<ProductId>
     public ProductTitle Title { get; private set; }
     public ProductDescription Description { get; private set; }
     public CategoryId? CategoryId { get; private set; }
+    public Category? Category { get; private set; }
     public ProductPrice Price { get; private set; }
     public StockQuantity StockQuantity { get; set; } = default!;
 
@@ -40,5 +44,17 @@ public class Product : AggregateRoot<ProductId>
     {
         var id = ProductId.Create(Guid.NewGuid()).Value;
         return Create(id, title, description, price, categoryId);
+    }
+
+    public void Update(ProductTitle title, ProductDescription description,
+        ProductPrice price, StockQuantity quantity, CategoryId categoryId)
+    {
+        Title = title;
+        Description = description;
+        Price = price;
+        StockQuantity = quantity;
+        CategoryId = categoryId;
+        
+        AddDomainEvent(new ProductUpdatedDomainEvent(this));
     }
 }
