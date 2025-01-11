@@ -1,7 +1,7 @@
-﻿using EcommerceProject.Core.Common;
-using MediatR;
+﻿using MediatR;
+using Shared.Core.Validation;
 
-namespace EcommerceProject.Application.Common.Interfaces.Messaging;
+namespace Shared.Core.CQRS;
 
 public interface ICommandBase;
 public interface ICommand: IRequest<Result>, ICommandBase;
