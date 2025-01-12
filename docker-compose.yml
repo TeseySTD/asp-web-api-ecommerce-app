@@ -1,18 +1,23 @@
 version: '3.9'
 
 services:
-
-  db:
+  users.db:
     image: postgres
-    restart: always
-    container_name: postgres
-    volumes:
-      - ./ecommercedb-data:/var/lib/postgresql/data
+    container_name: users.db
     ports:
       - "5432:5432"
-    environment:
-      PGDATA: /var/lib/postgresql/data/pgdata
-      POSTGRES_PASSWORD: 123
-      POSTGRES_USER: postgres
-      POSTGRES_DB: ecommercedb
+  
+  users.api:
+    container_name: users.api
+    build:
+      context: .
+      dockerfile: Server/src/Services/Users/Users.API/Dockerfile
+    ports:
+      - "8080:8080"
+
+  
+  
+volumes:
+  users_data:
+    name: users_data
 

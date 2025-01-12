@@ -1,0 +1,19 @@
+﻿version: '3.9'
+
+services:
+  users.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: usersdb
+    volumes:
+      - users_data:/var/lib/postgresql/data
+  
+  users.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__Database=Username=postgres;Password=123;Host=users.db;Port=5432;Database=usersdb;Include Error Detail=true
+    depends_on:
+      - users.db 
