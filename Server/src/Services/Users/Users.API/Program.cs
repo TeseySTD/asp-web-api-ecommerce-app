@@ -1,6 +1,5 @@
-using System.Reflection;
 using Carter;
-using Shared.Core.Extensions;
+using Users.API.Extensions;
 using Users.Application;
 using Users.Infrastructure.Extensions;
 using Users.Persistence;
@@ -10,14 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+services.AddSwaggerGenWithAuthScheme();
 
 services
+    .AddApplicationLayerServices()
     .AddPersistenceLayerServices(builder.Configuration)
-    .AddInfrastructureLayerServices()
-    .AddApplicationLayerServices();
+    .AddInfrastructureLayerServices();
 
 services.AddCarter();
+
+services.AddAuthentication(builder.Configuration);
+services.AddAuthrorizationWithRoleHierarchyPolicies();
 
 var app = builder.Build();
 
@@ -28,8 +30,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.ApplyMigrations();
 }
-
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapCarter();
 
 app.Run();

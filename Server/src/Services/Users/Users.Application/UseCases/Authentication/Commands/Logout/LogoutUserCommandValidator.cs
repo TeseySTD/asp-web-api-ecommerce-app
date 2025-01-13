@@ -8,6 +8,6 @@ public class LogoutUserCommandValidator : AbstractValidator<LogoutUserCommand>
 {
     public LogoutUserCommandValidator()
     {
-        RuleFor(x => x.UserId.Value).MustBeCreatedWith(UserId.Create);
+        RuleFor(x => x.UserId).MustBeCreatedWith(UserId.Create);
     }
 }

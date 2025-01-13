@@ -65,18 +65,19 @@ public class AuthenticationModule : ICarterModule
         });
 
         // Logout
-        routeGroup.MapDelete("/logout", [Authorize] async (ISender sender, ClaimsPrincipal user) =>
+        routeGroup.MapDelete("/logout", async (ISender sender, ClaimsPrincipal user) =>
         {
             var userIdClaim = user.FindFirstValue("userId");
             Guid id = Guid.TryParse(userIdClaim, out Guid parsed) ? parsed : Guid.Empty;
 
-            var cmd = new LogoutUserCommand(UserId.Create(id).Value);
+            var cmd = new LogoutUserCommand(id);
             var result = await sender.Send(cmd);
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
-        });
+        })
+        .RequireAuthorization();
     }
 }

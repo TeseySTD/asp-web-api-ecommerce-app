@@ -24,8 +24,6 @@ public static class Authentication
             .ValidateOnStart()
             .ValidateDataAnnotations();
         
-        services.AddScoped<ITokenProvider,TokenProvider>();
-        
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
             {

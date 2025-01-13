@@ -12,7 +12,7 @@ COPY ["Server/src/Services/Users/Users.Application/Users.Application.csproj", "U
 COPY ["Server/src/Services/Users/Users.Core/Users.Core.csproj", "Users/Users.Core/"]
 COPY ["Server/src/Services/Users/Users.Infrastructure/Users.Infrastructure.csproj", "Users/Users.Infrastructure/"]
 COPY ["Server/src/Services/Users/Users.Persistence/Users.Persistence.csproj", "Users/Users.Persistence/"]
-COPY ["Server/src/Shared", "Shared"]
+COPY ["Server/src/Shared/Shared.Core/Shared.Core.csproj", "Shared"]
 RUN dotnet restore "Users/Users.API/Users.API.csproj"
 COPY . .
 WORKDIR "src/Users/Users.API"
