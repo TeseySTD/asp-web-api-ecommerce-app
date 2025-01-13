@@ -17,3 +17,20 @@ services:
       - ConnectionStrings__Database=Username=postgres;Password=123;Host=users.db;Port=5432;Database=usersdb;Include Error Detail=true
     depends_on:
       - users.db 
+        
+  catalog.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: catalogdb
+    volumes:
+      - catalog_data:/var/lib/postgresql/data
+
+  catalog.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=7080
+      - ConnectionStrings__Database=Username=postgres;Password=123;Host=catalog.db;Port=5432;Database=catalogdb;Include Error Detail=true
+    depends_on:
+      - catalog.db 

@@ -14,8 +14,24 @@ services:
       dockerfile: Server/src/Services/Users/Users.API/Dockerfile
     ports:
       - "8080:8080"
+        
+  catalog.db:
+    image: postgres
+    container_name: catalog.db
+    ports:
+      - "5431:5432"
+
+  catalog.api:
+    container_name: catalog.api
+    build:
+      context: .
+      dockerfile: Server/src/Services/Catalog/Catalog.API/Dockerfile
+    ports:
+      - "7080:7080"
 
 volumes:
   users_data:
     name: users_data
+  catalog_data:
+    name: catalog_data
 
