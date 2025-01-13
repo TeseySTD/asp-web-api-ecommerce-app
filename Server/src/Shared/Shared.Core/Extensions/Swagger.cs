@@ -8,12 +8,30 @@ public static class Swagger
     {
         app.UseSwaggerUI(options =>
         {
-            options.InjectStylesheet("/swagger-ui/_base.css");
-            options.InjectStylesheet("/swagger-ui/theme.css");
+            options.InjectStylesheet("/swagger-dark-theme/_base.css");
+            options.InjectStylesheet("/swagger-dark-theme/theme.css");
         });
         
-        // For swagger dark theme style files.
-        app.UseStaticFiles();
+        // Add middleware to serve embedded resources
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path.StartsWithSegments("/swagger-dark-theme"))
+            {
+                var assembly = typeof(Swagger).Assembly;
+                var fileName = context.Request.Path.Value!.Split('/').Last();
+                var resourceName = $"Shared.Core.SwaggerDarkTheme.{fileName}";
+                
+                using var stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream != null)
+                {
+                    context.Response.ContentType = "text/css";
+                    await stream.CopyToAsync(context.Response.Body);
+                    return;
+                }
+            }
+            
+            await next();
+        });
         
         return app;
     }

@@ -1,4 +1,6 @@
+using System.Reflection;
 using Carter;
+using Shared.Core.Extensions;
 using Users.API.Extensions;
 using Users.Application;
 using Users.Infrastructure.Extensions;
@@ -27,7 +29,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerDarkThemeUi();
     app.ApplyMigrations();
 }
 app.UseHttpsRedirection();
