@@ -12,10 +12,10 @@ COPY ["Server/src/Services/Users/Users.Application/Users.Application.csproj", "U
 COPY ["Server/src/Services/Users/Users.Core/Users.Core.csproj", "Users/Users.Core/"]
 COPY ["Server/src/Services/Users/Users.Infrastructure/Users.Infrastructure.csproj", "Users/Users.Infrastructure/"]
 COPY ["Server/src/Services/Users/Users.Persistence/Users.Persistence.csproj", "Users/Users.Persistence/"]
-COPY ["Server/src/Shared/Shared.Core/Shared.Core.csproj", "Shared"]
+COPY ["Server/src/Shared/Shared.Core/Shared.Core.csproj", "Shared/Shared.Core"]
 RUN dotnet restore "Users/Users.API/Users.API.csproj"
 COPY . .
-WORKDIR "src/Users/Users.API"
+WORKDIR "/src/Users/Users.API"
 RUN dotnet build "Users.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

@@ -4,7 +4,7 @@ namespace Shared.Core.Extensions;
 
 public static class Swagger
 {
-    public static IApplicationBuilder UseSwaggerDarkThemeUi(this IApplicationBuilder app)
+    public static IApplicationBuilder  UseSwaggerDarkThemeUI(this IApplicationBuilder app)
     {
         app.UseSwaggerUI(options =>
         {

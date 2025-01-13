@@ -29,7 +29,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerDarkThemeUi();
+    app.UseSwaggerDarkThemeUI();
     app.ApplyMigrations();
 }
 app.UseHttpsRedirection();

@@ -15,8 +15,6 @@ services:
     ports:
       - "8080:8080"
 
-  
-  
 volumes:
   users_data:
     name: users_data
