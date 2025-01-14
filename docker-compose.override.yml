@@ -34,3 +34,20 @@ services:
       - ConnectionStrings__Database=Username=postgres;Password=123;Host=catalog.db;Port=5432;Database=catalogdb;Include Error Detail=true
     depends_on:
       - catalog.db 
+  
+  ordering.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: orderingdb
+    volumes:
+      - ordering_data:/var/lib/postgresql/data
+
+  ordering.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=6080
+      - ConnectionStrings__Database=Username=postgres;Password=123;Host=ordering.db;Port=5432;Database=orderingdb;Include Error Detail=true
+    depends_on:
+      - ordering.db 

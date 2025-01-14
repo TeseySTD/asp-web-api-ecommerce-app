@@ -12,7 +12,8 @@ COPY ["Server/src/Services/Catalog/Catalog.Core/Catalog.Core.csproj", "Services/
 COPY ["Server/src/Services/Catalog/Catalog.Persistence/Catalog.Persistence.csproj", "Services/Catalog/Catalog.Persistence/"]
 COPY ["Server/src/Shared/Shared.Core/Shared.Core.csproj", "Shared/Shared.Core/"]
 RUN dotnet restore "Services/Catalog/Catalog.API/Catalog.API.csproj"
-COPY . .
+COPY ["Server/src/Services/Catalog", "Services/Catalog"]
+COPY ["Server/src/Shared/Shared.Core", "Shared/Shared.Core"]
 WORKDIR "/src/Services/Catalog/Catalog.API"
 RUN dotnet build "Catalog.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

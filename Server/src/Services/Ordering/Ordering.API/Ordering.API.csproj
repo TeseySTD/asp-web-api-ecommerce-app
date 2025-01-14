@@ -23,4 +23,10 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />
+      <ProjectReference Include="..\Ordering.Core\Ordering.Core.csproj" />
+      <ProjectReference Include="..\Ordering.Persistence\Ordering.Persistence.csproj" />
+    </ItemGroup>
+
 </Project>

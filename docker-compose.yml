@@ -8,6 +8,7 @@ services:
       - "5432:5432"
   
   users.api:
+    image: users.api
     container_name: users.api
     build:
       context: .
@@ -22,16 +23,34 @@ services:
       - "5431:5432"
 
   catalog.api:
+    image: catalog.api
     container_name: catalog.api
     build:
       context: .
       dockerfile: Server/src/Services/Catalog/Catalog.API/Dockerfile
     ports:
       - "7080:7080"
+        
+  ordering.db:
+    image: postgres
+    container_name: ordering.db
+    ports:
+      - "5430:5432"
+
+  ordering.api:
+    image: ordering.api
+    container_name: ordering.api
+    build:
+      context: .
+      dockerfile: Server/src/Services/Ordering/Ordering.API/Dockerfile
+    ports:
+      - "6080:6080"
 
 volumes:
   users_data:
     name: users_data
   catalog_data:
     name: catalog_data
+  ordering_data:
+    name: ordering_data
 
