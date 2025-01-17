@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 using Users.Application.Common.Interfaces;
 using Users.Application.Dto;
 using Users.Application.UseCases.Users.Commands.CreateUser;

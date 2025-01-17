@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 using Users.Application.Common.Interfaces;
 using Users.Core.Models.ValueObjects;
 
@@ -17,8 +18,8 @@ public class DeleteUserCommandHandler : ICommandHandler<DeleteUserCommand>
 
     public async Task<Result> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
-        var result = Result.TryFail()
-            .CheckError(!await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value, cancellationToken),
+        var result = Result.Try()
+            .Check(!await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value, cancellationToken),
                 new Error("User not exists.", $"User with id: {request.Id} not exists."))
             .Build();
         if (result.IsFailure)

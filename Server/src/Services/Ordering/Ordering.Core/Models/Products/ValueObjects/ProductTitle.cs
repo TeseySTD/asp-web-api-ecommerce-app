@@ -1,4 +1,5 @@
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.Core.Models.Products.ValueObjects;
 
@@ -15,10 +16,10 @@ public record ProductTitle
 
     public static Result<ProductTitle> Create(string title)
     {
-        var result = Result<ProductTitle>.TryFail()
-            .CheckError(string.IsNullOrEmpty(title), 
+        var result = Result<ProductTitle>.Try()
+            .Check(string.IsNullOrEmpty(title), 
                 new Error("Title is required", "Title must be not empty"))
-            .CheckError(title.Length > MaxTitleLength || title.Length < MinTitleLength,
+            .Check(title.Length > MaxTitleLength || title.Length < MinTitleLength,
                 new Error("Title is too long", $"Product title must be between {MinTitleLength} and {MaxTitleLength} characters"))
             .Build();
         

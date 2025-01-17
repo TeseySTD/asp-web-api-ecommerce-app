@@ -1,4 +1,4 @@
-﻿namespace Shared.Core.Validation;
+﻿namespace Shared.Core.Validation.Result;
 
 public record Error(string Message, string Description)
 {

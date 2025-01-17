@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using Shared.Core.Validation.Result;
 
 namespace Shared.Core.Validation.FluentValidation;
 

@@ -1,4 +1,5 @@
 ﻿using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.Core.Models.Categories.ValueObjects;
 
@@ -16,10 +17,10 @@ public record CategoryDescription
 
     public static Result<CategoryDescription> Create(string value)
     {
-        var result = Result<CategoryDescription>.TryFail()
-            .CheckError(string.IsNullOrEmpty(value),
+        var result = Result<CategoryDescription>.Try()
+            .Check(string.IsNullOrEmpty(value),
                 new Error("Value cannot be null or empty.", nameof(value)))
-            .CheckError(value.Length < MinDescriptionLength || value.Length > MaxDescriptionLength,
+            .Check(value.Length < MinDescriptionLength || value.Length > MaxDescriptionLength,
                 new Error("Description is out of range.",
                     $"Description must be less then {MaxDescriptionLength} symbols and more than {MinDescriptionLength} symbols"))
             .Build();

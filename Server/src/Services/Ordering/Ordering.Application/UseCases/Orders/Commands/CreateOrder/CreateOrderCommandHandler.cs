@@ -7,6 +7,7 @@ using Ordering.Core.Models.Products;
 using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.Application.UseCases.Orders.Commands.CreateOrder;
 
@@ -83,13 +84,13 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
 
     public async Task<Result> Add(Order order, CancellationToken cancellationToken)
     {
-        var resultBuilder = Result.TryFail()
-            .CheckError(await _context.Orders.AnyAsync(o => o.Id == order.Id, cancellationToken),
+        var resultBuilder = Result.Try()
+            .Check(await _context.Orders.AnyAsync(o => o.Id == order.Id, cancellationToken),
                 new Error(nameof(Order), $"Order with id: {order.Id} already exists"))
-            .CheckError(order.OrderItems.Any(o => o.Product == null),
+            .Check(order.OrderItems.Any(o => o.Product == null),
                 new Error("Order items error", "Product in order item cannot be null."))
             .DropIfFailed()
-            .CheckError(() => order.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
+            .Check(() => order.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
                 new Error("Order items error", "Each order item must be unique."));
 
         var result = resultBuilder.Build();

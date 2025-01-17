@@ -4,6 +4,7 @@ using Ordering.Application.Dto.Order;
 using Ordering.Core.Models.Orders.ValueObjects;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.Application.UseCases.Orders.Queries.GetOrders;
 

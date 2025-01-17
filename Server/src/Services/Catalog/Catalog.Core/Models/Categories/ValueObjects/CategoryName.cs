@@ -1,4 +1,5 @@
 ﻿using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.Core.Models.Categories.ValueObjects;
 
@@ -15,10 +16,10 @@ public record CategoryName
 
     public static Result<CategoryName> Create(string value)
     {
-        var result = Result<CategoryName>.TryFail()
-            .CheckError(string.IsNullOrWhiteSpace(value),
+        var result = Result<CategoryName>.Try()
+            .Check(string.IsNullOrWhiteSpace(value),
                 new Error("Name cannot be null or whitespace", nameof(CategoryName)))
-            .CheckError(value.Length > MaxNameLength,
+            .Check(value.Length > MaxNameLength,
                 new Error($"Name must be less than {MaxNameLength} symbols", nameof(CategoryName)))
             .Build();
         

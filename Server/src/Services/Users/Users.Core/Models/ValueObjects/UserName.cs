@@ -1,4 +1,5 @@
 ﻿using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Users.Core.Models.ValueObjects;
 
@@ -13,11 +14,11 @@ public record UserName
 
     public static Result<UserName> Create(string name)
     {
-        return Result<UserName>.TryFail(new UserName(name))
-            .CheckError(string.IsNullOrEmpty(name),
+        return Result<UserName>.Try(new UserName(name))
+            .Check(string.IsNullOrEmpty(name),
                 new Error("Name is required", "Name cannot be null or empty."))
             .DropIfFailed()
-            .CheckError(name.Length < MinNameLength || name.Length > MaxNameLength,
+            .Check(name.Length < MinNameLength || name.Length > MaxNameLength,
                 new Error("Name is out of range.", $"Name must be between {MinNameLength} and {MaxNameLength}"))
             .Build();
     }

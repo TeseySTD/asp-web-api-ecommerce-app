@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 using Users.Application.Common.Interfaces;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
@@ -21,12 +22,12 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, User>
 
     public async Task<Result<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var result = await Result<User>.TryFail()
-            .CheckErrorAsync(
+        var result = await Result<User>.Try()
+            .CheckAsync(
                 async () => await _context.Users.AnyAsync(u => u.Email == Email.Create(request.Value.Email).Value,
                     cancellationToken),
                 new Error("User already exists.", $"User with email: {request.Value.Email} already exists."))
-            .CheckErrorAsync(
+            .CheckAsync(
                 async () => await _context.Users.AnyAsync(
                     u => u.PhoneNumber == PhoneNumber.Create(request.Value.PhoneNumber).Value,
                     cancellationToken),

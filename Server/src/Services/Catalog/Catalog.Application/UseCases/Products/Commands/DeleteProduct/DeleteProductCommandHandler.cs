@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Products.Commands.DeleteProduct;
 

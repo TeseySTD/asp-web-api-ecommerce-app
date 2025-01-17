@@ -1,4 +1,5 @@
 ﻿using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.Core.Models.Categories.ValueObjects;
 
@@ -13,8 +14,8 @@ public record CategoryId
 
     public static Result<CategoryId> Create(Guid categoryId)
     {
-        var result = Result<CategoryId>.TryFail()
-            .CheckError(categoryId == Guid.Empty,
+        var result = Result<CategoryId>.Try()
+            .Check(categoryId == Guid.Empty,
                 new Error("Category Id is invalid",  nameof(CategoryId)))
             .Build();
         

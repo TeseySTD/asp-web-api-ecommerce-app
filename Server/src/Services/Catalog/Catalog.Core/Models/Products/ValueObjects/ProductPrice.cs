@@ -1,4 +1,5 @@
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.Core.Models.Products.ValueObjects;
 
@@ -13,8 +14,8 @@ public record ProductPrice
     }
 
     public static Result<ProductPrice> Create(decimal price){
-        var result = Result<ProductPrice>.TryFail()
-            .CheckError(price < MinPrice || price > MaxPrice,
+        var result = Result<ProductPrice>.Try()
+            .Check(price < MinPrice || price > MaxPrice,
                 new Error("Price is out of range", $"Price must be between {MinPrice} and {MaxPrice}"))
             .Build();
         

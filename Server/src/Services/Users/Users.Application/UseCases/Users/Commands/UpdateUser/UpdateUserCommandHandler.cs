@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 using Users.Application.Common.Interfaces;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
@@ -21,16 +22,16 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var result = await Result.TryFail()
-            .CheckErrorAsync(
+        var result = await Result.Try()
+            .CheckAsync(
                 async () => !await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value, cancellationToken),
                 new Error("User not exists.", $"User with id: {request.Id} not exists."))
             .DropIfFailed()
-            .CheckErrorAsync(
+            .CheckAsync(
                 async () => await _context.Users.AnyAsync(
                     u => u.Email == Email.Create(request.Value.Email).Value && u.Id != UserId.Create(request.Id).Value, cancellationToken),
                 new Error("Incorrect email.", $"User with email: {request.Value.Email} already exists."))
-            .CheckErrorAsync(
+            .CheckAsync(
                 async () => await _context.Users.AnyAsync(
                     u => u.PhoneNumber == PhoneNumber.Create(request.Value.PhoneNumber).Value &&
                          u.Id != UserId.Create(request.Id).Value, cancellationToken),

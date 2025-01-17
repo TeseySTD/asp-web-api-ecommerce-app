@@ -1,4 +1,5 @@
 ﻿using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Users.Core.Models.ValueObjects;
 
@@ -12,11 +13,11 @@ public record Password
 
     public static Result<Password> Create(string password)
     {
-        return Result<Password>.TryFail(new Password(password))
-            .CheckError(string.IsNullOrEmpty(password),
+        return Result<Password>.Try(new Password(password))
+            .Check(string.IsNullOrEmpty(password),
                 new Error("Password is required", "Password must be not null or empty."))
             .DropIfFailed()
-            .CheckError(password.Length < MinPasswordLength,
+            .Check(password.Length < MinPasswordLength,
                 new Error("Password less than min length", $"Password less than {MinPasswordLength} characters."))
             .Build();
     }

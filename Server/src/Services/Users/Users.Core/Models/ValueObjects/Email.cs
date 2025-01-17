@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Users.Core.Models.ValueObjects;
 
@@ -13,11 +14,11 @@ public record Email
 
     public static Result<Email> Create(string email)
     {
-        return Result<Email>.TryFail(new Email(email))
-            .CheckError(string.IsNullOrEmpty(email),
+        return Result<Email>.Try(new Email(email))
+            .Check(string.IsNullOrEmpty(email),
                 new Error("Email is required", "Email cannot be null or empty"))
             .DropIfFailed()
-            .CheckError(!Regex.IsMatch(email, RegexEmail),
+            .Check(!Regex.IsMatch(email, RegexEmail),
                 new Error("Email is not a valid email", "Email is not a valid email"))
             .Build();
     }

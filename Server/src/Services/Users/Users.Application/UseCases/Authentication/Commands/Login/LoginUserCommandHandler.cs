@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 using Users.Application.Common.Interfaces;
 using Users.Application.Dto;
 using Users.Core.Models;
@@ -27,11 +28,11 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, TokensD
         var email = Email.Create(request.Email).Value;
         User user = default!;
 
-        var result = await Result<TokensDto>.TryFail()
-            .CheckError(!await _context.Users.AnyAsync(u => u.Email == email),
+        var result = await Result<TokensDto>.Try()
+            .Check(!await _context.Users.AnyAsync(u => u.Email == email),
                 new Error("Incorrect email", $"User with email {request.Email} does not exist"))
             .DropIfFailed()
-            .CheckErrorAsync(async () =>
+            .CheckAsync(async () =>
                 {
                     user = await _context.Users
                         .AsNoTracking()

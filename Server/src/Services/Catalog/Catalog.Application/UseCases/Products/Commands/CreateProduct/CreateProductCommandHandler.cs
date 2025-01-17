@@ -5,6 +5,7 @@ using Catalog.Core.Models.Products.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Products.Commands.CreateProduct;
 
@@ -34,10 +35,10 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
 
     private async Task<Result> Add(Product product, CancellationToken cancellationToken = default)
     {
-        var result = Result.TryFail()
-            .CheckError(await _context.Products.AnyAsync(p => p.Id == product.Id),
+        var result = Result.Try()
+            .Check(await _context.Products.AnyAsync(p => p.Id == product.Id),
                 new Error("Product already exists", $"Product already exists, incorrect id:{product.Id}"))
-            .CheckError(!await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
+            .Check(!await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
                 new Error("Category not found", $"Category not found, incorrect id:{product.CategoryId}"))
             .Build();
 

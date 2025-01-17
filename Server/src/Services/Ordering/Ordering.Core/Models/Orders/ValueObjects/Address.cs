@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.Core.Models.Orders.ValueObjects;
 
@@ -21,10 +22,10 @@ public record Address
 
     public static Result<Address> Create(string addressLine, string? country, string? state, string? zipCode)
     {
-        return Result<Address>.TryFail(new Address(addressLine, country, state, zipCode))
-            .CheckError(string.IsNullOrWhiteSpace(addressLine),
+        return Result<Address>.Try(new Address(addressLine, country, state, zipCode))
+            .Check(string.IsNullOrWhiteSpace(addressLine),
                 new Error("Address line is required", "Address line cannot be whitespace or empty"))
-            .CheckErrorIf(
+            .CheckIf(
                 checkCondition: !string.IsNullOrWhiteSpace(zipCode), 
                 errorCondition:!Regex.IsMatch(zipCode, RegexZipCode),
                 error: new Error("Zip code is invalid", "Zip code is invalid"))

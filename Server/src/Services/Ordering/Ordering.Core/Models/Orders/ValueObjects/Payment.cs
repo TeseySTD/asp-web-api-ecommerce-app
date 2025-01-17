@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.Core.Models.Orders.ValueObjects;
 
@@ -33,16 +34,16 @@ public record Payment
 
     public static Result<Payment> Create(string cardName, string cardNumber, string? expiration, string cvv, string? paymentMethod)
     {
-        var result =  Result<Payment>.TryFail(new Payment(cardName, cardNumber, expiration, cvv, paymentMethod))
-            .CheckError(string.IsNullOrWhiteSpace(cardName),
+        var result =  Result<Payment>.Try(new Payment(cardName, cardNumber, expiration, cvv, paymentMethod))
+            .Check(string.IsNullOrWhiteSpace(cardName),
                 new Error("Card name is required", "Card name is required"))
-            .CheckError(string.IsNullOrWhiteSpace(cardNumber),
+            .Check(string.IsNullOrWhiteSpace(cardNumber),
                 new Error("Card number is required", "Card number is required"))
-            .CheckError(!Regex.IsMatch(cardNumber, VisaMasterCardNumberRegex),
+            .Check(!Regex.IsMatch(cardNumber, VisaMasterCardNumberRegex),
                 new Error("Card number is invalid", "Card number must be a valid Visa Master card number."))
-            .CheckError(string.IsNullOrWhiteSpace(cvv),
+            .Check(string.IsNullOrWhiteSpace(cvv),
                 new Error("CVV is required", "CVV is required"))
-            .CheckErrorIf(
+            .CheckIf(
                 !string.IsNullOrWhiteSpace(cvv),
                 cvv.Length != CVVLength,
                 new Error("CVV is out of range", $"CVV must be of length {CVVLength}"))

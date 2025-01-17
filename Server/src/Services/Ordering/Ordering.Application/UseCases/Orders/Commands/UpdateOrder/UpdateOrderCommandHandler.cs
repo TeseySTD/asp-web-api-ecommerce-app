@@ -6,6 +6,7 @@ using Ordering.Core.Models.Products;
 using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.Application.UseCases.Orders.Commands.UpdateOrder;
 
@@ -20,14 +21,14 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
 
     public async Task<Result> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
-        var resultBuilder = await Result.TryFail()
-            .CheckErrorAsync( async () => !await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken),
+        var resultBuilder = await Result.Try()
+            .CheckAsync( async () => !await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken),
                 new Error("Order for update not found", $"There is no order with this id {request.OrderId} "))
             .DropIfFailed()
-            .CheckError(() => request.Value.OrderItems.Any(o => o.ProductId == null),
+            .Check(() => request.Value.OrderItems.Any(o => o.ProductId == null),
                 new Error("Order items error", "Product in order item cannot be null."))
             .DropIfFailed()
-            .CheckError(() => request.Value.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
+            .Check(() => request.Value.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
                 new Error("Order items error", "Each order item must be unique."));
 
         var result = resultBuilder.Build();

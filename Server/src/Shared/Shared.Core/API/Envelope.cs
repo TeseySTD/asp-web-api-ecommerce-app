@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Shared.Core.Validation;
 using Shared.Core.Validation.FluentValidation;
+using Shared.Core.Validation.Result;
 
 namespace Shared.Core.API;
 

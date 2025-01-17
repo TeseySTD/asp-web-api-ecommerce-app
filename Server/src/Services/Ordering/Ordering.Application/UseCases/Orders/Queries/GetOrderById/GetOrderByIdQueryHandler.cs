@@ -3,6 +3,7 @@ using Ordering.Application.Common.Interfaces;
 using Ordering.Application.Dto.Order;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.Application.UseCases.Orders.Queries.GetOrderById;
 

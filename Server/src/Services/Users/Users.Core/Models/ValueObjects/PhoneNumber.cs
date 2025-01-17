@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Users.Core.Models.ValueObjects;
 
@@ -13,11 +14,11 @@ public record PhoneNumber
 
     public static Result<PhoneNumber> Create(string phoneNumber)
     {
-        return Result<PhoneNumber>.TryFail(new PhoneNumber(phoneNumber))
-            .CheckError(string.IsNullOrEmpty(phoneNumber),
+        return Result<PhoneNumber>.Try(new PhoneNumber(phoneNumber))
+            .Check(string.IsNullOrEmpty(phoneNumber),
                 new Error("Phone number is required", "Phone number must be not null or empty."))
             .DropIfFailed()
-            .CheckError(!Regex.IsMatch(phoneNumber, RegexPhoneNumber),
+            .Check(!Regex.IsMatch(phoneNumber, RegexPhoneNumber),
                 new Error("Phone number is incorrect.", "Phone number is not a valid phone number."))
             .Build();
     }

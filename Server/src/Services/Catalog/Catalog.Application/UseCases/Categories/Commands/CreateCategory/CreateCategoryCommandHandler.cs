@@ -3,6 +3,7 @@ using Catalog.Core.Models.Categories;
 using Catalog.Core.Models.Categories.ValueObjects;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Categories.Commands.CreateCategory;
 

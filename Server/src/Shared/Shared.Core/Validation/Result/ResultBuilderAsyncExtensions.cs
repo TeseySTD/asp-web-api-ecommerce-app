@@ -1,66 +1,66 @@
-﻿namespace Shared.Core.Validation;
+﻿namespace Shared.Core.Validation.Result;
 
-public static class ResultBuilderExtensions
+public static class ResultBuilderAsyncExtensions
 {
-    public static async Task<ResultBuilder<TResult>> CheckError<TResult>(
+    public static async Task<ResultBuilder<TResult>> Check<TResult>(
         this Task<ResultBuilder<TResult>> resultBuilder, bool errorCondition, Error error) where TResult : Result
     {
         var resultBuilderAfter = await resultBuilder;
-        resultBuilderAfter.CheckError(errorCondition, error);
+        resultBuilderAfter.Check(errorCondition, error);
 
         return resultBuilderAfter;
     }
 
 
-    public static async Task<ResultBuilder<TResult>> CheckErrorIf<TResult>(
+    public static async Task<ResultBuilder<TResult>> CheckIf<TResult>(
         this Task<ResultBuilder<TResult>> resultBuilder,
         bool checkCondition, bool errorCondition, Error error) where TResult : Result
     {
         var resultBuilderAfter = await resultBuilder;
         if (checkCondition)
-            resultBuilderAfter.CheckError(errorCondition, error);
+            resultBuilderAfter.Check(errorCondition, error);
 
         return resultBuilderAfter;
     }
 
-    public static async Task<ResultBuilder<TResult>> CheckError<TResult>(
+    public static async Task<ResultBuilder<TResult>> Check<TResult>(
         this Task<ResultBuilder<TResult>> resultBuilder, Func<bool> errorConditionFunc, Error error)
         where TResult : Result
     {
         var resultBuilderAfter = await resultBuilder;
-        resultBuilderAfter.CheckError(errorConditionFunc(), error);
+        resultBuilderAfter.Check(errorConditionFunc(), error);
 
         return resultBuilderAfter;
     }
 
-    public static async Task<ResultBuilder<TResult>> CheckErrorIf<TResult>(
+    public static async Task<ResultBuilder<TResult>> CheckIf<TResult>(
         this Task<ResultBuilder<TResult>> resultBuilder, bool checkCondition, Func<bool> errorConditionFunc,
         Error error) where TResult : Result
     {
         var resultBuilderAfter = await resultBuilder;
 
-        resultBuilderAfter.CheckErrorIf(checkCondition, errorConditionFunc(), error);
+        resultBuilderAfter.CheckIf(checkCondition, errorConditionFunc(), error);
 
         return resultBuilderAfter;
     }
 
-    public static async Task<ResultBuilder<TResult>> CheckErrorAsync<TResult>(
+    public static async Task<ResultBuilder<TResult>> CheckAsync<TResult>(
         this Task<ResultBuilder<TResult>> resultBuilder, Func<Task<bool>> errorConditionFunc, Error error)
         where TResult : Result
     {
         var resultBuilderAfter = await resultBuilder;
 
-        return await resultBuilderAfter.CheckErrorAsync(errorConditionFunc, error);
+        return await resultBuilderAfter.CheckAsync(errorConditionFunc, error);
     }
 
-    public static async Task<ResultBuilder<TResult>> CheckErrorIfAsync<TResult>(
+    public static async Task<ResultBuilder<TResult>> CheckIfAsync<TResult>(
         this Task<ResultBuilder<TResult>> resultBuilder, bool checkCondition,
         Func<Task<bool>> errorConditionFunc,
         Error error) where TResult : Result
     {
         var resultBuilderAfter = await resultBuilder;
 
-        return await resultBuilderAfter.CheckErrorIfAsync(checkCondition, errorConditionFunc, error);
+        return await resultBuilderAfter.CheckIfAsync(checkCondition, errorConditionFunc, error);
     }
 
     public static async Task<ResultBuilder<TResult>> DropIfFailed<TResult>(this Task<ResultBuilder<TResult>> resultBuilder)

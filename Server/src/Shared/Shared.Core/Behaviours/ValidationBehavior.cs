@@ -3,6 +3,7 @@ using MediatR;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
 using Shared.Core.Validation.FluentValidation;
+using Shared.Core.Validation.Result;
 
 namespace Shared.Core.Behaviours;
 

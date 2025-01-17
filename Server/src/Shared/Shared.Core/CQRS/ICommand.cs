@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Shared.Core.CQRS;
 

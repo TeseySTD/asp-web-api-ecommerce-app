@@ -3,6 +3,7 @@ using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Shared.Core.Behaviours;
 

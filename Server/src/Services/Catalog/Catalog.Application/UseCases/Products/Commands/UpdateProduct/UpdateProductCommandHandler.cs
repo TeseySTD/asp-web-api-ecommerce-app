@@ -5,6 +5,7 @@ using Catalog.Core.Models.Products.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Products.Commands.UpdateProduct;
 
@@ -40,8 +41,8 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
     private async Task<Result> Update(Product product, CancellationToken cancellationToken = default)
     {
-        var result = Result.TryFail()
-            .CheckErrorIf(
+        var result = Result.Try()
+            .CheckIf(
                 product.CategoryId != null,
                 !await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
                 new Error("Category not found", $"Category not found, incorrect id:{product.CategoryId}"))
