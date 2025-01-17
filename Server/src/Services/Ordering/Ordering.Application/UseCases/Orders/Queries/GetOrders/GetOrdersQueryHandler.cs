@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
 using Ordering.Application.Dto.Order;
+using Ordering.Core.Models.Orders.ValueObjects;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
 
@@ -25,7 +26,6 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, IEnumerable<O
             .AsNoTracking()
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
-            .Include(o => o.Customer)
             .ToListAsync(cancellationToken);
 
         var orderDtos = orders.Select(o =>
@@ -40,8 +40,7 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, IEnumerable<O
 
             return new OrderReadDto(
                 OrderId: o.Id.Value,
-                UserName: o.Customer.Name.Value,
-                Email: o.Customer.Email.Value,
+                CustomerId: o.CustomerId.Value,
                 OrderDate: o.OrderDate.ToString(),
                 Status: o.Status.ToString(),
                 CardName: o.Payment.CardName,

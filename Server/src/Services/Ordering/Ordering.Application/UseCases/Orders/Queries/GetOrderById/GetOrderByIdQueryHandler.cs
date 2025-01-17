@@ -24,7 +24,6 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, OrderRe
             .AsNoTracking()
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
-            .Include(o => o.Customer)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         var products = order!.OrderItems.Select(oi =>
@@ -37,8 +36,7 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, OrderRe
 
         var orderDto = new OrderReadDto(
             OrderId: order.Id.Value,
-            UserName: order.Customer.Name.Value,
-            Email: order.Customer.Email.Value,
+            CustomerId: order.CustomerId.Value,
             OrderDate: order.OrderDate.ToString(),
             Status: order.Status.ToString(),
             CardName: order.Payment.CardName,

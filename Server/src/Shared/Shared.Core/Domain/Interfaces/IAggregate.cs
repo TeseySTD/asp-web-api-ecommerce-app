@@ -1,3 +1,5 @@
+using Shared.Core.Domain.Classes;
+
 namespace Shared.Core.Domain.Interfaces;
 
 public interface IAggregate<TId> : IAggregate, IEntity<TId>
@@ -7,7 +9,7 @@ public interface IAggregate<TId> : IAggregate, IEntity<TId>
 
 public interface IAggregate : IEntity
 {
-    IReadOnlyList<IDomainEvent> DomainEvents { get; }
+    IReadOnlyList<DomainEvent> DomainEvents { get; }
 
-    IDomainEvent[] ClearDomainEvents();
+    DomainEvent[] ClearDomainEvents();
 }

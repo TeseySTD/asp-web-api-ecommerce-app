@@ -1,6 +1,20 @@
 ﻿version: '3.9'
 
 services:
+  messagebroker:
+    container_name: messagebroker
+    hostname: eccomerce-mq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - message_broker_data:/var/lib/rabbitmq
+      - message_broker_log:/var/log/rabbitmq
+    
   users.db:
     restart: always
     environment:
@@ -32,8 +46,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=7080
       - ConnectionStrings__Database=Username=postgres;Password=123;Host=catalog.db;Port=5432;Database=catalogdb;Include Error Detail=true
+      - MessageBroker__Host=amqp://eccomerce-mq:5672
+      - MessageBroker_UserName=guest
+      - MessageBroker_Password=guest
     depends_on:
       - catalog.db 
+      - messagebroker
   
   ordering.db:
     restart: always
@@ -49,5 +67,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=6080
       - ConnectionStrings__Database=Username=postgres;Password=123;Host=ordering.db;Port=5432;Database=orderingdb;Include Error Detail=true
+      - MessageBroker__Host=amqp://eccomerce-mq:5672
+      - MessageBroker_UserName=guest
+      - MessageBroker_Password=guest
     depends_on:
       - ordering.db 
+      - messagebroker

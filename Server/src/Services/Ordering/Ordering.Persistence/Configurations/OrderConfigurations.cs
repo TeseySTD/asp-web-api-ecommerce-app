@@ -26,11 +26,11 @@ public class OrderConfigurations : IEntityTypeConfiguration<Order>
                 id => id.Value,
                 value => OrderId.Create(value).Value);
         
-        builder.HasOne(o => o.Customer)
-            .WithMany()
-            .HasForeignKey(o => o.CustomerId)
-            .HasPrincipalKey(u => u.Id)
-            .OnDelete(DeleteBehavior.SetNull);
+        builder.Property(o => o.CustomerId)
+            .ValueGeneratedNever()
+            .HasConversion(
+                id => id.Value,
+                value => CustomerId.Create(value).Value);
         
         builder.HasMany(o => o.OrderItems)
             .WithOne()
@@ -104,6 +104,6 @@ public class OrderItemConfigurations : IEntityTypeConfiguration<OrderItem>
         builder.Property(o => o.Price)
             .HasConversion(
                 price => price.Value,
-                value => ProductPrice.Create(value).Value);
+                value => OrderItemPrice.Create(value).Value);
     }
 }

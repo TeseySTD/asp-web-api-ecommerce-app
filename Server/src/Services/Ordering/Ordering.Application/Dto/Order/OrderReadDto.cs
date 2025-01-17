@@ -2,8 +2,7 @@
 
 public record OrderReadDto(
     Guid OrderId,
-    string UserName,
-    string Email,
+    Guid CustomerId,
     string OrderDate,
     string Status,
     string CardName,

@@ -26,7 +26,7 @@ public class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderCommand>
         );
 
         RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => ProductPrice.Create(e.Price)
+            (e) => OrderItemPrice.Create(e.Price)
         );
         
         RuleFor(x => x.Value.Payment).MustBeCreatedWith(

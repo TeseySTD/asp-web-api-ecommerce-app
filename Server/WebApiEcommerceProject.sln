@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Users.Infrastructure", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Users.Core", "src\Services\Users\Users.Core\Users.Core.csproj", "{09E34E34-AD45-4BD4-A39B-C9023B242A77}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Messaging", "src\Shared\Shared.Messaging\Shared.Messaging.csproj", "{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{09E34E34-AD45-4BD4-A39B-C9023B242A77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09E34E34-AD45-4BD4-A39B-C9023B242A77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09E34E34-AD45-4BD4-A39B-C9023B242A77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

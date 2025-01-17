@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
-using Ordering.Core.Models.Customers.ValueObjects;
 using Ordering.Core.Models.Orders;
 using Ordering.Core.Models.Orders.Entities;
 using Ordering.Core.Models.Orders.ValueObjects;
@@ -42,16 +41,30 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
         var orderItems = new List<OrderItem>();
         foreach (var item in request.Value.OrderItems)
         {
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == ProductId.Create(item.ProductId).Value, 
+                    cancellationToken);
+
+            if (product == null)
+            {
+                product = Product.Create(
+                    id: ProductId.Create(item.ProductId).Value,
+                    title: ProductTitle.Create(item.ProductName).Value,
+                    description: ProductDescription.Create(item.ProductDescription).Value
+                );
+            
+                await _context.Products.AddAsync(product, cancellationToken);
+            }
+
             var orderItem = OrderItem.Create(
                 orderId: orderId,
-                productId: ProductId.Create(item.ProductId).Value,
+                product: product,
                 quantity: OrderItemQuantity.Create(item.Quantity).Value,
-                price: ProductPrice.Create(item.Price).Value
+                price: OrderItemPrice.Create(item.Price).Value
             );
 
             orderItems.Add(orderItem);
         }
-
         var order = Order.Create(
             id: orderId,
             payment: payment,
@@ -61,13 +74,13 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
         );
 
         return (await Add(order, cancellationToken))
-            .Map<Result<Guid>>
+            .Map
             (
                 onSuccess: () => Result<Guid>.Success(order.Id.Value),
                 onFailure: errors => Result<Guid>.Failure(errors)
             );
     }
-    
+
     public async Task<Result> Add(Order order, CancellationToken cancellationToken)
     {
         var resultBuilder = Result.TryFail()

@@ -6,15 +6,15 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregate<TId>
 {
     protected AggregateRoot(TId id) : base(id){}
     protected AggregateRoot(){}
-    protected List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
-    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+    protected List<DomainEvent> _domainEvents = new List<DomainEvent>();
+    public IReadOnlyList<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    public void AddDomainEvent(IDomainEvent domainEvent)
+    public void AddDomainEvent(DomainEvent domainEvent)
     {
         _domainEvents.Add(domainEvent);
     }
     
-    public IDomainEvent[] ClearDomainEvents()
+    public DomainEvent[] ClearDomainEvents()
     {
         var dequeuedEvents = _domainEvents.ToArray();
         

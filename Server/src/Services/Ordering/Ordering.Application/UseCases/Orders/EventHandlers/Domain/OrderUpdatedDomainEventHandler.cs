@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Ordering.Core.Models.Orders.Events;
 using Shared.Core.Domain.Interfaces;
 
-namespace Ordering.Application.UseCases.Orders.EventHandlers;
+namespace Ordering.Application.UseCases.Orders.EventHandlers.Domain;
 
 public class OrderUpdatedDomainEventHandler : INotificationHandler<OrderUpdatedDomainEvent>
 {
@@ -17,9 +17,8 @@ public class OrderUpdatedDomainEventHandler : INotificationHandler<OrderUpdatedD
 
     public Task Handle(OrderUpdatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        var domainEvent = notification as IDomainEvent;
         _logger.LogInformation("Domain event {Type} on {Time} handled: {DomainEvent}",
-            domainEvent.EventType, domainEvent.OccurredOn,
+            notification.EventType, notification.OccurredOnUtc,
             JsonSerializer.Serialize(notification, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true}));
         return Task.CompletedTask;
     }

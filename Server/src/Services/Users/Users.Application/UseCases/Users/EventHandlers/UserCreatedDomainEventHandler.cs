@@ -17,9 +17,8 @@ public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDom
 
     public Task Handle(UserCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        var domainEvent = notification as IDomainEvent;
         _logger.LogInformation("Domain event {Type} on {Time} handled: {DomainEvent}",
-            domainEvent.EventType, domainEvent.OccurredOn,
+            notification.EventType, notification.OccurredOnUtc,
             JsonSerializer.Serialize(notification, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true}));
         return Task.CompletedTask;
     }

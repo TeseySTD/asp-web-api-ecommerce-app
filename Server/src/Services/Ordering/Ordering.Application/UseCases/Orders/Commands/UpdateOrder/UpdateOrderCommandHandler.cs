@@ -61,7 +61,7 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
                 orderId: orderToUpdate!.Id,
                 productId: ProductId.Create(item.ProductId).Value,
                 quantity: OrderItemQuantity.Create(item.Quantity).Value,
-                price: ProductPrice.Create(item.Price).Value
+                price: OrderItemPrice.Create(item.Price).Value
             );
 
             orderItems.Add(orderItem);

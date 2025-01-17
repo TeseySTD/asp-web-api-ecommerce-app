@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Domain.Interfaces;
 
-namespace Catalog.Application.UseCases.Products.EventHandlers;
+namespace Catalog.Application.UseCases.Products.EventHandlers.Domain;
 
 public class ProductUpdatedDomainEventHandler : INotificationHandler<ProductUpdatedDomainEvent>
 {
@@ -17,9 +17,8 @@ public class ProductUpdatedDomainEventHandler : INotificationHandler<ProductUpda
 
     public Task Handle(ProductUpdatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        var domainEvent = notification as IDomainEvent;
         _logger.LogInformation("Domain event {Type} on {Time} handled: {DomainEvent}",
-            domainEvent.EventType, domainEvent.OccurredOn,
+            notification.EventType, notification.OccurredOnUtc,
             JsonSerializer.Serialize(notification, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true}));
         return Task.CompletedTask;
     }

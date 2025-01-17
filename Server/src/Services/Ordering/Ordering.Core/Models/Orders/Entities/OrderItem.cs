@@ -10,7 +10,7 @@ public class OrderItem : Entity<OrderItemId>
     private OrderItem() : base(){ }
     
     private OrderItem(OrderItemId id, ProductId productId, OrderId orderId, OrderItemQuantity quantity,
-        ProductPrice price) : base(id)
+        OrderItemPrice price) : base(id)
     {
         ProductId = productId;
         OrderId = orderId;
@@ -22,9 +22,13 @@ public class OrderItem : Entity<OrderItemId>
     public Product Product { get; set; }
     public OrderId OrderId { get; set; }
     public OrderItemQuantity Quantity { get; set; }
-    public ProductPrice Price { get; set; }
+    public OrderItemPrice Price { get; set; }
 
     public static OrderItem Create(ProductId productId, OrderId orderId, OrderItemQuantity quantity,
-        ProductPrice price) =>
+        OrderItemPrice price) =>
         new(OrderItemId.Create(Guid.NewGuid()).Value, productId, orderId, quantity, price);
+    
+    public static OrderItem Create(Product product, OrderId orderId, OrderItemQuantity quantity,
+        OrderItemPrice price) =>
+        new(OrderItemId.Create(Guid.NewGuid()).Value, product.Id, orderId, quantity, price){Product = product};
 }

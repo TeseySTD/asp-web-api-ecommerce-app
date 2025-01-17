@@ -1,6 +1,9 @@
 version: '3.9'
 
 services:
+  messagebroker:
+    image: rabbitmq:management
+  
   users.db:
     image: postgres
     container_name: users.db
@@ -53,4 +56,8 @@ volumes:
     name: catalog_data
   ordering_data:
     name: ordering_data
+  message_broker_data:
+    name: message_broker_data
+  message_broker_log:
+    name: message_broker_log
 

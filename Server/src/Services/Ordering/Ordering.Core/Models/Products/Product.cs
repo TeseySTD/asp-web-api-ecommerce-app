@@ -1,3 +1,4 @@
+using Ordering.Core.Models.Orders.ValueObjects;
 using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.Domain.Classes;
 
@@ -9,36 +10,26 @@ public class Product : AggregateRoot<ProductId>
     {
     }
 
-    private Product(ProductId id, ProductTitle title, ProductDescription description, ProductPrice price) : base(id)
+    private Product(ProductId id, ProductTitle title, ProductDescription description) : base(id)
     {
         Title = title;
         Description = description;
-        Price = price;
     }
 
     public ProductTitle Title { get; private set; }
     public ProductDescription Description { get; private set; }
-    public ProductPrice Price { get; private set; }
     
 
-    public static Product Create(ProductId id, ProductTitle title, ProductDescription description,
-        ProductPrice price)
+    public static Product Create(ProductId id, ProductTitle title, ProductDescription description)
     {
-        var product = new Product(id, title, description, price);
+        var product = new Product(id, title, description);
         return product;
     }
 
-    public static Product Create(ProductTitle title, ProductDescription description, ProductPrice price)
-    {
-        var id = ProductId.Create(Guid.NewGuid()).Value;
-        return Create(id, title, description, price);
-    }
-
     public void Update(ProductTitle title, ProductDescription description,
-        ProductPrice price)
+        OrderItemPrice price)
     {
         Title = title;
         Description = description;
-        Price = price;
     }
 }

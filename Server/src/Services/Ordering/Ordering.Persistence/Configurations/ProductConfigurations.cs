@@ -33,11 +33,5 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasConversion(
                 d => d.Value,
                 value => ProductDescription.Create(value).Value);
-
-        builder
-            .Property(p => p.Price)
-            .HasConversion(
-                p => p.Value,
-                value => ProductPrice.Create(value).Value);
     }
 }

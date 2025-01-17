@@ -11,9 +11,11 @@ COPY ["Server/src/Services/Ordering/Ordering.Application/Ordering.Application.cs
 COPY ["Server/src/Services/Ordering/Ordering.Core/Ordering.Core.csproj", "Services/Ordering/Ordering.Core/"]
 COPY ["Server/src/Services/Ordering/Ordering.Persistence/Ordering.Persistence.csproj", "Services/Ordering/Ordering.Persistence/"]
 COPY ["Server/src/Shared/Shared.Core/Shared.Core.csproj", "Shared/Shared.Core/"]
+COPY ["Server/src/Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Services/Ordering/Ordering.API/Ordering.API.csproj"
 COPY ["Server/src/Services/Ordering", "Services/Ordering"]
 COPY ["Server/src/Shared/Shared.Core", "Shared/Shared.Core"]
+COPY ["Server/src/Shared/Shared.Messaging", "Shared/Shared.Messaging"]
 WORKDIR "/src/Services/Ordering/Ordering.API"
 RUN dotnet build "Ordering.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Shared.Core.Domain.Classes;
 using Users.Application.Common.Interfaces;
 using Users.Core.Models;
 using Users.Core.Models.Entities;
@@ -17,6 +18,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Ignore<DomainEvent>();
+
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         base.OnModelCreating(modelBuilder);
     }

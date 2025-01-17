@@ -12,7 +12,7 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
 services
-    .AddApplicationLayerServices()
+    .AddApplicationLayerServices(builder.Configuration)
     .AddPersistenceLayerServices(builder.Configuration);
 
 services.AddCarter();

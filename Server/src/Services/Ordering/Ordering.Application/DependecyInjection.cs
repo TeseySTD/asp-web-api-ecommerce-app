@@ -3,12 +3,13 @@ using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Behaviours;
+using Shared.Messaging.Broker;
 
 namespace Ordering.Application;
 
 public static class DependecyInjection
 {
-    public static IServiceCollection AddApplicationLayerServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationLayerServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMediatR( cfg => 
         {
@@ -18,6 +19,8 @@ public static class DependecyInjection
         });
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        
+        services.AddMessageBroker(configuration, Assembly.GetExecutingAssembly());
         return services;
     }
     

@@ -1,13 +1,15 @@
 ﻿using System.Reflection;
 using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Behaviours;
+using Shared.Messaging.Broker;
 
 namespace Catalog.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationLayerServices(this IServiceCollection services){
+    public static IServiceCollection AddApplicationLayerServices(this IServiceCollection services, IConfiguration configuration){
         services.AddMediatR( cfg => 
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
@@ -16,6 +18,9 @@ public static class DependencyInjection
         });
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        
+        services.AddMessageBroker(configuration, Assembly.GetExecutingAssembly());
+        
         return services;
     }
 }

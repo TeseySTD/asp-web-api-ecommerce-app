@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Ordering.Core.Models.Customers.ValueObjects;
 using Ordering.Core.Models.Orders.ValueObjects;
 using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.Validation.FluentValidation;
@@ -29,7 +28,7 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
         );
 
         RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => ProductPrice.Create(e.Price)
+            (e) => OrderItemPrice.Create(e.Price)
         );
         
         RuleFor(x => x.Value.Payment).MustBeCreatedWith(

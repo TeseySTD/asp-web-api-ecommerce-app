@@ -57,4 +57,14 @@ public class Product : AggregateRoot<ProductId>
         
         AddDomainEvent(new ProductUpdatedDomainEvent(this));
     }
+
+    public void IncreaseProductQuantity(uint quantity) => StockQuantity = StockQuantity.Create(StockQuantity.Value + quantity);
+
+    public void DecreaseProductQuantity(uint quantity)
+    {
+        if(StockQuantity.Value >= quantity)
+            StockQuantity = StockQuantity.Create(StockQuantity.Value - quantity);
+        else
+            throw new ArgumentException("The quantity provided is greater than the quantity of product."); 
+    }
 }

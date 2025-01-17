@@ -1,6 +1,6 @@
 using Shared.Core.Validation;
 
-namespace Ordering.Core.Models.Customers.ValueObjects;
+namespace Ordering.Core.Models.Orders.ValueObjects;
 
 public record CustomerId
 {

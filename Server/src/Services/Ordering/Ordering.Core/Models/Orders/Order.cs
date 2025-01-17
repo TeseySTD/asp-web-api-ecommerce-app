@@ -1,5 +1,4 @@
-using Ordering.Core.Models.Customers;
-using Ordering.Core.Models.Customers.ValueObjects;
+
 using Ordering.Core.Models.Orders.Entities;
 using Ordering.Core.Models.Orders.Events;
 using Ordering.Core.Models.Orders.ValueObjects;
@@ -24,7 +23,6 @@ public class Order : AggregateRoot<OrderId>
     }
 
     public CustomerId CustomerId { get; private set; }
-    public Customer Customer { get; private set; }
     public DateTime OrderDate { get; private set; } = DateTime.UtcNow;
     public Payment Payment { get; private set; }
     public Address DestinationAddress { get; private set; }
@@ -51,7 +49,7 @@ public class Order : AggregateRoot<OrderId>
             Payment = payment,
             DestinationAddress = destinationAddress
         };
-        order.AddDomainEvent(new OrderCreatedDomainEvent(order.Id));
+        order.AddDomainEvent(new OrderCreatedDomainEvent(order));
         return order;
     }
 
@@ -68,11 +66,16 @@ public class Order : AggregateRoot<OrderId>
         
         AddDomainEvent(new OrderUpdatedDomainEvent(this));
     }
+
+    public void ApproveOrder() => Status = OrderStatus.InProgress;
+    public void CancelOrder() => Status = OrderStatus.Cancelled;
+    public void CompleteOrder() => Status = OrderStatus.Completed;
 }
 
 public enum OrderStatus
 {
     NotStarted = 1,
     InProgress,
-    Completed
+    Completed,
+    Cancelled,
 }
