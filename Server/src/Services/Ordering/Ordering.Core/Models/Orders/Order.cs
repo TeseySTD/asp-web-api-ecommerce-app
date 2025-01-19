@@ -67,9 +67,9 @@ public class Order : AggregateRoot<OrderId>
         AddDomainEvent(new OrderUpdatedDomainEvent(this));
     }
 
-    public void ApproveOrder() => Status = OrderStatus.InProgress;
-    public void CancelOrder() => Status = OrderStatus.Cancelled;
-    public void CompleteOrder() => Status = OrderStatus.Completed;
+    public void Approve() => Status = OrderStatus.InProgress;
+    public void Cancel() => Status = OrderStatus.Cancelled;
+    public void Complete() => Status = OrderStatus.Completed;
 }
 
 public enum OrderStatus

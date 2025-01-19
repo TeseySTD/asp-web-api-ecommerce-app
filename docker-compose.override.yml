@@ -29,6 +29,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__Database=Username=postgres;Password=123;Host=users.db;Port=5432;Database=usersdb;Include Error Detail=true
+      - MessageBroker__Host=amqp://eccomerce-mq:5672
+      - MessageBroker_UserName=guest
+      - MessageBroker_Password=guest
     depends_on:
       - users.db 
         

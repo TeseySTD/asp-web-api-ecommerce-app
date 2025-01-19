@@ -17,7 +17,10 @@ public static class Extensions
             if (assembly is not null)
             {
                 config.AddConsumers(assembly);
+                config.SetInMemorySagaRepositoryProvider();
+                config.AddSagaStateMachines(assembly);
             }
+            
             
             config.UsingRabbitMq((context, configurator) =>
             {

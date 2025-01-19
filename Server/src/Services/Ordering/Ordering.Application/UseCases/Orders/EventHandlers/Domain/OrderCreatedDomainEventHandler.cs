@@ -27,12 +27,12 @@ public class OrderCreatedDomainEventHandler : INotificationHandler<OrderCreatedD
             JsonSerializer.Serialize(notification,
                 new JsonSerializerOptions { WriteIndented = true, IncludeFields = true }));
 
-        var makeOrderEvent = new MakeOrderEvent(
-            orderId: notification.Order.Id.Value,
-            products: notification.Order.OrderItems.Select(oi =>
-                new MakeOrderEventProduct(
+        var makeOrderEvent = new OrderMadeEvent(
+            OrderId: notification.Order.Id.Value,
+            CustomerId: notification.Order.CustomerId.Value,
+            Products: notification.Order.OrderItems.Select(oi =>
+                new ProductWithQuantityDto(
                     oi.Product.Id.Value,
-                    oi.Price.Value,
                     oi.Quantity.Value
                 )
             ).ToList()

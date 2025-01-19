@@ -1,21 +1,20 @@
 ﻿using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Shared.Core.Domain.Interfaces;
 using Users.Core.Models.Events;
 
-namespace Users.Application.UseCases.Users.EventHandlers;
+namespace Users.Application.UseCases.Users.EventHandlers.Domain;
 
-public class UserUpdatedDomainEventHandler : INotificationHandler<UserUpdatedDomainEvent>
+public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDomainEvent>
 {
-    private readonly ILogger<UserUpdatedDomainEventHandler> _logger;
+    private readonly ILogger<UserCreatedDomainEventHandler> _logger;
 
-    public UserUpdatedDomainEventHandler(ILogger<UserUpdatedDomainEventHandler> logger)
+    public UserCreatedDomainEventHandler(ILogger<UserCreatedDomainEventHandler> logger)
     {
         _logger = logger;
     }
 
-    public Task Handle(UserUpdatedDomainEvent notification, CancellationToken cancellationToken)
+    public Task Handle(UserCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Domain event {Type} on {Time} handled: {DomainEvent}",
             notification.EventType, notification.OccurredOnUtc,

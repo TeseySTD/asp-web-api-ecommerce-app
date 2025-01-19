@@ -12,9 +12,11 @@ COPY ["Server/src/Services/Users/Users.Core/Users.Core.csproj", "Services/Users/
 COPY ["Server/src/Services/Users/Users.Infrastructure/Users.Infrastructure.csproj", "Services/Users/Users.Infrastructure/"]
 COPY ["Server/src/Services/Users/Users.Persistence/Users.Persistence.csproj", "Services/Users/Users.Persistence/"]
 COPY ["Server/src/Shared/Shared.Core/Shared.Core.csproj", "Shared/Shared.Core/"]
+COPY ["Server/src/Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Services/Users/Users.API/Users.API.csproj"
 COPY ["Server/src/Services/Users", "Services/Users"]
 COPY ["Server/src/Shared/Shared.Core", "Shared/Shared.Core"]
+COPY ["Server/src/Shared/Shared.Messaging", "Shared/Shared.Messaging"]
 WORKDIR "/src/Services/Users/Users.API"
 RUN dotnet build "Users.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

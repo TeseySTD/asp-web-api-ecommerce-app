@@ -5,32 +5,34 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Messaging.Events;
 using Shared.Messaging.Events.Order;
+using Shared.Messaging.Messages;
+using Shared.Messaging.Messages.Order;
 
 namespace Catalog.Application.UseCases.Products.EventHandlers.Integration;
 
-public sealed class MakeOrderEventHandler : IntegrationEventHandler<MakeOrderEvent>
+public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<ReserveProductsMessage>
 {
     private readonly IApplicationDbContext _dbContext;
     private readonly IPublishEndpoint _publishEndpoint;
 
-    public MakeOrderEventHandler(ILogger<IntegrationEventHandler<MakeOrderEvent>> logger,
+    public ReserveProductsMessageHandler(ILogger<IntegrationMessageHandler<ReserveProductsMessage>> logger,
         IApplicationDbContext dbContext, IPublishEndpoint publishEndpoint) : base(logger)
     {
         _dbContext = dbContext;
         _publishEndpoint = publishEndpoint;
     }
 
-    public override async Task Handle(ConsumeContext<MakeOrderEvent> context)
+    public override async Task Handle(ConsumeContext<ReserveProductsMessage> context)
     {
         if (await ValidateOrder(context))
         {
             await UpdateProductQuantities(context);
 
-            await _publishEndpoint.Publish(new ApprovedOrderEvent(context.Message.OrderId));
+            await _publishEndpoint.Publish(new ReservedProductsEvent(context.Message.OrderId));
         }
     }
 
-    private async Task<bool> ValidateOrder(ConsumeContext<MakeOrderEvent> context)
+    private async Task<bool> ValidateOrder(ConsumeContext<ReserveProductsMessage> context)
     {
         var productIds = context.Message.Products
             .Select(p => ProductId.Create(p.ProductId).Value)
@@ -49,7 +51,7 @@ public sealed class MakeOrderEventHandler : IntegrationEventHandler<MakeOrderEve
         {
             var missingProductsMessage =
                 $"Missing products with IDs: {string.Join(", ", missingProducts.Select(id => id.Value))}";
-            await PublishCancelOrder(context.Message.OrderId, missingProductsMessage);
+            await PublishFailedReservation(context.Message.OrderId, missingProductsMessage);
             Logger.LogWarning(missingProductsMessage);
             return false;
         }
@@ -62,7 +64,7 @@ public sealed class MakeOrderEventHandler : IntegrationEventHandler<MakeOrderEve
             if (product == null || product.Value < orderProduct.ProductQuantity)
             {
                 var insufficientQuantityMessage = $"Insufficient quantity for product {productId.Value}";
-                await PublishCancelOrder(context.Message.OrderId, insufficientQuantityMessage);
+                await PublishFailedReservation(context.Message.OrderId, insufficientQuantityMessage);
                 Logger.LogWarning(insufficientQuantityMessage);
                 return false;
             }
@@ -71,7 +73,7 @@ public sealed class MakeOrderEventHandler : IntegrationEventHandler<MakeOrderEve
         return true;
     }
 
-    private async Task UpdateProductQuantities(ConsumeContext<MakeOrderEvent> context)
+    private async Task UpdateProductQuantities(ConsumeContext<ReserveProductsMessage> context)
     {
         foreach (var orderProduct in context.Message.Products)
         {
@@ -86,9 +88,9 @@ public sealed class MakeOrderEventHandler : IntegrationEventHandler<MakeOrderEve
         await _dbContext.SaveChangesAsync(default);
     }
 
-    private async Task PublishCancelOrder(Guid orderId, string reason)
+    private async Task PublishFailedReservation(Guid orderId, string reason)
     {
-        await _publishEndpoint.Publish(new CancelOrderEvent(
+        await _publishEndpoint.Publish(new ReservationProductsFailedEvent(
             OrderId: orderId,
             Reason: reason));
     }

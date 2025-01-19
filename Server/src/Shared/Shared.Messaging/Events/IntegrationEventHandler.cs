@@ -31,11 +31,11 @@ public abstract class IntegrationEventHandler<TEvent> : IConsumer<TEvent> where 
         LogFinalMessage(context);
     }
 
-    public void LogStartupMessage(ConsumeContext<TEvent> context) => Logger.LogInformation(
+    protected void LogStartupMessage(ConsumeContext<TEvent> context) => Logger.LogInformation(
         "[START] Integration event {EventType} that occurred on {OccurredTime}, is handling...",
         context.Message.EventType, context.Message.OccuredOnUtc);
 
-    public void LogFinalMessage(ConsumeContext<TEvent> context) => Logger.LogInformation(
+    protected void LogFinalMessage(ConsumeContext<TEvent> context) => Logger.LogInformation(
         "[END] Integration event {EventType} that occurred on {OccurredTime}, handled at {Time}.",
         context.Message.EventType, context.Message.OccuredOnUtc, DateTime.UtcNow);
 }

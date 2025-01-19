@@ -14,7 +14,7 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGenWithAuthScheme();
 
 services
-    .AddApplicationLayerServices()
+    .AddApplicationLayerServices(builder.Configuration)
     .AddPersistenceLayerServices(builder.Configuration)
     .AddInfrastructureLayerServices();
 

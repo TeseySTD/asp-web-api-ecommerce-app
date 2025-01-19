@@ -23,7 +23,7 @@ public class ApprovedOrderEventHandler : IntegrationEventHandler<ApprovedOrderEv
         var orderId = OrderId.Create(context.Message.OrderId).Value;
         var order = await _dbContext.Orders.FindAsync(orderId);
         
-        order!.ApproveOrder();
+        order!.Approve();
 
         await _dbContext.SaveChangesAsync(default);
     }

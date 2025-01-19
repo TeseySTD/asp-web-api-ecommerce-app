@@ -7,17 +7,17 @@ using Shared.Messaging.Events.Order;
 
 namespace Ordering.Application.UseCases.Orders.EventHandlers.Integration;
 
-public class CancelOrderEventHandler : IntegrationEventHandler<CancelOrderEvent>
+public class CanceledOrderEventHandler : IntegrationEventHandler<CanceledOrderEvent>
 {
     private readonly IApplicationDbContext _dbContext;
 
-    public CancelOrderEventHandler(ILogger<IntegrationEventHandler<CancelOrderEvent>> logger,
+    public CanceledOrderEventHandler(ILogger<IntegrationEventHandler<CanceledOrderEvent>> logger,
         IApplicationDbContext dbContext) : base(logger)
     {
         _dbContext = dbContext;
     }
 
-    public override async Task Handle(ConsumeContext<CancelOrderEvent> context)
+    public override async Task Handle(ConsumeContext<CanceledOrderEvent> context)
     {
         Logger.Log(LogLevel.Warning, "Order with id {Id} cancelled by reason {Reason}"
             , context.Message.Id, context.Message.Reason);
@@ -25,7 +25,7 @@ public class CancelOrderEventHandler : IntegrationEventHandler<CancelOrderEvent>
         var orderId = OrderId.Create(context.Message.OrderId).Value;
         var order = await _dbContext.Orders.FindAsync(orderId);
 
-        order!.CancelOrder();
+        order!.Cancel();
         await _dbContext.SaveChangesAsync(default);
     }
 }
