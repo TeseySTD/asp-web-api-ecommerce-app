@@ -33,6 +33,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Users.Core", "src\Services\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Messaging", "src\Shared\Shared.Messaging\Shared.Messaging.csproj", "{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YarpGateway", "src\APIGateways\YarpGateway\YarpGateway.csproj", "{86841D7D-9E66-425C-B221-304983DF2AFF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2E6A5A6A-1F39-4752-933F-8CE4C1B052A7}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +106,10 @@ Global
 		{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A9A6D46-A5F9-473E-8CAB-5AA23584DA3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86841D7D-9E66-425C-B221-304983DF2AFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86841D7D-9E66-425C-B221-304983DF2AFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86841D7D-9E66-425C-B221-304983DF2AFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86841D7D-9E66-425C-B221-304983DF2AFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

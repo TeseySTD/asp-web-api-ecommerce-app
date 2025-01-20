@@ -1,6 +1,15 @@
 version: '3.9'
 
 services:
+  yarpgateway:
+    image: yarpgateway
+    container_name: yarpgateway
+    build:
+      context: .
+      dockerfile: Server/src/APIGateways/YarpGateway/Dockerfile
+    ports:
+      - "9080:9080"
+  
   messagebroker:
     image: rabbitmq:management
   

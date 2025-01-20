@@ -1,4 +1,4 @@
-﻿namespace Users.Infrastructure.Authorization;
+﻿namespace Shared.Core.Auth;
 
 public static class Policies
 {

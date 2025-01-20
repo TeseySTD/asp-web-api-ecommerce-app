@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shared.Core.Auth;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 
@@ -48,6 +49,6 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
         builder.Property(u => u.Role)
             .HasConversion(
                 r => r.ToString(),
-                value => Enum.Parse<User.UserRole>(value));
+                value => Enum.Parse<UserRole>(value));
     }
 }

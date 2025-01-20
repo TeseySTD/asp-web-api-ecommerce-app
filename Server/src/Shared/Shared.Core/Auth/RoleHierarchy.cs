@@ -1,14 +1,13 @@
-﻿using Users.Core.Models;
-
-namespace Users.Infrastructure.Authorization;
+﻿namespace Shared.Core.Auth;
 
 public static class RoleHierarchy
 {
+    
     private static readonly Dictionary<string, int> RoleLevels = new ()
     {
-        { User.UserRole.Admin.ToString(), 3 },
-        { User.UserRole.Seller.ToString(), 2 },
-        { User.UserRole.Default.ToString(), 1 }
+        { UserRole.Admin.ToString(), 3 },
+        { UserRole.Seller.ToString(), 2 },
+        { UserRole.Default.ToString(), 1 }
     };
 
     public static bool IsRoleAllowed(string? userRole, string requiredRole)

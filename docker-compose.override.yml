@@ -1,6 +1,6 @@
 ﻿version: '3.9'
 
-services:
+services:  
   messagebroker:
     container_name: messagebroker
     hostname: eccomerce-mq
@@ -76,3 +76,12 @@ services:
     depends_on:
       - ordering.db 
       - messagebroker
+        
+  yarpgateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=9080
+    depends_on:
+      - users.api
+      - catalog.api
+      - ordering.api

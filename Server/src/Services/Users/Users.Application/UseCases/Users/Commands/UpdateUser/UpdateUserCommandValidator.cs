@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Shared.Core.Auth;
 using Shared.Core.Validation.FluentValidation;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
@@ -19,6 +20,6 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
         
         RuleFor(x => x.Value.PhoneNumber).MustBeCreatedWith(PhoneNumber.Create);
         
-        RuleFor(x => x.Value.Role).IsEnumName(typeof(User.UserRole));
+        RuleFor(x => x.Value.Role).IsEnumName(typeof(UserRole));
     }
 }

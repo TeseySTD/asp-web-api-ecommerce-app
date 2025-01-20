@@ -1,7 +1,6 @@
-using System.Reflection;
 using Carter;
+using Shared.Core.Auth;
 using Shared.Core.Extensions;
-using Users.API.Extensions;
 using Users.Application;
 using Users.Infrastructure.Extensions;
 using Users.Persistence;

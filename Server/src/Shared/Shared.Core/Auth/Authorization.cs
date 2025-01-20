@@ -1,13 +1,13 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using Users.Core.Models;
-using Users.Infrastructure.Authorization;
 
-namespace Users.Infrastructure.Extensions;
+namespace Shared.Core.Auth;
 
 public static class Authorization
 {
-    public static IServiceCollection AddAuthrorizationWithRoleHierarchyPolicies(this IServiceCollection services)
+    public static IServiceCollection AddAuthrorizationWithRoleHierarchyPolicies(this IServiceCollection services,
+        Action<AuthorizationOptions>? configure = null)
     {
         services.AddAuthorization(options =>
         {
@@ -15,27 +15,30 @@ public static class Authorization
                 policy.RequireAssertion(context =>
                 {
                     var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
-                    return RoleHierarchy.IsRoleAllowed(userRole, User.UserRole.Admin.ToString());
+                    return RoleHierarchy.IsRoleAllowed(userRole, Policies.RequireAdminPolicy);
                 })
             );
-            
+
             options.AddPolicy(Policies.RequireSellerPolicy, policy =>
                 policy.RequireAssertion(context =>
                 {
                     var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
-                    return RoleHierarchy.IsRoleAllowed(userRole, User.UserRole.Seller.ToString());
+                    return RoleHierarchy.IsRoleAllowed(userRole, Policies.RequireSellerPolicy);
                 })
             );
-            
+
             options.AddPolicy(Policies.RequireDefaultPolicy, policy =>
                 policy.RequireAssertion(context =>
                 {
                     var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
-                    return RoleHierarchy.IsRoleAllowed(userRole, User.UserRole.Default.ToString());
+                    return RoleHierarchy.IsRoleAllowed(userRole, Policies.RequireDefaultPolicy);
                 })
             );
+            
+            if(configure != null)
+                services.Configure(configure);
         });
-
+        
         return services;
     }
 }

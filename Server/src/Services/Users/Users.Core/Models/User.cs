@@ -1,3 +1,4 @@
+using Shared.Core.Auth;
 using Shared.Core.Domain.Classes;
 using Users.Core.Models.Events;
 using Users.Core.Models.ValueObjects;
@@ -44,11 +45,5 @@ public class User : AggregateRoot<UserId>
         
         AddDomainEvent(new UserUpdatedDomainEvent(this));
     }
-
-    public enum UserRole
-    {
-        Default = 1,
-        Seller,
-        Admin
-    }
+    
 }

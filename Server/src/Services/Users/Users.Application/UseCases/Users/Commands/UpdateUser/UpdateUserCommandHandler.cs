@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shared.Core.Auth;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
@@ -49,7 +50,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
             email: Email.Create(request.Value.Email).Value,
             hashedPassword: HashedPassword.Create(hashedPassword).Value,
             phoneNumber: PhoneNumber.Create(request.Value.PhoneNumber).Value,
-            role: Enum.Parse<User.UserRole>(request.Value.Role)
+            role: Enum.Parse<UserRole>(request.Value.Role)
         );
         await _context.SaveChangesAsync(cancellationToken);
         

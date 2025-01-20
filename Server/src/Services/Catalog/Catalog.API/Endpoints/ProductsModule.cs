@@ -11,6 +11,7 @@ using Catalog.Core.Models.Products.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Core.API;
+using Shared.Core.Auth;
 
 namespace Catalog.API.Endpoints;
 
@@ -62,7 +63,7 @@ public class ProductModule : CarterModule
                 onSuccess: () => Results.Ok(writeDto.Id),
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
-        });
+        }).RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/{id:guid}", async (ISender sender, Guid id, UpdateProductRequest request, CancellationToken cancellationToken) =>
         {
