@@ -1,11 +1,10 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Users.Application.Common.Interfaces;
 using Users.Infrastructure.Authentication;
+using Users.Infrastructure.Helpers;
 
 namespace Users.Infrastructure.Extensions;
 
@@ -32,8 +31,7 @@ public static class Authentication
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                IssuerSigningKey = new RsaSecurityKey(KeyHelper.GetKey("JWT_PUBLIC_KEY_PATH")),
             });
         return services;
     }

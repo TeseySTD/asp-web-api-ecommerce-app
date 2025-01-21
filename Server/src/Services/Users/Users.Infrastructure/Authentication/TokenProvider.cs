@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Users.Application.Common.Interfaces;
 using Users.Core.Models;
 using Users.Core.Models.Entities;
+using Users.Infrastructure.Helpers;
 
 namespace Users.Infrastructure.Authentication;
 
@@ -25,8 +26,8 @@ public class TokenProvider(IOptions<JwtSettings> jwtSettings, IOptions<RefreshTo
             expires: DateTime.UtcNow.AddMinutes(jwtSettings.Value.ExpirationInMinutes),
             claims: claims,
             signingCredentials: new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey)),
-                SecurityAlgorithms.HmacSha256
+                new RsaSecurityKey(KeyHelper.GetKey("JWT_PRIVATE_KEY_PATH")),
+                SecurityAlgorithms.RsaSha256
             )
         );
 

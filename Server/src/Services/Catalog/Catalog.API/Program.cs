@@ -18,7 +18,7 @@ services
 
 services.AddCarter();
 
-services.AddSharedAuthentication(builder.Configuration["JwtSettings:SecretKey"]!);
+services.AddSharedAuthentication(Environment.GetEnvironmentVariable("JWT_PUBLIC_KEY_PATH")!);
 services.AddAuthrorizationWithRoleHierarchyPolicies();
 
 var app = builder.Build();

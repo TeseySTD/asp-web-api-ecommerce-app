@@ -14,7 +14,7 @@ services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 services.AddAuthrorizationWithRoleHierarchyPolicies();
-services.AddSharedAuthentication(builder.Configuration["JwtSettings:SecretKey"]!);
+services.AddSharedAuthentication(Environment.GetEnvironmentVariable("JWT_PUBLIC_KEY_PATH")!);
 
 
 services.AddRateLimiter(options =>

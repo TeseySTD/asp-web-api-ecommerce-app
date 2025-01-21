@@ -32,6 +32,11 @@ services:
       - MessageBroker__Host=amqp://eccomerce-mq:5672
       - MessageBroker_UserName=guest
       - MessageBroker_Password=guest
+      - JWT_PRIVATE_KEY_PATH=/home/app/secrets/jwt_private_key.pem
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_private_key.pem:/home/app/secrets/jwt_private_key.pem:ro
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro        
     depends_on:
       - users.db 
         
@@ -52,6 +57,9 @@ services:
       - MessageBroker__Host=amqp://eccomerce-mq:5672
       - MessageBroker_UserName=guest
       - MessageBroker_Password=guest
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro
     depends_on:
       - catalog.db 
       - messagebroker
@@ -73,6 +81,9 @@ services:
       - MessageBroker__Host=amqp://eccomerce-mq:5672
       - MessageBroker_UserName=guest
       - MessageBroker_Password=guest
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro
     depends_on:
       - ordering.db 
       - messagebroker
@@ -81,6 +92,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=9080
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro
     depends_on:
       - users.api
       - catalog.api

@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyManager", "src\KeyManager\KeyManager.csproj", "{DBBE3C7D-32B6-4645-A052-6AEE82E15CC3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,10 @@ Global
 		{86841D7D-9E66-425C-B221-304983DF2AFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86841D7D-9E66-425C-B221-304983DF2AFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86841D7D-9E66-425C-B221-304983DF2AFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBBE3C7D-32B6-4645-A052-6AEE82E15CC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBBE3C7D-32B6-4645-A052-6AEE82E15CC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBBE3C7D-32B6-4645-A052-6AEE82E15CC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBBE3C7D-32B6-4645-A052-6AEE82E15CC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
