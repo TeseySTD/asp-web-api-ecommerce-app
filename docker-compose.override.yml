@@ -1,0 +1,108 @@
+﻿version: '3.9'
+
+services:  
+  messagebroker:
+    container_name: messagebroker
+    hostname: eccomerce-mq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - message_broker_data:/var/lib/rabbitmq
+      - message_broker_log:/var/log/rabbitmq
+    
+  users.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: usersdb
+    volumes:
+      - users_data:/var/lib/postgresql/data
+        
+  catalog.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: catalogdb
+    volumes:
+      - catalog_data:/var/lib/postgresql/data
+  
+  ordering.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: orderingdb
+    volumes:
+      - ordering_data:/var/lib/postgresql/data
+        
+  distributed.cache:
+    container_name: distributed.cache
+    restart: always
+    ports:
+      - "6379:6379"
+  
+  users.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__Database=Username=postgres;Password=123;Host=users.db;Port=5432;Database=usersdb;Include Error Detail=true
+      - MessageBroker__Host=amqp://eccomerce-mq:5672
+      - MessageBroker_UserName=guest
+      - MessageBroker_Password=guest
+      - JWT_PRIVATE_KEY_PATH=/home/app/secrets/jwt_private_key.pem
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_private_key.pem:/home/app/secrets/jwt_private_key.pem:ro
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro        
+    depends_on:
+      - users.db 
+
+  catalog.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=7080
+      - ConnectionStrings__Database=Username=postgres;Password=123;Host=catalog.db;Port=5432;Database=catalogdb;Include Error Detail=true
+      - ConnectionStrings__Redis=distributed.cache:6379
+      - MessageBroker__Host=amqp://eccomerce-mq:5672
+      - MessageBroker_UserName=guest
+      - MessageBroker_Password=guest
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro
+    depends_on:
+      - catalog.db 
+      - messagebroker
+
+  ordering.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=6080
+      - ConnectionStrings__Database=Username=postgres;Password=123;Host=ordering.db;Port=5432;Database=orderingdb;Include Error Detail=true
+      - MessageBroker__Host=amqp://eccomerce-mq:5672
+      - MessageBroker_UserName=guest
+      - MessageBroker_Password=guest
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro
+    depends_on:
+      - ordering.db 
+      - messagebroker
+        
+  yarpgateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=9080
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro
+    depends_on:
+      - users.api
+      - catalog.api
+      - ordering.api
