@@ -11,14 +11,17 @@ using Users.Application.UseCases.Users.Queries.GetUsers;
 
 namespace Users.API.Endpoints;
 
-public class UsersModule : ICarterModule
+public class UsersModule : CarterModule
 {
-    public void AddRoutes(IEndpointRouteBuilder app)
+    public UsersModule() : base("/api/users")
     {
-        var routeGroup = app.MapGroup("/api/users");
-
+        WithTags("Users");
+    }
+    
+    public override void AddRoutes(IEndpointRouteBuilder app)
+    {
         // Get all users
-        routeGroup.MapGet("/", async (ISender sender) =>
+        app.MapGet("/", async (ISender sender) =>
         {
             var query = new GetUsersQuery();
             var result = await sender.Send(query);
@@ -30,7 +33,7 @@ public class UsersModule : ICarterModule
         });
 
         // Get user by ID
-        routeGroup.MapGet("/{id:guid}", async (ISender sender, Guid id) =>
+        app.MapGet("/{id:guid}", async (ISender sender, Guid id) =>
         {
             var query = new GetUserByIdQuery(id);
             var result = await sender.Send(query);
@@ -42,7 +45,7 @@ public class UsersModule : ICarterModule
         });
 
         // Update user
-        routeGroup.MapPut("/{id:guid}", async (ISender sender, Guid id, UpdateUserRequest request) =>
+        app.MapPut("/{id:guid}", async (ISender sender, Guid id, UpdateUserRequest request) =>
         {
             var dto = new UserUpdateDto(
                 Name: request.Name,
@@ -62,7 +65,7 @@ public class UsersModule : ICarterModule
         });
 
         // Delete user
-        routeGroup.MapDelete("/{id:guid}", async (ISender sender, Guid id) =>
+        app.MapDelete("/{id:guid}", async (ISender sender, Guid id) =>
         {
             var cmd = new DeleteUserCommand(id);
             var result = await sender.Send(cmd);

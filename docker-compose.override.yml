@@ -23,6 +23,30 @@ services:
       POSTGRES_DB: usersdb
     volumes:
       - users_data:/var/lib/postgresql/data
+        
+  catalog.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: catalogdb
+    volumes:
+      - catalog_data:/var/lib/postgresql/data
+  
+  ordering.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: orderingdb
+    volumes:
+      - ordering_data:/var/lib/postgresql/data
+        
+  distributed.cache:
+    container_name: distributed.cache
+    restart: always
+    ports:
+      - "6379:6379"
   
   users.api:
     environment:
@@ -39,21 +63,13 @@ services:
       - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro        
     depends_on:
       - users.db 
-        
-  catalog.db:
-    restart: always
-    environment:
-      POSTGRES_PASSWORD: 123
-      POSTGRES_USER: postgres
-      POSTGRES_DB: catalogdb
-    volumes:
-      - catalog_data:/var/lib/postgresql/data
 
   catalog.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=7080
       - ConnectionStrings__Database=Username=postgres;Password=123;Host=catalog.db;Port=5432;Database=catalogdb;Include Error Detail=true
+      - ConnectionStrings__Redis=distributed.cache:6379
       - MessageBroker__Host=amqp://eccomerce-mq:5672
       - MessageBroker_UserName=guest
       - MessageBroker_Password=guest
@@ -63,15 +79,6 @@ services:
     depends_on:
       - catalog.db 
       - messagebroker
-  
-  ordering.db:
-    restart: always
-    environment:
-      POSTGRES_PASSWORD: 123
-      POSTGRES_USER: postgres
-      POSTGRES_DB: orderingdb
-    volumes:
-      - ordering_data:/var/lib/postgresql/data
 
   ordering.api:
     environment:

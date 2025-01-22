@@ -7,6 +7,6 @@ public abstract class OrdersEndpoint : CarterModule
 {
     public OrdersEndpoint() : base("/api/orders")
     {
-        
+        WithTags("Ordering");
     }
 }

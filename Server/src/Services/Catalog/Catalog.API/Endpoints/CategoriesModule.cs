@@ -17,6 +17,7 @@ public class CategoryModule : CarterModule
 {
     public CategoryModule() : base("/api/categories")
     {
+        WithTags("Categories");
     }
 
     public override void AddRoutes(IEndpointRouteBuilder app)

@@ -1,15 +1,6 @@
 version: '3.9'
 
 services:
-  yarpgateway:
-    image: yarpgateway
-    container_name: yarpgateway
-    build:
-      context: .
-      dockerfile: Server/src/APIGateways/YarpGateway/Dockerfile
-    ports:
-      - "9080:9080"
-  
   messagebroker:
     image: rabbitmq:management
   
@@ -19,6 +10,21 @@ services:
     ports:
       - "5432:5432"
   
+  catalog.db:
+    image: postgres
+    container_name: catalog.db
+    ports:
+      - "5431:5432"
+        
+  ordering.db:
+    image: postgres
+    container_name: ordering.db
+    ports:
+      - "5430:5432"
+        
+  distributed.cache:
+    image: redis
+  
   users.api:
     image: users.api
     container_name: users.api
@@ -26,13 +32,7 @@ services:
       context: .
       dockerfile: Server/src/Services/Users/Users.API/Dockerfile
     ports:
-      - "8080:8080"
-        
-  catalog.db:
-    image: postgres
-    container_name: catalog.db
-    ports:
-      - "5431:5432"
+      - "8080:8080" 
 
   catalog.api:
     image: catalog.api
@@ -42,12 +42,6 @@ services:
       dockerfile: Server/src/Services/Catalog/Catalog.API/Dockerfile
     ports:
       - "7080:7080"
-        
-  ordering.db:
-    image: postgres
-    container_name: ordering.db
-    ports:
-      - "5430:5432"
 
   ordering.api:
     image: ordering.api
@@ -57,6 +51,15 @@ services:
       dockerfile: Server/src/Services/Ordering/Ordering.API/Dockerfile
     ports:
       - "6080:6080"
+        
+  yarpgateway:
+    image: yarpgateway
+    container_name: yarpgateway
+    build:
+      context: .
+      dockerfile: Server/src/APIGateways/YarpGateway/Dockerfile
+    ports:
+      - "9080:9080"
 
 volumes:
   users_data:

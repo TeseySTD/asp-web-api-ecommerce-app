@@ -14,14 +14,17 @@ using Users.Core.Models.ValueObjects;
 
 namespace Users.API.Endpoints;
 
-public class AuthenticationModule : ICarterModule
+public class AuthenticationModule : CarterModule
 {
-    public void AddRoutes(IEndpointRouteBuilder app)
+    public AuthenticationModule() : base("/api/auth")
     {
-        var routeGroup = app.MapGroup("/api/auth");
-
+        WithTags("Authentication");
+    }
+    
+    public override void AddRoutes(IEndpointRouteBuilder app)
+    {
         // Login
-        routeGroup.MapPost("/login", async (ISender sender, LoginUserRequest request) =>
+        app.MapPost("/login", async (ISender sender, LoginUserRequest request) =>
         {
             var cmd = new LoginUserCommand(request.Email, request.Password);
             var result = await sender.Send(cmd);
@@ -33,7 +36,7 @@ public class AuthenticationModule : ICarterModule
         });
 
         // Register
-        routeGroup.MapPost("/register", async (ISender sender, RegisterUserRequest request) =>
+        app.MapPost("/register", async (ISender sender, RegisterUserRequest request) =>
         {
             var dto = new UserWriteDto(
                 Name: request.Name,
@@ -53,7 +56,7 @@ public class AuthenticationModule : ICarterModule
         });
 
         // Refresh token
-        routeGroup.MapPost("/refresh", async (ISender sender, string refreshToken) =>
+        app.MapPost("/refresh", async (ISender sender, string refreshToken) =>
         {
             var cmd = new RefreshTokenCommand(refreshToken);
             var result = await sender.Send(cmd);
@@ -65,7 +68,7 @@ public class AuthenticationModule : ICarterModule
         });
 
         // Logout
-        routeGroup.MapDelete("/logout", async (ISender sender, ClaimsPrincipal user) =>
+        app.MapDelete("/logout", async (ISender sender, ClaimsPrincipal user) =>
         {
             var userIdClaim = user.FindFirstValue("userId");
             Guid id = Guid.TryParse(userIdClaim, out Guid parsed) ? parsed : Guid.Empty;

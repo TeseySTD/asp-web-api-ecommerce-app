@@ -1,14 +1,13 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 9080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Server/src/APIGateways/YarpGateway/YarpGateway.csproj", "APIGateways/YarpGateway/"]
-RUN dotnet restore "/APIGateways/YarpGateway/YarpGateway.csproj"
+RUN dotnet restore "APIGateways/YarpGateway/YarpGateway.csproj"
 COPY ["Server/src/APIGateways/YarpGateway", "APIGateways/YarpGateway"]
 COPY ["Server/src/Shared/Shared.Core", "Shared/Shared.Core"]
 WORKDIR "/src/APIGateways/YarpGateway"
