@@ -1,8 +1,12 @@
-﻿using Catalog.Application.Common.Interfaces;
+﻿using System.Text.Json;
+using Catalog.Application.Common.Interfaces;
+using Catalog.Application.Dto.Product;
 using Catalog.Core.Models.Categories.ValueObjects;
 using Catalog.Core.Models.Products;
 using Catalog.Core.Models.Products.ValueObjects;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
@@ -12,10 +16,12 @@ namespace Catalog.Application.UseCases.Products.Commands.UpdateProduct;
 public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 {
     private IApplicationDbContext _context;
+    private readonly IDistributedCache _cache;
 
-    public UpdateProductCommandHandler(IApplicationDbContext context)
+    public UpdateProductCommandHandler(IApplicationDbContext context, IDistributedCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -36,12 +42,18 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
                 ? null
                 : CategoryId.Create((Guid)request.Value.CategoryId).Value);
 
-        return await Update(product, cancellationToken);
+        var result = await Update(product, cancellationToken);
+
+        if (result.IsSuccess)
+            await _cache.SetStringAsync($"product-{product.Id.Value}",
+                JsonSerializer.Serialize(result.Value));
+
+        return result;
     }
 
-    private async Task<Result> Update(Product product, CancellationToken cancellationToken = default)
+    private async Task<Result<ProductReadDto>> Update(Product product, CancellationToken cancellationToken = default)
     {
-        var result = Result.Try()
+        var result = Result<ProductReadDto>.Try()
             .CheckIf(
                 product.CategoryId != null,
                 !await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
@@ -61,6 +73,13 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result.Success();
+        var productReadDto =  await _context.Products
+            .Include(p => p.Category)
+            .Where(p => p.Id == productToUpdate.Id)
+            .ProjectToType<ProductReadDto>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return productReadDto!;
     }
 }

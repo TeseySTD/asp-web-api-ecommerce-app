@@ -1,9 +1,11 @@
-﻿using Catalog.Application.Common.Interfaces;
-using Catalog.Application.Dto.Category;
+﻿using System.Text.Json;
+using Catalog.Application.Common.Interfaces;
 using Catalog.Application.Dto.Product;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.IdentityModel.Tokens;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Products.Queries.GetProductById;
@@ -11,46 +13,33 @@ namespace Catalog.Application.UseCases.Products.Queries.GetProductById;
 public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, ProductReadDto>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IDistributedCache _cache;
 
-    public GetProductByIdQueryHandler(IApplicationDbContext context)
+    public GetProductByIdQueryHandler(IApplicationDbContext context, IDistributedCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result<ProductReadDto>> Handle(GetProductByIdQuery request,
         CancellationToken cancellationToken)
     {
+        var cachedProduct = await _cache.GetStringAsync($"product-{request.Id.Value}", cancellationToken);
+        if (!cachedProduct.IsNullOrEmpty())
+            return JsonSerializer.Deserialize<ProductReadDto>(cachedProduct!)!;
+
         var product = await _context.Products
+            .Include(p => p.Category)
             .Where(p => p.Id == request.Id)
+            .ProjectToType<ProductReadDto>()
             .AsNoTracking()
             .FirstOrDefaultAsync(cancellationToken);
 
         if (product == null)
             return Error.NotFound;
 
-        var category = await _context.Categories
-            .AsNoTracking()
-            .Where(c => c.Id == product.CategoryId)
-            .FirstOrDefaultAsync(cancellationToken);
+        await _cache.SetStringAsync($"product-{request.Id.Value}", JsonSerializer.Serialize(product));
 
-        var categoryDto = category == null
-            ? null
-            : new CategoryDto(
-                Id: category.Id.Value,
-                Name: category.Name.Value,
-                Description: category.Description.Value
-            );
-
-        var response =
-            new ProductReadDto(
-                Id: product.Id.Value,
-                Title: product.Title.Value,
-                Description: product.Description.Value,
-                Price: product.Price.Value,
-                Quantity: product.StockQuantity.Value,
-                Category: categoryDto
-            );
-
-        return response;
+        return product!;
     }
 }

@@ -82,7 +82,7 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product != null)
-                product.DecreaseProductQuantity(orderProduct.ProductQuantity);
+                product.DecreaseQuantity(orderProduct.ProductQuantity);
         }
 
         await _dbContext.SaveChangesAsync(default);

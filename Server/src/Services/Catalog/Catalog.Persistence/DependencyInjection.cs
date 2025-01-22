@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Catalog.Persistence;
 
-public static class DependencyInjectionExtension
+public static class DependencyInjection
 {
     public static IServiceCollection AddPersistenceLayerServices(this IServiceCollection services, IConfiguration configuration){
 
@@ -19,6 +19,13 @@ public static class DependencyInjectionExtension
         {
             options.AddInterceptors(serviceProvider.GetServices<ISaveChangesInterceptor>());
             options.UseNpgsql(configuration.GetConnectionString("Database"));
+        });
+        
+        //Add distributed cache
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "Catalog";
         });
         
         return services;

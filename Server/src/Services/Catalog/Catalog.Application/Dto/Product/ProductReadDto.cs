@@ -2,4 +2,10 @@
 
 namespace Catalog.Application.Dto.Product;
 
-public record ProductReadDto(Guid Id, string Title, string Description, decimal Price, uint Quantity, CategoryDto? Category);
+public record ProductReadDto(
+    Guid Id,
+    string Title,
+    string Description,
+    decimal Price,
+    uint StockQuantity,
+    CategoryDto? Category);

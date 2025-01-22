@@ -1,6 +1,8 @@
 ﻿using Catalog.Application.Common.Interfaces;
 using Catalog.Application.Dto.Category;
 using Catalog.Application.Dto.Product;
+using Catalog.Core.Models.Categories;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
@@ -23,30 +25,11 @@ public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, IR
         if (!_context.Products.Any())
             return Result<IReadOnlyList<ProductReadDto>>.Failure(Error.NotFound);
 
-        var products = await _context.Products
+        var productDtos = await _context.Products
             .Include(p => p.Category)
             .AsNoTracking()
+            .ProjectToType<ProductReadDto>()
             .ToListAsync(cancellationToken);
-
-        var productDtos = products.Select(p =>
-        {
-            var categoryDto = p.Category == null
-                ? null
-                : new CategoryDto(
-                    Id: p.Category.Id.Value,
-                    Name: p.Category.Name.Value,
-                    Description: p.Category.Description.Value
-                );
-
-            return new ProductReadDto(
-                Id: p.Id.Value,
-                Title: p.Title.Value,
-                Description: p.Description.Value,
-                Price: p.Price.Value,
-                Quantity: p.StockQuantity.Value,
-                Category: categoryDto
-            );
-        }).ToList();
 
         return productDtos.ToList().AsReadOnly();
     }

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using FluentValidation;
+using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Behaviours;
@@ -20,6 +21,10 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         
         services.AddMessageBroker(configuration, Assembly.GetExecutingAssembly());
+        
+        //Mapping
+        services.AddMapster();
+        MapsterConfig.Configure();
         
         return services;
     }

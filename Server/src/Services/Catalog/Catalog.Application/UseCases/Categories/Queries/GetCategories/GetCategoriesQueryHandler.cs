@@ -1,5 +1,6 @@
 ﻿using Catalog.Application.Common.Interfaces;
 using Catalog.Application.Dto.Category;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
@@ -19,11 +20,7 @@ public class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, List<
     public async Task<Result<List<CategoryDto>>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
         var categories = await _context.Categories
-            .Select(c =>
-                new CategoryDto(
-                    c.Id.Value, c.Name.Value, c.Description.Value
-                )
-            )
+            .ProjectToType<CategoryDto>()
             .AsNoTracking()
             .ToListAsync();
 
