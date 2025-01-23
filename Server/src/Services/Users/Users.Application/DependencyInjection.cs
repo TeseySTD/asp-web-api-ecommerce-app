@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using FluentValidation;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Behaviours;
@@ -20,7 +21,12 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         
-        services.AddMessageBroker(configuration, Assembly.GetExecutingAssembly());
+        services.AddMessageBroker(configuration, configure =>
+        {
+            configure.AddConsumers(Assembly.GetExecutingAssembly());
+            configure.SetInMemorySagaRepositoryProvider();
+            configure.AddSagaStateMachines(Assembly.GetExecutingAssembly());
+        });
         
         return services;
     }

@@ -8,19 +8,14 @@ namespace Shared.Messaging.Broker;
 public static class Extensions
 {
     public static IServiceCollection AddMessageBroker
-        (this IServiceCollection services, IConfiguration configuration, Assembly? assembly = null)
+        (this IServiceCollection services, IConfiguration configuration, Action<IBusRegistrationConfigurator>? configure = null)
     {
         services.AddMassTransit(config =>
         {
             config.SetKebabCaseEndpointNameFormatter();
 
-            if (assembly is not null)
-            {
-                config.AddConsumers(assembly);
-                config.SetInMemorySagaRepositoryProvider();
-                config.AddSagaStateMachines(assembly);
-            }
-            
+            if (configure != null)
+                configure.Invoke(config);
             
             config.UsingRabbitMq((context, configurator) =>
             {
@@ -30,6 +25,8 @@ public static class Extensions
                     hostConfigurator.Password(configuration["MessageBroker:Password"]!);
                 });
                 configurator.ConfigureEndpoints(context);
+                
+                configurator.UseInMemoryOutbox(context);
             });
         });
         

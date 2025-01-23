@@ -11,23 +11,30 @@ namespace Shared.Core.Validation.Result;
 /// </remarks>
 public class Result
 {
-    protected readonly List<Error> _errors = new();
+    protected List<Error> _errors = new();
+
+    public Result(bool isSuccess, IEnumerable<Error> errors)
+    {
+        IsSuccess = isSuccess;
+        Errors = errors.ToList();
+    }
+
     public bool IsSuccess { get; private set; }
     public bool IsFailure => !IsSuccess;
 
-    public IReadOnlyCollection<Error> Errors => new ReadOnlyCollection<Error>(_errors);
-
-    protected Result(bool isSuccess, IEnumerable<Error> errors)
+    public IReadOnlyCollection<Error> Errors
     {
-        IsSuccess = isSuccess;
-        if (errors != null)
-            _errors.AddRange(errors);
+        get => new ReadOnlyCollection<Error>(_errors);
+        private set => _errors = value.ToList();
     }
 
-    public static Result Success() => new(true, new[] { Error.None });
+    public static Result Success() => new(true, [Error.None]);
     public static Result Failure(IEnumerable<Error> errors) => new(false, errors);
-    public static Result Failure(Error error) => Failure(new[] { error });
-
+    public static Result Failure(Error error) => new(false, [error]);
+    
+    public static ResultBuilder<Result> Try() => new(new Result(true, Array.Empty<Error>()));
+    
+    public void Fail() => IsSuccess = false;
     public Result AddError(Error error)
     {
         if (IsFailure)
@@ -35,14 +42,10 @@ public class Result
         return this;
     }
 
-    public TResult Map<TResult>(Func<TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure)
-        => IsSuccess ? onSuccess() : onFailure(Errors);
+    public TResult Map<TResult>(Func<TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure) =>
+        IsSuccess ? onSuccess() : onFailure(Errors!);
 
     public static implicit operator Result(Error error) => Failure(error);
-
-    public static ResultBuilder<Result> Try() => new(Result.Success());
-
-    public void Fail() => IsSuccess = false;
 }
 
 /// <summary>
@@ -57,22 +60,25 @@ public class Result<TResponse> : Result where TResponse : notnull
 {
     public TResponse Value { get; }
 
-    private Result(bool isSuccess, IEnumerable<Error> errors, TResponse value)
-        : base(isSuccess, errors)
+    public Result(bool isSuccess, IEnumerable<Error> errors, TResponse value) : base(isSuccess, errors)
     {
         Value = value;
     }
 
-    public static Result<TResponse> Success(TResponse response) => new(true, new[] { Error.None }, response);
-    public new static Result<TResponse> Failure(IEnumerable<Error> errors) => new(false, errors, default!);
-    public new static Result<TResponse> Failure(Error error) => Failure(new[] { error });
+    public static Result<TResponse> Success(TResponse response) => new(true, [Error.None], response);
+    public new static Result<TResponse> Failure(IEnumerable<Error> errors) =>
+        new(false, errors.ToList(), default!);
+    public new static Result<TResponse> Failure(Error error) =>
+        new(false, [error], default!);
 
-    public new static ResultBuilder<Result<TResponse>> Try() => new(Success(default!));
-    public static ResultBuilder<Result<TResponse>> Try(TResponse value) => new(Success(value));
-
-    public TResult Map<TResult>(Func<TResponse, TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure)
-        => IsSuccess ? onSuccess(Value) : onFailure(Errors);
+    public new static ResultBuilder<Result<TResponse>> Try() => new(
+        new Result<TResponse>(true, Array.Empty<Error>(), default!));
+    public static ResultBuilder<Result<TResponse>> Try(TResponse value) => new(
+        new Result<TResponse>(true, Array.Empty<Error>(), value));
 
     public static implicit operator Result<TResponse>(TResponse response) => Success(response);
     public static implicit operator Result<TResponse>(Error error) => Failure(error);
+
+    public TResult Map<TResult>(Func<TResponse, TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure) =>
+        IsSuccess ? onSuccess(Value!) : onFailure(Errors!);
 }

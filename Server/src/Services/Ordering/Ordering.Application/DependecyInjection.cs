@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using FluentValidation;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Behaviours;
@@ -19,8 +20,6 @@ public static class DependecyInjection
         });
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-        
-        services.AddMessageBroker(configuration, Assembly.GetExecutingAssembly());
         return services;
     }
     

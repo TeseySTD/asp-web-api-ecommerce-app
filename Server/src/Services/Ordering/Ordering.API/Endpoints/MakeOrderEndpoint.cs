@@ -45,6 +45,6 @@ public class MakeOrderEndpoint : OrdersEndpoint
                 onSuccess: value => Results.Ok(value),
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
-        }).RequireAuthorization();
+        });
     }
 }
