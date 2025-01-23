@@ -31,7 +31,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, TokensD
         var result = await Result<TokensDto>.Try()
             .Check(!await _context.Users.AnyAsync(u => u.Email == email),
                 new Error("Incorrect email", $"User with email {request.Email} does not exist"))
-            .DropIfFailed()
+            .DropIfFail()
             .CheckAsync(async () =>
                 {
                     user = await _context.Users

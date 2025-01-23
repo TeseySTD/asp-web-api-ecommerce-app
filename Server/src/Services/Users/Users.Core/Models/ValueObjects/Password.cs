@@ -16,7 +16,7 @@ public record Password
         return Result<Password>.Try(new Password(password))
             .Check(string.IsNullOrEmpty(password),
                 new Error("Password is required", "Password must be not null or empty."))
-            .DropIfFailed()
+            .DropIfFail()
             .Check(password.Length < MinPasswordLength,
                 new Error("Password less than min length", $"Password less than {MinPasswordLength} characters."))
             .Build();

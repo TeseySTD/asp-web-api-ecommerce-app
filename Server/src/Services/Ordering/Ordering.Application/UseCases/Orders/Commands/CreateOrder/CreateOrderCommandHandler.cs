@@ -89,7 +89,7 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
                 new Error(nameof(Order), $"Order with id: {order.Id} already exists"))
             .Check(order.OrderItems.Any(o => o.Product == null),
                 new Error("Order items error", "Product in order item cannot be null."))
-            .DropIfFailed()
+            .DropIfFail()
             .Check(() => order.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
                 new Error("Order items error", "Each order item must be unique."));
 

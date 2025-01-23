@@ -17,7 +17,6 @@ public static class MapGetSwaggerForYarpExtension
                 {
                     var cluster = child.Get<ClusterConfig>();
                     var swagger = child.GetSection("Swagger").Get<GatewaySwaggerSpec>();
-                 
                     // Map swagger endpoint if we find a cluster with swagger configuration
                     endpoints.MapSwaggerSpecs(routes!, cluster!, swagger!);
                 }

@@ -17,7 +17,7 @@ public record PhoneNumber
         return Result<PhoneNumber>.Try(new PhoneNumber(phoneNumber))
             .Check(string.IsNullOrEmpty(phoneNumber),
                 new Error("Phone number is required", "Phone number must be not null or empty."))
-            .DropIfFailed()
+            .DropIfFail()
             .Check(!Regex.IsMatch(phoneNumber, RegexPhoneNumber),
                 new Error("Phone number is incorrect.", "Phone number is not a valid phone number."))
             .Build();

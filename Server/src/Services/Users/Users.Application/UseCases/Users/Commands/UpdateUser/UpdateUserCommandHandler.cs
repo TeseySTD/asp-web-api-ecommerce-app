@@ -27,7 +27,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
             .CheckAsync(
                 async () => !await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value, cancellationToken),
                 new Error("User not exists.", $"User with id: {request.Id} not exists."))
-            .DropIfFailed()
+            .DropIfFail()
             .CheckAsync(
                 async () => await _context.Users.AnyAsync(
                     u => u.Email == Email.Create(request.Value.Email).Value && u.Id != UserId.Create(request.Id).Value, cancellationToken),

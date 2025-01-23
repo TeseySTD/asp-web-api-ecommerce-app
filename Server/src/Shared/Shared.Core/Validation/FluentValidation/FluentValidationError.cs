@@ -2,5 +2,9 @@
 
 namespace Shared.Core.Validation.FluentValidation;
 
-// Marker for fluent validation error
+/// <summary>
+/// Marker for Fluent Validation library error
+/// </summary>
+/// <param name="Message">Error message</param>
+/// <param name="Description">Error desctription</param>
 public record FluentValidationError(string Message, string Description): Error (Message, Description);

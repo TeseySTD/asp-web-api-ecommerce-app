@@ -24,10 +24,10 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
         var resultBuilder = await Result.Try()
             .CheckAsync( async () => !await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken),
                 new Error("Order for update not found", $"There is no order with this id {request.OrderId} "))
-            .DropIfFailed()
+            .DropIfFail()
             .Check(() => request.Value.OrderItems.Any(o => o.ProductId == null),
                 new Error("Order items error", "Product in order item cannot be null."))
-            .DropIfFailed()
+            .DropIfFail()
             .Check(() => request.Value.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
                 new Error("Order items error", "Each order item must be unique."));
 
