@@ -2,6 +2,7 @@
 using Catalog.Core.Models.Products.ValueObjects;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Shared.Messaging.Events;
 using Shared.Messaging.Events.Order;
@@ -13,13 +14,17 @@ namespace Catalog.Application.UseCases.Products.EventHandlers.Integration;
 public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<ReserveProductsMessage>
 {
     private readonly IApplicationDbContext _dbContext;
+    private readonly IDistributedCache _cache;
     private readonly IPublishEndpoint _publishEndpoint;
 
     public ReserveProductsMessageHandler(ILogger<IntegrationMessageHandler<ReserveProductsMessage>> logger,
-        IApplicationDbContext dbContext, IPublishEndpoint publishEndpoint) : base(logger)
+        IApplicationDbContext dbContext,
+        IPublishEndpoint publishEndpoint,
+        IDistributedCache cache) : base(logger)
     {
         _dbContext = dbContext;
         _publishEndpoint = publishEndpoint;
+        _cache = cache;
     }
 
     public override async Task Handle(ConsumeContext<ReserveProductsMessage> context)
@@ -82,7 +87,10 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product != null)
+            {
                 product.DecreaseQuantity(orderProduct.ProductQuantity);
+                await _cache.RemoveAsync($"product-{product.Id.Value}");
+            }
         }
 
         await _dbContext.SaveChangesAsync(default);

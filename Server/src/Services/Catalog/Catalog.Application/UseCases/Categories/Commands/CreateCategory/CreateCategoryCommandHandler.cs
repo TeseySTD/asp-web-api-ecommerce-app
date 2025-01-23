@@ -28,7 +28,11 @@ public class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryComman
 
         if (result.IsSuccess)
             await _cache.SetStringAsync($"category-{result.Value.Id.Value}",
-                JsonSerializer.Serialize(result.Value.Adapt<CategoryDto>()));
+                JsonSerializer.Serialize(result.Value.Adapt<CategoryDto>()),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
 
         return result.Map(
             onSuccess: value => value.Id,

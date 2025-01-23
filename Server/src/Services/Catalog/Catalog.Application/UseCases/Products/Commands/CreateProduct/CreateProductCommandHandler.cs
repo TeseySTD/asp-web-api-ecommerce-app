@@ -40,8 +40,12 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
 
         if (result.IsSuccess)
             await _cache.SetStringAsync($"product-{product.Id.Value}",
-                JsonSerializer.Serialize(result.Value));
-        
+                JsonSerializer.Serialize(result.Value),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
+
         return result;
     }
 
@@ -58,14 +62,14 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
         {
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync(cancellationToken);
-            
-            var productReadDto =  await _context.Products
+
+            var productReadDto = await _context.Products
                 .Include(p => p.Category)
                 .Where(p => p.Id == product.Id)
                 .ProjectToType<ProductReadDto>()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
-            
+
             return productReadDto!;
         }
 

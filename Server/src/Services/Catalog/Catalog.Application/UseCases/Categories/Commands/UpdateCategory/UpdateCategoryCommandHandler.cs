@@ -36,7 +36,11 @@ public class UpdateCategoryCommandHandler : ICommandHandler<UpdateCategoryComman
 
         if (result.IsSuccess)
             await _cache.SetStringAsync($"category-{updatedCategoryId.Value}",
-                JsonSerializer.Serialize(updatedCategory.Adapt<CategoryDto>()), cancellationToken);
+                JsonSerializer.Serialize(updatedCategory.Adapt<CategoryDto>()),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                }, cancellationToken);
 
         return result;
     }
@@ -52,9 +56,9 @@ public class UpdateCategoryCommandHandler : ICommandHandler<UpdateCategoryComman
             categoryToUpdate!.Update(
                 name: category.Name,
                 description: category.Description);
-            
+
             await _context.SaveChangesAsync(cancellationToken);
-            
+
             await InvalidateProductCache(categoryToUpdate.Id);
 
             return Result.Success();
@@ -64,7 +68,7 @@ public class UpdateCategoryCommandHandler : ICommandHandler<UpdateCategoryComman
             return new Error(e.Message, e.StackTrace ?? string.Empty);
         }
     }
-    
+
     private async Task InvalidateProductCache(CategoryId categoryId)
     {
         var productsIds = await _context.Products
@@ -72,8 +76,8 @@ public class UpdateCategoryCommandHandler : ICommandHandler<UpdateCategoryComman
             .AsNoTracking()
             .Select(p => p.Id.Value)
             .ToListAsync();
-    
-        foreach(var productId in productsIds)
+
+        foreach (var productId in productsIds)
         {
             await _cache.RemoveAsync($"product-{productId}");
         }

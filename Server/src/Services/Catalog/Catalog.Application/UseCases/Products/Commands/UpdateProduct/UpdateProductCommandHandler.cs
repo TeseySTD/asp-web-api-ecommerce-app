@@ -46,7 +46,11 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
         if (result.IsSuccess)
             await _cache.SetStringAsync($"product-{product.Id.Value}",
-                JsonSerializer.Serialize(result.Value));
+                JsonSerializer.Serialize(result.Value),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
 
         return result;
     }

@@ -28,11 +28,12 @@ public class GetCategoryByIdQueryHandler : IQueryHandler<GetCategoryByIdQuery, C
         var cachedCategory = await _cache.GetStringAsync($"category-{request.Id.Value}");
         if (!cachedCategory.IsNullOrEmpty())
             return JsonSerializer.Deserialize<CategoryDto>(cachedCategory!)!;
-        
+
         var result = await GetCategoryById(request, cancellationToken);
-        if(result.IsSuccess)
-            await _cache.SetStringAsync($"category-{request.Id.Value}", JsonSerializer.Serialize(result.Value));
-        
+        if (result.IsSuccess)
+            await _cache.SetStringAsync($"category-{request.Id.Value}", JsonSerializer.Serialize(result.Value),
+                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
+
         return result;
     }
 

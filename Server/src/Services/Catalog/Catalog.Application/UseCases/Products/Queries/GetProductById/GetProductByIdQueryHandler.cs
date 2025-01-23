@@ -38,7 +38,8 @@ public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, Pro
         if (product == null)
             return Error.NotFound;
 
-        await _cache.SetStringAsync($"product-{request.Id.Value}", JsonSerializer.Serialize(product));
+        await _cache.SetStringAsync($"product-{request.Id.Value}", JsonSerializer.Serialize(product),
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
 
         return product!;
     }
