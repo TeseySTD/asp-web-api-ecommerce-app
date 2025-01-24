@@ -58,9 +58,8 @@ public class Order : AggregateRoot<OrderId>
         _orderItems.Add(orderItem);
     }
 
-    public void Update(IEnumerable<OrderItem> orderItems, Payment payment, Address destinationAddress)
+    public void Update(Payment payment, Address destinationAddress)
     {
-        _orderItems = orderItems!.ToList();
         Payment = payment!;
         DestinationAddress = destinationAddress!;
         

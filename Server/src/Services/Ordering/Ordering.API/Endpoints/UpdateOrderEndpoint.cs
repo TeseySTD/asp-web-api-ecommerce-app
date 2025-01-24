@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
 using Ordering.API.Http.Order.Requests;
 using Ordering.Application.Dto.Order;
 using Ordering.Application.UseCases.Orders.Commands.UpdateOrder;
@@ -11,7 +12,7 @@ public class UpdateOrderEndpoint : OrdersEndpoint
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPut($"/{{id:guid}}", async (ISender sender,Guid id, UpdateOrderRequest request) =>
+        app.MapPut($"/{{id:guid}}", async (ISender sender, Guid id, ClaimsPrincipal user, UpdateOrderRequest request) =>
         {
             var payment = (
                 request.CardName,
@@ -28,23 +29,21 @@ public class UpdateOrderEndpoint : OrdersEndpoint
                 request.ZipCode
             );
 
-            var orderItems = request.OrderItems.Select(i =>
-                (i.ProductId, i.ProductName, i.ProductDescription, i.Quantity, i.Price)
-            );
-
             var dto = new OrderUpdateDto(
-                OrderItems: orderItems,
                 Payment: payment,
                 DestinationAddress: address
             );
 
-            var cmd = new UpdateOrderCommand(OrderId.Create(id).Value, dto);
+            var customerIdString = user.FindFirstValue("userId");
+            Guid customerId = Guid.TryParse(customerIdString, out Guid parsed) ? parsed : Guid.Empty;
+            
+            var cmd = new UpdateOrderCommand(customerId, id, dto);
             var result = await sender.Send(cmd);
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
-        });
+        }).RequireAuthorization();
     }
 }

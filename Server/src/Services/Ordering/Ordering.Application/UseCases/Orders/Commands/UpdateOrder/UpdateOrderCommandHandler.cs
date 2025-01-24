@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
+using Ordering.Core.Models.Orders;
 using Ordering.Core.Models.Orders.Entities;
 using Ordering.Core.Models.Orders.ValueObjects;
 using Ordering.Core.Models.Products;
@@ -21,25 +22,13 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
 
     public async Task<Result> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
-        var resultBuilder = await Result.Try()
-            .CheckAsync( async () => !await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken),
-                new Error("Order for update not found", $"There is no order with this id {request.OrderId} "))
-            .DropIfFail()
-            .Check(() => request.Value.OrderItems.Any(o => o.ProductId == null),
-                new Error("Order items error", "Product in order item cannot be null."))
-            .DropIfFail()
-            .Check(() => request.Value.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
-                new Error("Order items error", "Each order item must be unique."));
-
-        var result = resultBuilder.Build();
+        var result = await ValidateCommand(request, cancellationToken);
         
         if(result.IsFailure)
             return result;
         
-        var orderToUpdate = await _context.Orders
-            .Include(o => o.OrderItems)
-            .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
-
+        var orderToUpdate = result.Value;
+        
         var payment = Payment.Create(
             cvv: request.Value.Payment.cvv,
             cardNumber: request.Value.Payment.cardNumber,
@@ -55,23 +44,59 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
             zipCode: request.Value.DestinationAddress.zipCode
         ).Value;
 
-        var orderItems = new List<OrderItem>();
-        foreach (var item in request.Value.OrderItems)
-        {
-            var orderItem = OrderItem.Create(
-                orderId: orderToUpdate!.Id,
-                productId: ProductId.Create(item.ProductId).Value,
-                quantity: OrderItemQuantity.Create(item.Quantity).Value,
-                price: OrderItemPrice.Create(item.Price).Value
-            );
-
-            orderItems.Add(orderItem);
-        }
-
-        orderToUpdate!.Update(orderItems, payment, destiantionAddress);
+        orderToUpdate!.Update(payment, destiantionAddress);
 
         await _context.SaveChangesAsync(cancellationToken);
 
         return result;
+    }
+
+    private async Task<Result<Order>> ValidateCommand(UpdateOrderCommand request, CancellationToken cancellationToken)
+    {
+        var orderId = OrderId.Create(request.OrderId).Value;
+        var customerId = CustomerId.Create(request.CustomerId).Value;
+        Order? orderToUpdate = null;
+
+        var result = await Result<Order>.Try()
+            .Check(!await _context.Orders.AnyAsync(o => o.Id == orderId, cancellationToken),
+                UpdateOrderErrors.OrderNotFound(orderId.Value))
+            .DropIfFail()
+            .CheckAsync(
+                async () => !await _context.Orders.AnyAsync(o => o.Id == orderId && o.CustomerId == customerId,
+                    cancellationToken),
+                UpdateOrderErrors.CustomerMismatch(request.CustomerId))
+            .DropIfFail()
+            .CheckAsync(async () =>
+            {
+                orderToUpdate = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+
+                if (orderToUpdate!.Status == OrderStatus.Cancelled || orderToUpdate!.Status == OrderStatus.Completed)
+                    return true;
+                return false;
+            }, UpdateOrderErrors.IncorrectOrderState)
+            .BuildAsync();
+
+        return result.Map(
+            onSuccess: () => orderToUpdate,
+            onFailure: errors => Result<Order>.Failure(errors)
+        );
+    }
+
+    public static class UpdateOrderErrors
+    {
+        public static Error OrderNotFound(Guid orderId) => new(
+            "Order for update not found",
+            $"There is no order with this id: {orderId}"
+        );
+
+        public static Error CustomerMismatch(Guid customerId) => new(
+            "You can`t update this order!",
+            $"Your id {customerId} doesn’t match with customer’s id in order."
+        );
+
+        public static Error IncorrectOrderState => new("Incorrect order state",
+            $"The order state cannot be {OrderStatus.Cancelled} or {OrderStatus.Completed}");
     }
 }
