@@ -16,19 +16,7 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
         );
         
         RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => ProductTitle.Create(e.ProductName)
-        );
-
-        RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => ProductDescription.Create(e.ProductDescription)
-        );
-        
-        RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
             (e) => OrderItemQuantity.Create(e.Quantity)
-        );
-
-        RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => OrderItemPrice.Create(e.Price)
         );
         
         RuleFor(x => x.Value.Payment).MustBeCreatedWith(

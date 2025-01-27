@@ -59,7 +59,8 @@ public class MakeOrderSaga : MassTransitStateMachine<MakeOrderSagaState>
             When(ReservedProducts)
                 .Publish(context => new
                     ApprovedOrderEvent(
-                        OrderId: context.Message.OrderId
+                        OrderId: context.Message.OrderId,
+                        OrderItemsDtos: context.Message.OrderItemsDtos
                     )
                 )
                 .Finalize(),

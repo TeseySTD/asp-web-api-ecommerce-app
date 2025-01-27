@@ -33,7 +33,32 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
         {
             await UpdateProductQuantities(context);
 
-            await _publishEndpoint.Publish(new ReservedProductsEvent(context.Message.OrderId));
+            var orderItems = context.Message.Products;
+            var orderItemsIds = orderItems.Select(o => ProductId.Create(o.ProductId).Value);
+
+            var products = await _dbContext.Products
+                .AsNoTracking()
+                .Where(p => orderItemsIds.Contains(p.Id))
+                .Select(p => new
+                    { p.Id, Title = p.Title.Value, Description = p.Description.Value, Price = p.Price.Value })
+                .ToListAsync();
+
+            var orderItemsDtos = products.Select(p =>
+            {
+                var quantity = orderItems.First(o => o.ProductId == p.Id.Value).ProductQuantity;
+                return new OrderItemApprovedDto(
+                    Id: p.Id.Value,
+                    ProductTitle: p.Title,
+                    ProductDescription: p.Description,
+                    Quantity: quantity,
+                    UnitPrice: p.Price
+                );
+            }).ToList();
+
+            await _publishEndpoint.Publish(new ReservedProductsEvent(
+                context.Message.OrderId,
+                orderItemsDtos
+            ));
         }
     }
 
@@ -46,7 +71,7 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
         var products = await _dbContext.Products
             .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
-            .Select(p => new { p.Id, p.StockQuantity.Value })
+            .Select(p => new { p.Id, Quantity = p.StockQuantity.Value})
             .ToListAsync();
 
         var existingProductIds = products.Select(p => p.Id).ToList();
@@ -66,7 +91,7 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
             var productId = ProductId.Create(orderProduct.ProductId).Value;
             var product = products.FirstOrDefault(p => p.Id == productId);
 
-            if (product == null || product.Value < orderProduct.ProductQuantity)
+            if (product!.Quantity < orderProduct.ProductQuantity)
             {
                 var insufficientQuantityMessage = $"Insufficient quantity for product {productId.Value}";
                 await PublishFailedReservation(context.Message.OrderId, insufficientQuantityMessage);

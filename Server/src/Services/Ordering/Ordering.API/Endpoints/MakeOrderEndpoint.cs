@@ -28,7 +28,7 @@ public class MakeOrderEndpoint : OrdersEndpoint
             );
 
             var orderItems = request.OrderItems.Select(i =>
-                (i.ProductId, i.ProductName, i.ProductDescription, i.Quantity, i.Price)
+                (i.ProductId, i.Quantity)
             );
 
             var dto = new OrderWriteDto(
@@ -45,6 +45,6 @@ public class MakeOrderEndpoint : OrdersEndpoint
                 onSuccess: value => Results.Ok(value),
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
-        }).RequireAuthorization();
+        });
     }
 }
