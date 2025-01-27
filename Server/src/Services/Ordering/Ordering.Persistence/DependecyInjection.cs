@@ -32,6 +32,7 @@ public static class DependecyInjection
         {
             configure.AddConsumer<CanceledOrderEventHandler>();
             configure.AddConsumer<ApprovedOrderEventHandler>();
+            configure.AddConsumer<ProductUpdatedEventHandler>();
             
             configure.AddSagaStateMachine<MakeOrderSaga, MakeOrderSagaState>()
                 .EntityFrameworkRepository(r =>

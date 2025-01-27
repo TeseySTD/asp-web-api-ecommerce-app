@@ -26,8 +26,7 @@ public class Product : AggregateRoot<ProductId>
         return product;
     }
 
-    public void Update(ProductTitle title, ProductDescription description,
-        OrderItemPrice price)
+    public void Update(ProductTitle title, ProductDescription description)
     {
         Title = title;
         Description = description;
