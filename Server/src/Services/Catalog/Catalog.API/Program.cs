@@ -13,6 +13,7 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGenWithAuthScheme();
 
 services
+    .AddApiLayerServices() //Must be before application layer.
     .AddApplicationLayerServices(builder.Configuration)
     .AddPersistenceLayerServices(builder.Configuration);
 

@@ -4,4 +4,4 @@ using Shared.Core.CQRS;
 
 namespace Catalog.Application.UseCases.Categories.Queries.GetCategoryById;
 
-public record GetCategoryByIdQuery(CategoryId Id) : IQuery<CategoryDto>;
+public record GetCategoryByIdQuery(CategoryId Id) : IQuery<CategoryReadDto>;

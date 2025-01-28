@@ -30,7 +30,7 @@ public static class DependencyInjection
         
         //Mapping
         services.AddMapster();
-        MapsterConfig.Configure();
+        MapsterConfig.Configure(services.BuildServiceProvider());
         
         return services;
     }

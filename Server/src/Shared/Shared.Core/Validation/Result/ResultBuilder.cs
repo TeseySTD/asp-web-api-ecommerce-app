@@ -87,7 +87,7 @@ public class ResultBuilder<TResult>
         return this;
     }
 
-    public ResultBuilder<TResult> Combine(params TResult[] results)
+    public ResultBuilder<TResult> Combine(params Result[] results)
     {
         var failures = results
             .Where(r => r.IsFailure)

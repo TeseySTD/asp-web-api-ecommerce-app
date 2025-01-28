@@ -2,14 +2,22 @@
 using Catalog.API.Http.Category.Requests;
 using Catalog.API.Http.Category.Responses;
 using Catalog.Application.Dto.Category;
+using Catalog.Application.Dto.Image;
+using Catalog.Application.UseCases.Categories.Commands.AddCategoryImages;
 using Catalog.Application.UseCases.Categories.Commands.CreateCategory;
 using Catalog.Application.UseCases.Categories.Commands.DeleteCategory;
 using Catalog.Application.UseCases.Categories.Commands.UpdateCategory;
 using Catalog.Application.UseCases.Categories.Queries.GetCategories;
 using Catalog.Application.UseCases.Categories.Queries.GetCategoryById;
+using Catalog.Application.UseCases.Products.Commands.AddProductImages;
+using Catalog.Core.Models.Categories;
 using Catalog.Core.Models.Categories.ValueObjects;
+using Catalog.Core.Models.Images;
+using Catalog.Core.Models.Products;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Shared.Core.API;
+using Shared.Core.Validation.Result;
 
 namespace Catalog.API.Endpoints;
 
@@ -58,9 +66,53 @@ public class CategoryModule : CarterModule
             );
         });
 
+        app.MapPost("/{id:guid}/images", async (ISender sender,
+                Guid id,
+                [FromForm] IFormFileCollection images, CancellationToken cancellationToken) =>
+            {
+                var imageDtos = new List<ImageDto>();
+                var validationResult = Result.Try()
+                    .Check(images == null, CategoriesModuleErrors.RequiredImageError)
+                    .Check(images!.Count() == 0 || images.Count() > Category.MaxImagesCount,
+                        CategoriesModuleErrors.ImageCountOutOfRangeError)
+                    .Check(() =>
+                    {
+                        foreach (var image in images)
+                            if (!Enum.GetNames<ImageContentType>().Select(t => $"image/{t.ToLower()}")
+                                    .Contains(image.ContentType))
+                                return true;
+
+                        return false;
+                    }, CategoriesModuleErrors.FilesMustBeImages)
+                    .Build();
+                if (validationResult.IsFailure)
+                    return Results.BadRequest(Envelope.Of(validationResult.Errors));
+
+                foreach (var image in images)
+                {
+                    using var ms = new MemoryStream();
+                    await image.CopyToAsync(ms, cancellationToken);
+
+                    imageDtos.Add(new ImageDto(
+                        FileName: image.FileName,
+                        ContentType: image.ContentType.Replace("image/", ""),
+                        Data: ms.ToArray()
+                    ));
+                }
+
+                var cmd = new AddCategoryImagesCommand(id, imageDtos);
+                var result = await sender.Send(cmd, cancellationToken);
+
+                return result.Map(
+                    onSuccess: () => Results.Ok(id),
+                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                );
+            })
+            .DisableAntiforgery();
+        
         app.MapPut("/{id:guid}", async (ISender sender, Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken) =>
         {
-            var categoryDto = new CategoryDto(
+            var categoryDto = new CategoryWriteDto(
                 Id: id,
                 Name: request.Name,
                 Description: request.Description
@@ -86,4 +138,15 @@ public class CategoryModule : CarterModule
             );
         });
     }
+}
+
+public static class CategoriesModuleErrors
+{
+    public static Error RequiredImageError => new("Images are required", "Image files are required");
+
+    public static Error ImageCountOutOfRangeError =>
+        new("Images count is out of range", $"Images count must be between 1 and {Category.MaxImagesCount}");
+
+    public static Error FilesMustBeImages => new("All files must be images",
+        $"All files must be images with content type:{string.Join(" ,", Enum.GetNames<ImageContentType>())}");
 }

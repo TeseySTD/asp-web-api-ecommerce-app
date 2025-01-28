@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace Shared.Core.Extensions;
@@ -51,6 +53,7 @@ public static class Swagger
     {
         services.AddSwaggerGen(options =>
         {
+            options.OperationFilter<SwaggerFileOperationFilter>();
             options.CustomSchemaIds(id => id.FullName!.Replace("+", "-"));
 
             var securityScheme = new OpenApiSecurityScheme
@@ -84,4 +87,37 @@ public static class Swagger
 
         return services;
     }
+    
+    
+    public class SwaggerFileOperationFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            var formFileParameters = context.MethodInfo.GetParameters()
+                .Where(p => p.ParameterType == typeof(IEnumerable<IFormFile>) || p.ParameterType == typeof(IFormFile))
+                .ToList();
+
+            foreach (var parameter in formFileParameters)
+            {
+                operation.RequestBody = new OpenApiRequestBody
+                {
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        ["multipart/form-data"] = new OpenApiMediaType
+                        {
+                            Schema = new OpenApiSchema
+                            {
+                                Type = "object",
+                                Properties = new Dictionary<string, OpenApiSchema>
+                                {
+                                    { parameter.Name, new OpenApiSchema { Type = "string", Format = "binary" } }
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        }
+    }
+
 }

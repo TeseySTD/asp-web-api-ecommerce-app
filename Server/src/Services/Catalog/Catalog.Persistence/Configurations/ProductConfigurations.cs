@@ -58,5 +58,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasForeignKey(p => p.CategoryId)
             .HasPrincipalKey(c => c.Id)
             .OnDelete(DeleteBehavior.SetNull);
+        
+        builder.HasMany(x => x.Images)
+            .WithOne()
+            .HasForeignKey(x => x.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -8,4 +8,5 @@ public record ProductReadDto(
     string Description,
     decimal Price,
     uint StockQuantity,
-    CategoryDto? Category);
+    string[] Images,
+    CategoryReadDto? Category);

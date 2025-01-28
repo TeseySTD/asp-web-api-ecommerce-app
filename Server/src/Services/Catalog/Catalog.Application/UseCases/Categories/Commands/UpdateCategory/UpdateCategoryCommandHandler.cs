@@ -36,7 +36,7 @@ public class UpdateCategoryCommandHandler : ICommandHandler<UpdateCategoryComman
 
         if (result.IsSuccess)
             await _cache.SetStringAsync($"category-{updatedCategoryId.Value}",
-                JsonSerializer.Serialize(updatedCategory.Adapt<CategoryDto>()),
+                JsonSerializer.Serialize(updatedCategory.Adapt<CategoryReadDto>()),
                 new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)

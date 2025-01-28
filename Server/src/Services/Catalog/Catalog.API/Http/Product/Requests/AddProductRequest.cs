@@ -1,4 +1,6 @@
-﻿namespace Catalog.API.Http.Product.Requests;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Catalog.API.Http.Product.Requests;
 
 public record AddProductRequest(
     string Title,

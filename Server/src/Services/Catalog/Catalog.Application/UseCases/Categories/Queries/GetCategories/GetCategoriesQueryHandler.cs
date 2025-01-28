@@ -8,7 +8,7 @@ using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Categories.Queries.GetCategories;
 
-public class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, List<CategoryDto>>
+public class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, List<CategoryReadDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -17,10 +17,10 @@ public class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, List<
         _context = context;
     }
 
-    public async Task<Result<List<CategoryDto>>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<CategoryReadDto>>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
         var categories = await _context.Categories
-            .ProjectToType<CategoryDto>()
+            .ProjectToType<CategoryReadDto>()
             .AsNoTracking()
             .ToListAsync();
 
