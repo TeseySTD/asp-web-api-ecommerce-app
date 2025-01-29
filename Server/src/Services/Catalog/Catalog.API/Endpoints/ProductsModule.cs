@@ -29,9 +29,11 @@ public class ProductModule : CarterModule
 
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", async (ISender sender, CancellationToken cancellationToken) =>
+        app.MapGet("/", async (ISender sender,
+            [AsParameters]PaginationRequest paginationRequest,
+            CancellationToken cancellationToken) =>
         {
-            var query = new GetProductsQuery();
+            var query = new GetProductsQuery(paginationRequest);
             var result = await sender.Send(query, cancellationToken);
 
             return result.Map(

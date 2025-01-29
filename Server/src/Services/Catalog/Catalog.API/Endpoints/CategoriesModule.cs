@@ -30,9 +30,10 @@ public class CategoryModule : CarterModule
 
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", async (ISender sender) =>
+        app.MapGet("/", async (ISender sender, 
+            [AsParameters]PaginationRequest request) =>
         {
-            var query = new GetCategoriesQuery();
+            var query = new GetCategoriesQuery(request);
             var result = await sender.Send(query);
 
             return result.Map(

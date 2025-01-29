@@ -21,9 +21,10 @@ public class UsersModule : CarterModule
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
         // Get all users
-        app.MapGet("/", async (ISender sender) =>
+        app.MapGet("/", async (ISender sender,
+            [AsParameters]PaginationRequest paginationRequest) =>
         {
-            var query = new GetUsersQuery();
+            var query = new GetUsersQuery(paginationRequest);
             var result = await sender.Send(query);
 
             return result.Map(

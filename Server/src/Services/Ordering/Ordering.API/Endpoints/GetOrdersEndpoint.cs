@@ -6,12 +6,12 @@ namespace Ordering.API.Endpoints;
 
 public class GetOrdersEndpoint : OrdersEndpoint
 {
-
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", async (ISender sender) =>
+        app.MapGet("/", async (ISender sender,
+            [AsParameters] PaginationRequest paginationRequest) =>
         {
-            var query = new GetOrdersQuery();
+            var query = new GetOrdersQuery(paginationRequest);
             var result = await sender.Send(query);
 
             return result.Map(
