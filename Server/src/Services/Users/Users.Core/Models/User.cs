@@ -11,7 +11,11 @@ public class User : AggregateRoot<UserId>
     {
     }
 
-    private User(UserId id, UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber,
+    private User(UserId id,
+        UserName name,
+        Email email,
+        HashedPassword hashedPassword,
+        PhoneNumber phoneNumber,
         UserRole role) : base(id)
     {
         Name = name;
@@ -27,7 +31,10 @@ public class User : AggregateRoot<UserId>
     public PhoneNumber PhoneNumber { get; private set; }
     public UserRole Role { get; private set; }
 
-    public static User Create(UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber, UserRole role,
+    public bool IsEmailVerified { get; private set; } = false;
+
+    public static User Create(UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber,
+        UserRole role,
         UserId? id = null)
     {
         var user = new User(id ?? UserId.Create(Guid.NewGuid()).Value, name, email, hashedPassword, phoneNumber, role);
@@ -35,15 +42,21 @@ public class User : AggregateRoot<UserId>
         return user;
     }
 
-    public void Update(UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber, UserRole role)
+    public void VerifyEmail()
+    {
+        IsEmailVerified = true;
+        AddDomainEvent(new UserEmailVerifiedDomainEvent(this));
+    }
+    
+    public void Update(UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber,
+        UserRole role)
     {
         Name = name;
         Email = email;
         HashedPassword = hashedPassword;
         PhoneNumber = phoneNumber;
         Role = role;
-        
+
         AddDomainEvent(new UserUpdatedDomainEvent(this));
     }
-    
 }

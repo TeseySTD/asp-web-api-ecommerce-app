@@ -33,6 +33,12 @@ services:
       dockerfile: Server/src/Services/Users/Users.API/Dockerfile
     ports:
       - "8080:8080" 
+        
+  users.smtp:
+    image: changemakerstudiosus/papercut-smtp:latest
+    ports:
+      - "25:25"
+      - "2525:80"
 
   catalog.api:
     image: catalog.api

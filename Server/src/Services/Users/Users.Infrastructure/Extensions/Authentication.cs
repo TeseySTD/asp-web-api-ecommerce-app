@@ -23,6 +23,11 @@ public static class Authentication
             .ValidateOnStart()
             .ValidateDataAnnotations();
         
+        services.AddOptions<EmailVerificationTokenSettings>()
+            .BindConfiguration(EmailVerificationTokenSettings.SectionName)
+            .ValidateOnStart()
+            .ValidateDataAnnotations();
+        
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
             {

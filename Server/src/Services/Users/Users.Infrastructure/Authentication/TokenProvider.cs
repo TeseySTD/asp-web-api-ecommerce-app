@@ -11,7 +11,10 @@ using Users.Infrastructure.Helpers;
 
 namespace Users.Infrastructure.Authentication;
 
-public class TokenProvider(IOptions<JwtSettings> jwtSettings, IOptions<RefreshTokenSettings> refreshTokenSetting)
+public class TokenProvider(
+    IOptions<JwtSettings> jwtSettings,
+    IOptions<RefreshTokenSettings> refreshTokenSetting,
+    IOptions<EmailVerificationTokenSettings> emailVerificationTokenSettings)
     : ITokenProvider
 {
     public string GenerateJwtToken(User user)
@@ -42,5 +45,17 @@ public class TokenProvider(IOptions<JwtSettings> jwtSettings, IOptions<RefreshTo
             DateTime.UtcNow.AddDays(refreshTokenSetting.Value.ExpirationInDays));
 
         return refresh;
+    }
+
+    public EmailVerificationToken GenerateEmailVerificationToken(User user)
+    {
+        string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
+        var emailVerificationToken = EmailVerificationToken.Create(
+            user.Id,
+            DateTime.UtcNow.AddMinutes(emailVerificationTokenSettings.Value.ExpirationInMinutes)
+        );
+
+        return emailVerificationToken;
     }
 }

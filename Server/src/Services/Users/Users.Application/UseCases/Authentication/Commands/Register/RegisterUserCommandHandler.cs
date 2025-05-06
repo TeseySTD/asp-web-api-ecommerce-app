@@ -13,12 +13,17 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, T
     private readonly ISender _sender;
     private readonly ITokenProvider _tokenProvider;
     private readonly IApplicationDbContext _context;
+    private readonly IEmailHelper _emailHelper;
+    private readonly IEmailVerificationLinkFactory _emailVerificationLinkFactory;
 
-    public RegisterUserCommandHandler(ISender sender, ITokenProvider tokenProvider, IApplicationDbContext context)
+    public RegisterUserCommandHandler(ISender sender, ITokenProvider tokenProvider, IApplicationDbContext context,
+        IEmailHelper emailHelper, IEmailVerificationLinkFactory emailVerificationLinkFactory)
     {
         _sender = sender;
         _tokenProvider = tokenProvider;
         _context = context;
+        _emailHelper = emailHelper;
+        _emailVerificationLinkFactory = emailVerificationLinkFactory;
     }
 
     public async Task<Result<TokensDto>> Handle(RegisterUserCommand request,
@@ -34,9 +39,22 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, T
 
         var refreshToken = _tokenProvider.GenerateRefreshToken(user);
         var jwtToken = _tokenProvider.GenerateJwtToken(user);
-        
+        var emailVerificationToken = _tokenProvider.GenerateEmailVerificationToken(user);
+
         await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _context.EmailVerificationTokens.AddAsync(emailVerificationToken,cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
+
+        var emailVerificationLink = _emailVerificationLinkFactory.Create(emailVerificationToken);
+        
+        if (emailVerificationLink.IsFailure)
+            return Result<TokensDto>.Failure(emailVerificationLink.Errors);
+        
+        await _emailHelper.SendEmailAsync(
+            user.Email.Value,
+            "Email verification for asp ecommerce web api",
+            $"To verify your email please click on the link: <a href='{emailVerificationLink.Value}'>Verify email</a>"
+        );
 
         return new TokensDto(jwtToken, refreshToken.Token);
     }

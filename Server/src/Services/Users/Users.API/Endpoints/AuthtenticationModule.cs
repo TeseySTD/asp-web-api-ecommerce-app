@@ -2,20 +2,25 @@
 using Carter;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shared.Core.API;
 using Users.API.Http.Auth.Requests;
 using Users.API.Http.Auth.Responses;
 using Users.Application.Dto.User;
+using Users.Application.UseCases.Authentication.Commands.EmailVerification;
 using Users.Application.UseCases.Authentication.Commands.Login;
 using Users.Application.UseCases.Authentication.Commands.Logout;
 using Users.Application.UseCases.Authentication.Commands.RefreshToken;
 using Users.Application.UseCases.Authentication.Commands.Register;
+using Users.Core.Models.Entities;
 using Users.Core.Models.ValueObjects;
 
 namespace Users.API.Endpoints;
 
 public class AuthenticationModule : CarterModule
 {
+    public const string VerificationEmailName = "VerifyEmail";
+    
     public AuthenticationModule() : base("/api/auth")
     {
         WithTags("Authentication");
@@ -66,6 +71,19 @@ public class AuthenticationModule : CarterModule
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
         });
+        
+        //Verify token
+        app.MapGet("/verify-email", async (ISender sender, Guid tokenId) =>
+        {
+            var cmd = new EmailVerificationCommand(tokenId);
+            var result = await sender.Send(cmd);
+
+            return result.Map(
+                onSuccess: () => Results.Ok(),
+                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+            );
+        })
+        .WithName(VerificationEmailName);
 
         // Logout
         app.MapDelete("/logout", async (ISender sender, ClaimsPrincipal user) =>
