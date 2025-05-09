@@ -21,6 +21,12 @@ services:
     container_name: ordering.db
     ports:
       - "5430:5432"
+      
+  basket.db:
+    image: postgres
+    container_name: basket.db
+    ports:
+      - "5429:5432"
         
   distributed.cache:
     image: redis
@@ -57,6 +63,15 @@ services:
       dockerfile: Server/src/Services/Ordering/Ordering.API/Dockerfile
     ports:
       - "6080:6080"
+      
+  basket.api:
+    image: basket.api
+    container_name: basket.api
+    build:
+      context: .
+      dockerfile: Server/src/Services/Basket/Basket.API/Dockerfile
+    ports:
+      - "5080:5080"
         
   yarpgateway:
     image: yarpgateway
@@ -74,6 +89,8 @@ volumes:
     name: catalog_data
   ordering_data:
     name: ordering_data
+  basket_data:
+    name: basket_data
   message_broker_data:
     name: message_broker_data
   message_broker_log:

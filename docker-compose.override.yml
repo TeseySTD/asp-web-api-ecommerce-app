@@ -41,6 +41,15 @@ services:
       POSTGRES_DB: orderingdb
     volumes:
       - ordering_data:/var/lib/postgresql/data
+      
+  basket.db:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: basketdb
+    volumes:
+      - basket_data:/var/lib/postgresql/data
         
   distributed.cache:
     container_name: distributed.cache
@@ -97,6 +106,21 @@ services:
       - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro
     depends_on:
       - ordering.db 
+      - messagebroker
+      
+  basket.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5080
+      - ConnectionStrings__Database=Username=postgres;Password=123;Host=basket.db;Port=5432;Database=basketdb;Include Error Detail=true
+      - MessageBroker__Host=amqp://eccomerce-mq:5672
+      - MessageBroker_UserName=guest
+      - MessageBroker_Password=guest
+      - JWT_PUBLIC_KEY_PATH=/home/app/secrets/jwt_public_key.pem
+    volumes:
+      - ./Server/secrets/jwt_public_key.pem:/home/app/secrets/jwt_public_key.pem:ro
+    depends_on:
+      - basket.db
       - messagebroker
         
   yarpgateway:
