@@ -1,4 +1,5 @@
-﻿using Shared.Core.Validation.Result;
+﻿using System.Text.Json.Serialization;
+using Shared.Core.Validation.Result;
 
 namespace Basket.API.Models.Cart.ValueObjects;
 
@@ -6,12 +7,17 @@ public record CategoryName
 {
     public const int MaxNameLength = 50;
 
+    // For Marten
+    [JsonConstructor]
+    private CategoryName() { }
+    
     private CategoryName(string value)
     {
         Value = value;
     }
-
-    public string Value { get; private init; }
+    
+    [JsonInclude]
+    public string Value { get; private set; }
 
     public static Result<CategoryName> Create(string value)
     {

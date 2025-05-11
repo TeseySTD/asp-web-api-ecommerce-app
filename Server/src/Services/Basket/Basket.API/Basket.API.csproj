@@ -9,6 +9,8 @@
 
     <ItemGroup>
         <PackageReference Include="Carter" Version="8.0.0" />
+        <PackageReference Include="Mapster" Version="7.4.0" />
+        <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
         <PackageReference Include="Marten" Version="7.40.3" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
@@ -26,9 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\" />
-      <Folder Include="Application\UseCases\Commands\" />
-      <Folder Include="Application\UseCases\Queries\GetCart\" />
+      <Folder Include="Application\UseCases\Cart\Commands\RemoveProduct\" />
     </ItemGroup>
 
 </Project>

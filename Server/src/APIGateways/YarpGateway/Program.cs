@@ -51,6 +51,7 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/users-api/swagger/v1/swagger.json", "Users Api");
         options.SwaggerEndpoint("/catalog-api/swagger/v1/swagger.json", "Catalog Api");
         options.SwaggerEndpoint("/ordering-api/swagger/v1/swagger.json", "Ordering Api");
+        options.SwaggerEndpoint("/basket-api/swagger/v1/swagger.json", "Basket Api");
     });
 }
 

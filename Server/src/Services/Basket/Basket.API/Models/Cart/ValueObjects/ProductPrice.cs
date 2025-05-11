@@ -1,4 +1,6 @@
-﻿namespace Basket.API.Models.Cart.ValueObjects;
+﻿using System.Text.Json.Serialization;
+
+namespace Basket.API.Models.Cart.ValueObjects;
 
 using Shared.Core.Validation.Result;
 
@@ -6,7 +8,12 @@ public record ProductPrice
 {
     public const decimal MinPrice = 0.1m;
     public const decimal MaxPrice = 1000000.0m;
-    public decimal Value { get; init; }
+    [JsonInclude]
+    public decimal Value { get; private set; }
+    
+    // For Marten
+    [JsonConstructor]
+    private ProductPrice() { }
     protected ProductPrice(decimal price)
     {
         Value = price;

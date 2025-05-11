@@ -1,15 +1,23 @@
-﻿using Shared.Core.Validation.Result;
+﻿using System.Text.Json.Serialization;
+using Shared.Core.Validation.Result;
 
 namespace Basket.API.Models.Cart.ValueObjects;
 
 public record ProductId
 {
-    public Guid Value { get; init; }
-
+    [JsonInclude]
+    public Guid Value { get; private set; }
+    
+    // For Marten
+    public static ProductId From(Guid value) => new(value);
+    [JsonConstructor]
+    private ProductId() { }
+    
     private ProductId(Guid value)
     {
         Value = value;
     }
+
     public static Result<ProductId> Create(Guid productId)
     {
         var result = Result<ProductId>.Try()

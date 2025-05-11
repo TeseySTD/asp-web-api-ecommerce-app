@@ -73,6 +73,7 @@ services:
     depends_on:
       - users.db 
       - users.smtp
+      - messagebroker
         
   users.smtp:
     container_name: users.smtp
@@ -134,3 +135,4 @@ services:
       - users.api
       - catalog.api
       - ordering.api
+      - basket.api

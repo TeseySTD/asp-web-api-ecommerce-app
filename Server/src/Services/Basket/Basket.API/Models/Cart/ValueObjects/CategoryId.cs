@@ -1,4 +1,5 @@
-﻿using Shared.Core.Validation.Result;
+﻿using System.Text.Json.Serialization;
+using Shared.Core.Validation.Result;
 
 namespace Basket.API.Models.Cart.ValueObjects;
 
@@ -8,9 +9,12 @@ public record CategoryId
     {
         Value = categoryId;
     }
-
-    public Guid Value { get; set; }
-
+    [JsonInclude]
+    public Guid Value { get; private set; }
+    // For Marten
+    [JsonConstructor]
+    private CategoryId() { }
+    public static CategoryId From(Guid value) => new(value);
     public static Result<CategoryId> Create(Guid categoryId)
     {
         var result = Result<CategoryId>.Try()

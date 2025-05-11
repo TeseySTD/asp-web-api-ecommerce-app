@@ -16,6 +16,8 @@ public static class DependencyInjection
                                ?? throw new InvalidOperationException("Database connection string is not set."));
                 
                 cfg.Schema.For<ProductCart>().Identity(x => x.Id);
+                
+                cfg.UseSystemTextJsonForSerialization();
             })
             .UseLightweightSessions();
         

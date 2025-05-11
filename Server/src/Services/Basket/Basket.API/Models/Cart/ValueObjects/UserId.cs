@@ -6,13 +6,15 @@ public struct UserId
 {
     public Guid Value { get; init; }
 
+    // For Marten
+    public static UserId From(Guid value) => new(value);
+    
     private UserId(Guid value)
     {
         Value = value;
     }
 
-    // For Marten
-    public static UserId From(Guid value) => new(value);
+
     
     public static Result<UserId> Create(Guid productId)
     {

@@ -1,3 +1,4 @@
+using Basket.API.Application;
 using Basket.API.Application.UseCases;
 using Basket.API.Data;
 using Carter;

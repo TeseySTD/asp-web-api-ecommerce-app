@@ -1,4 +1,5 @@
-﻿using Shared.Core.Validation.Result;
+﻿using System.Text.Json.Serialization;
+using Shared.Core.Validation.Result;
 
 namespace Basket.API.Models.Cart.ValueObjects;
 
@@ -6,8 +7,12 @@ public record ProductTitle
 {
     public const int MaxTitleLength = 200;
     public const int MinTitleLength = 2;
-    public string Value { get; }
-
+    [JsonInclude]
+    public string Value { get; private set; }
+    
+    // For Marten
+    [JsonConstructor]
+    private ProductTitle() { }
     protected ProductTitle(string title)
     {
         Value = title;
