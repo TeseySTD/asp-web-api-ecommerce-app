@@ -27,8 +27,4 @@
       <ProjectReference Include="..\..\..\Shared\Shared.Messaging\Shared.Messaging.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Application\UseCases\Cart\Commands\RemoveProduct\" />
-    </ItemGroup>
-
 </Project>
