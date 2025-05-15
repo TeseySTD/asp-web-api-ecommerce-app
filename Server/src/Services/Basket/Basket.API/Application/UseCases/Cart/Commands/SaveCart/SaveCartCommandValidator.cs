@@ -10,6 +10,8 @@ public class SaveCartCommandValidator : AbstractValidator<SaveCartCommand>
 {
     public SaveCartCommandValidator()
     {
+        RuleFor(c => c.Dto).NotNull().WithMessage("Cart cannot be null");
+        
         RuleFor(c => c.Dto.UserId).MustBeCreatedWith(UserId.Create);
 
         RuleForEach(c => c.Dto.Items).MustBeCreatedWith((i) =>

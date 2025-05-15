@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Shared.Core.Validation.Result;
 
-namespace Ordering.Core.Models.Orders.ValueObjects;
+namespace Basket.API.Models.Cart.ValueObjects;
 
 public record Address
 {

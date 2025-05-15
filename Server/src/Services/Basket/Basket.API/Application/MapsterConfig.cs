@@ -1,4 +1,5 @@
 ﻿using Basket.API.Dto.Cart;
+using Basket.API.Http.Cart.Requests;
 using Basket.API.Models.Cart;
 using Basket.API.Models.Cart.Entities;
 using Basket.API.Models.Cart.ValueObjects;
@@ -13,6 +14,7 @@ public static class MapsterConfig
         ConfigureProductCart();
         ConfigureProductCartItem();
         ConfigureProductCartItemCategory();
+        ConfigureHttp();
     }
 
     public static void ConfigureProductCart()
@@ -26,13 +28,12 @@ public static class MapsterConfig
         TypeAdapterConfig<ProductCartDto, ProductCart>.NewConfig()
             .MapWith(src => src == null
                 ? null
-                : 
-                ProductCart.Create(
+                : ProductCart.Create(
                     src.UserId.Adapt<UserId>(),
                     src.Items.Adapt<ProductCartItem[]>()
                 )
             );
-        
+
         TypeAdapterConfig<ProductCart, ProductCartDto>.NewConfig()
             .MapWith(src => src == null
                 ? null
@@ -117,6 +118,29 @@ public static class MapsterConfig
                 : new ProductCartItemCategoryDto(
                     src.Id.Adapt<Guid>(),
                     src.CategoryName.Adapt<string>()
+                )
+            );
+    }
+
+    public static void ConfigureHttp()
+    {
+        TypeAdapterConfig<CheckoutBasketRequest, CheckoutBasketDto>.NewConfig()
+            .MapWith(src => src == null
+                ? null
+                : new CheckoutBasketDto(
+                    src.UserId,
+                    new(src.CardName,
+                        src.CardNumber,
+                        src.Expiration,
+                        src.CVV,
+                        src.PaymentMethod
+                    ),
+                    new(
+                        src.AddressLine,
+                        src.Country,
+                        src.State,
+                        src.ZipCode
+                    )
                 )
             );
     }

@@ -9,6 +9,7 @@ using Ordering.Application.UseCases.Orders.EventHandlers.Integration;
 using Ordering.Application.UseCases.Orders.Sagas;
 using Ordering.Persistence.Interceptors;
 using Shared.Messaging.Broker;
+using Shared.Messaging.Events.Basket;
 
 namespace Ordering.Persistence;
 
@@ -33,6 +34,7 @@ public static class DependecyInjection
             configure.AddConsumer<CanceledOrderEventHandler>();
             configure.AddConsumer<ApprovedOrderEventHandler>();
             configure.AddConsumer<ProductUpdatedEventHandler>();
+            configure.AddConsumer<BasketCheckoutedEventHandler>();
             
             configure.AddSagaStateMachine<MakeOrderSaga, MakeOrderSagaState>()
                 .EntityFrameworkRepository(r =>
