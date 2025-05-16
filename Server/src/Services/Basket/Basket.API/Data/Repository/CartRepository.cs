@@ -25,6 +25,15 @@ public class CartRepository : ICartRepository
             : new Error("Cart not found", $"Cart for user with id {userId.Value} not found");
     }
 
+    public async Task<Result<IEnumerable<ProductCart>>> GetCartsByProductId(ProductId productId,
+        CancellationToken cancellationToken = default)
+    {
+        var carts = await _session.Query<ProductCart>().Where(c => c.Items.Any(i => i.Id.Value == productId.Value)).ToListAsync();
+        return !carts.IsEmpty()
+            ? Result<IEnumerable<ProductCart>>.Success(carts)
+            : new Error("Carts not found", $"Carts for product with id {productId.Value} not found");
+    }
+
     public async Task<Result<ProductCart>> SaveCart(ProductCart cart, CancellationToken cancellationToken = default)
     {
         try

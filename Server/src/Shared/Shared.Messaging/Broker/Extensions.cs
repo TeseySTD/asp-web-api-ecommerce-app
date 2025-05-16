@@ -8,11 +8,11 @@ namespace Shared.Messaging.Broker;
 public static class Extensions
 {
     public static IServiceCollection AddMessageBroker
-        (this IServiceCollection services, IConfiguration configuration, Action<IBusRegistrationConfigurator>? configure = null)
+        (this IServiceCollection services, IConfiguration configuration, string serviceName, Action<IBusRegistrationConfigurator>? configure = null)
     {
         services.AddMassTransit(config =>
         {
-            config.SetKebabCaseEndpointNameFormatter();
+            var formatter = new KebabCaseEndpointNameFormatter(serviceName, false);
 
             if (configure != null)
                 configure.Invoke(config);
@@ -24,9 +24,9 @@ public static class Extensions
                     hostConfigurator.Username(configuration["MessageBroker:UserName"]!);
                     hostConfigurator.Password(configuration["MessageBroker:Password"]!);
                 });
-                configurator.ConfigureEndpoints(context);
-                
                 configurator.UseInMemoryOutbox(context);
+
+                configurator.ConfigureEndpoints(context, formatter);
             });
         });
         

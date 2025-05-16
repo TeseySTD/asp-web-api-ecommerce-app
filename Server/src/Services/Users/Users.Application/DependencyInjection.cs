@@ -21,7 +21,7 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         
-        services.AddMessageBroker(configuration, configure =>
+        services.AddMessageBroker(configuration, "users-api", configure =>
         {
             configure.AddConsumers(Assembly.GetExecutingAssembly());
             configure.SetInMemorySagaRepositoryProvider();

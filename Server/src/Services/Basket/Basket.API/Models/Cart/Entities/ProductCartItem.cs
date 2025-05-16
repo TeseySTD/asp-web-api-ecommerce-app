@@ -7,21 +7,18 @@ namespace Basket.API.Models.Cart.Entities;
 
 public class ProductCartItem : Entity<ProductId>
 {
-    [JsonInclude]
-    public ProductTitle Title { get; private set; }
-    [JsonInclude]
-    public StockQuantity StockQuantity { get; private set; }
-    [JsonInclude]
-    public ProductPrice Price { get; private set; }
-    [JsonInclude]
-    public ProductCartItemCategory Category { get; private set; }
-    [JsonInclude]
-    public List<string> ImageUrls { get; private set; } = [];
-    
+    [JsonInclude] public ProductTitle Title { get; private set; }
+    [JsonInclude] public StockQuantity StockQuantity { get; private set; }
+    [JsonInclude] public ProductPrice Price { get; private set; }
+    [JsonInclude] public ProductCartItemCategory? Category { get; private set; }
+    [JsonInclude] public List<string> ImageUrls { get; private set; } = [];
+
     // For Marten
     [JsonConstructor]
-    private ProductCartItem() : base(default!) { }
-    
+    private ProductCartItem() : base(default!)
+    {
+    }
+
     private ProductCartItem(
         ProductId productId,
         ProductTitle title,
@@ -51,4 +48,8 @@ public class ProductCartItem : Entity<ProductId>
 
         return new ProductCartItem(productId, title, category, stockQuantity, price, imageUrls);
     }
+
+    public void Update(ProductTitle title, ProductPrice price, ProductCartItemCategory? category,
+        IEnumerable<string> imageUrls) =>
+        (Title, Price, Category, ImageUrls) = (title, price, category, imageUrls.ToList());
 }

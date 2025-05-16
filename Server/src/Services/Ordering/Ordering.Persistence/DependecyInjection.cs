@@ -29,7 +29,7 @@ public static class DependecyInjection
         });
 
         //Add sagas state.
-        services.AddMessageBroker(configuration, configure =>
+        services.AddMessageBroker(configuration, "ordering-api", configure =>
         {
             configure.AddConsumer<CanceledOrderEventHandler>();
             configure.AddConsumer<ApprovedOrderEventHandler>();

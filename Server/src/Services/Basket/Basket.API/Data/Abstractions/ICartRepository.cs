@@ -9,6 +9,7 @@ namespace Basket.API.Data.Abstractions;
 public interface ICartRepository
 {
     Task<Result<ProductCart>> GetCartByUserId(UserId userId, CancellationToken cancellationToken = default);
+    Task<Result<IEnumerable<ProductCart>>>GetCartsByProductId(ProductId productId, CancellationToken cancellationToken = default);
     Task<Result<ProductCart>> SaveCart(ProductCart cart, CancellationToken cancellationToken = default);
     Task<Result> DeleteCart(UserId userId, CancellationToken cancellationToken = default);
     Task <Result> StoreProductInCart(UserId userId, ProductCartItem item, CancellationToken cancellationToken = default);
