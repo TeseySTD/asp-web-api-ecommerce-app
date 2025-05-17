@@ -1,8 +1,10 @@
 ﻿using Catalog.Application.Common.Interfaces;
 using Catalog.Application.Dto.Category;
+using Catalog.Application.Dto.Product;
 using Catalog.Core.Models.Categories;
 using Catalog.Core.Models.Categories.Entities;
 using Catalog.Core.Models.Categories.ValueObjects;
+using Catalog.Core.Models.Products;
 using Catalog.Core.Models.Products.Entities;
 using Catalog.Core.Models.Products.ValueObjects;
 using Mapster;
@@ -32,7 +34,8 @@ public static class MapsterConfig
 
         TypeAdapterConfig<Category, CategoryReadDto>.NewConfig()
             .MapWith(src => src == null
-                ? null : new CategoryReadDto
+                ? null
+                : new CategoryReadDto
                 (
                     src.Id.Value,
                     src.Name.Value,
@@ -56,5 +59,20 @@ public static class MapsterConfig
             .MapWith(src => src.Value);
         TypeAdapterConfig<ProductImage, string>.NewConfig()
             .MapWith(src => imageUrlGenerator.GenerateUrl(src.Id));
+
+        TypeAdapterConfig<Product, ProductReadDto>.NewConfig()
+            .MapWith(src => src == null
+                ? null
+                : new ProductReadDto
+                (
+                    src.Id.Value,
+                    src.Title.Value,
+                    src.Description.Value,
+                    src.Price.Value,
+                    src.StockQuantity.Value,
+                    src.Images.Adapt<string[]>(),
+                    src.Category.Adapt<CategoryReadDto>()
+                )
+            );
     }
 }

@@ -64,6 +64,7 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
 
             var productReadDto = await _context.Products
                 .Include(p => p.Category)
+                    .ThenInclude(c => c.Images)
                 .Where(p => p.Id == product.Id)
                 .ProjectToType<ProductReadDto>()
                 .AsNoTracking()

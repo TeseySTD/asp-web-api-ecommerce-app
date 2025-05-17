@@ -29,6 +29,7 @@ public sealed class
 
         var productDtos = await _context.Products
             .Include(p => p.Category)
+                .ThenInclude(c => c.Images)
             .AsNoTracking()
             .Skip(pageSize * pageIndex)
             .Take(pageSize)

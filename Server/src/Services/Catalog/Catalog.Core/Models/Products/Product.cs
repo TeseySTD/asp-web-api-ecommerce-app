@@ -51,13 +51,14 @@ public class Product : AggregateRoot<ProductId>
     }
 
     public void Update(ProductTitle title, ProductDescription description,
-        ProductPrice price, StockQuantity quantity, CategoryId categoryId)
+        ProductPrice price, StockQuantity quantity, Category? category)
     {
         Title = title;
         Description = description;
         Price = price;
         StockQuantity = quantity;
-        CategoryId = categoryId;
+        CategoryId = category is null ? null : category.Id;
+        Category = category;
         
         AddDomainEvent(new ProductUpdatedDomainEvent(this));
     }

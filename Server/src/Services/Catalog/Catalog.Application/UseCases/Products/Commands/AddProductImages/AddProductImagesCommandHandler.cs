@@ -36,8 +36,9 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
             .CheckAsync(async () =>
                 {
                     product = await _context.Products
-                        .Include(p => p.Images)
                         .Include(p => p.Category)
+                            .ThenInclude(c => c.Images)
+                        .Include(p => p.Images)
                         .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
 
                     return product!.Images.Count + request.Images.Count() > Product.MaxImagesCount;
