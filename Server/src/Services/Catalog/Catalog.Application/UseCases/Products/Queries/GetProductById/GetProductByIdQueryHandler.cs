@@ -30,6 +30,7 @@ public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, Pro
 
         var product = await _context.Products
             .Include(p => p.Category)
+                .ThenInclude(c => c.Images)
             .Where(p => p.Id == request.Id)
             .ProjectToType<ProductReadDto>()
             .AsNoTracking()
@@ -41,6 +42,6 @@ public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, Pro
         await _cache.SetStringAsync($"product-{request.Id.Value}", JsonSerializer.Serialize(product),
             new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
 
-        return product!;
+        return product;
     }
 }

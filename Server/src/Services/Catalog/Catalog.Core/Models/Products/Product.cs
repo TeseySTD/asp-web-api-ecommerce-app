@@ -70,11 +70,11 @@ public class Product : AggregateRoot<ProductId>
             Images.Add(productImage);
     }  
         
-    public void IncreaseQuantity(uint quantity) => StockQuantity = StockQuantity.Create(StockQuantity.Value + quantity);
+    public void IncreaseQuantity(uint quantity) => StockQuantity = StockQuantity.Create(StockQuantity.Value + quantity).Value;
     public void DecreaseQuantity(uint quantity)
     {
         if(StockQuantity.Value >= quantity)
-            StockQuantity = StockQuantity.Create(StockQuantity.Value - quantity);
+            StockQuantity = StockQuantity.Create(StockQuantity.Value - quantity).Value;
         else
             throw new ArgumentException("The quantity provided is greater than the quantity of product."); 
     }

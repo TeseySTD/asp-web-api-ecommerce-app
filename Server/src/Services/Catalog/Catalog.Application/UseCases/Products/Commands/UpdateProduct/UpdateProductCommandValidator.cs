@@ -28,7 +28,7 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
 
         RuleFor(x => x.Value.Quantity)
             .NotNull()
-            .WithMessage("Quantity is required");
+            .MustBeCreatedWith(StockQuantity.Create);
 
         RuleFor(x => x.Value.CategoryId)
             .MustBeCreatedWith(c => c.HasValue

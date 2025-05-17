@@ -5,7 +5,9 @@ using Catalog.Application.Dto.Image;
 using Catalog.Application.Dto.Product;
 using Catalog.Application.UseCases.Products.Commands.AddProductImages;
 using Catalog.Application.UseCases.Products.Commands.CreateProduct;
+using Catalog.Application.UseCases.Products.Commands.DecreaseQuantity;
 using Catalog.Application.UseCases.Products.Commands.DeleteProduct;
+using Catalog.Application.UseCases.Products.Commands.IncreaseQuantity;
 using Catalog.Application.UseCases.Products.Commands.UpdateProduct;
 using Catalog.Application.UseCases.Products.Queries.GetProductById;
 using Catalog.Application.UseCases.Products.Queries.GetProducts;
@@ -133,6 +135,30 @@ public class ProductModule : CarterModule
                 );
 
                 var cmd = new UpdateProductCommand(updateDto);
+                var result = await sender.Send(cmd, cancellationToken);
+
+                return result.Map(
+                    onSuccess: () => Results.Ok(),
+                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                );
+            });
+
+        app.MapPut("/increase-quantity/{id:guid}/{quantity:int}",
+            async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
+            {
+                var cmd = new IncreaseQuantityCommand(id, quantity);
+                var result = await sender.Send(cmd, cancellationToken);
+
+                return result.Map(
+                    onSuccess: () => Results.Ok(),
+                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                );
+            });
+        
+        app.MapPut("/decrease-quantity/{id:guid}/{quantity:int}",
+            async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
+            {
+                var cmd = new DecreaseQuantityCommand(id, quantity);
                 var result = await sender.Send(cmd, cancellationToken);
 
                 return result.Map(

@@ -33,7 +33,7 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
             categoryId: CategoryId.Create(request.Value.CategoryId).Value
         );
 
-        product.StockQuantity = StockQuantity.Create(request.Value.Quantity);
+        product.StockQuantity = StockQuantity.Create(request.Value.Quantity).Value;
 
         var result = await Add(product);
 
