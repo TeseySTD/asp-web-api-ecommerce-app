@@ -6,6 +6,7 @@ using Catalog.Application.Dto.Image;
 using Catalog.Application.UseCases.Categories.Commands.AddCategoryImages;
 using Catalog.Application.UseCases.Categories.Commands.CreateCategory;
 using Catalog.Application.UseCases.Categories.Commands.DeleteCategory;
+using Catalog.Application.UseCases.Categories.Commands.DeleteCategoryImage;
 using Catalog.Application.UseCases.Categories.Commands.UpdateCategory;
 using Catalog.Application.UseCases.Categories.Queries.GetCategories;
 using Catalog.Application.UseCases.Categories.Queries.GetCategoryById;
@@ -13,6 +14,7 @@ using Catalog.Application.UseCases.Products.Commands.AddProductImages;
 using Catalog.Core.Models.Categories;
 using Catalog.Core.Models.Categories.ValueObjects;
 using Catalog.Core.Models.Images;
+using Catalog.Core.Models.Images.ValueObjects;
 using Catalog.Core.Models.Products;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -110,6 +112,18 @@ public class CategoryModule : CarterModule
                 );
             })
             .DisableAntiforgery();
+
+        app.MapDelete("/{id:guid}/images/{imageId:guid}",
+            async (ISender sender, Guid id, Guid imageId, CancellationToken cancellationToken) =>
+            {
+                var cmd = new DeleteCategoryImageCommand(id, imageId);
+                var result = await sender.Send(cmd, cancellationToken);
+                
+                return result.Map(
+                    onSuccess: () => Results.Ok(),
+                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                );
+            });
         
         app.MapPut("/{id:guid}", async (ISender sender, Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken) =>
         {

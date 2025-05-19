@@ -2,6 +2,7 @@
 using Catalog.Core.Models.Categories.Events;
 using Catalog.Core.Models.Categories.ValueObjects;
 using Catalog.Core.Models.Images;
+using Catalog.Core.Models.Images.ValueObjects;
 using Shared.Core.Domain.Classes;
 
 namespace Catalog.Core.Models.Categories;
@@ -43,5 +44,11 @@ public class Category : AggregateRoot<CategoryId>
         var categoryImage = CategoryImage.Create(image.Id, Id);
         if(Images.Count < MaxImagesCount)
             Images.Add(categoryImage);
+    }
+
+    public void RemoveImage(ImageId imageId)
+    {
+        Images.RemoveAll(i => i.Id == imageId);
+        AddDomainEvent(new CategoryUpdatedDomainEvent(this));
     }
 }

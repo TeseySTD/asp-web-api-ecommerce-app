@@ -7,6 +7,7 @@ using Catalog.Application.UseCases.Products.Commands.AddProductImages;
 using Catalog.Application.UseCases.Products.Commands.CreateProduct;
 using Catalog.Application.UseCases.Products.Commands.DecreaseQuantity;
 using Catalog.Application.UseCases.Products.Commands.DeleteProduct;
+using Catalog.Application.UseCases.Products.Commands.DeleteProductImage;
 using Catalog.Application.UseCases.Products.Commands.IncreaseQuantity;
 using Catalog.Application.UseCases.Products.Commands.UpdateProduct;
 using Catalog.Application.UseCases.Products.Queries.GetProductById;
@@ -121,6 +122,19 @@ public class ProductModule : CarterModule
             })
             .DisableAntiforgery()
             .RequireAuthorization(Policies.RequireSellerPolicy);
+
+        app.MapDelete("/{id:guid}/images{imageId:guid}", async (ISender sender,
+            Guid id, Guid imageId, CancellationToken cancellationToken) =>
+        {
+            var cmd = new DeleteProductImageCommand(id, imageId);
+            var result = await sender.Send(cmd, cancellationToken);
+
+            return result.Map(
+                onSuccess: () => Results.Ok(),
+                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+            );
+        })
+        .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/{id:guid}",
             async (ISender sender, Guid id, UpdateProductRequest request, CancellationToken cancellationToken) =>

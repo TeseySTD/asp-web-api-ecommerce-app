@@ -62,7 +62,7 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
             product!.AddImage(image);
         }
 
-        await _context.SaveChangesAsync(default);
+        await _context.SaveChangesAsync(cancellationToken);
 
         await _cache.SetStringAsync($"product-{product!.Id.Value}",
             JsonSerializer.Serialize(product.Adapt<ProductReadDto>()),

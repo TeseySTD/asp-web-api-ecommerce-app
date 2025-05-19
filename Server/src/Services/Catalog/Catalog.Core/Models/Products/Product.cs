@@ -1,6 +1,7 @@
 using Catalog.Core.Models.Categories;
 using Catalog.Core.Models.Categories.ValueObjects;
 using Catalog.Core.Models.Images;
+using Catalog.Core.Models.Images.ValueObjects;
 using Catalog.Core.Models.Products.Entities;
 using Catalog.Core.Models.Products.Events;
 using Catalog.Core.Models.Products.ValueObjects;
@@ -69,6 +70,12 @@ public class Product : AggregateRoot<ProductId>
         if(Images.Count < MaxImagesCount)
             Images.Add(productImage);
     }  
+    
+    public void RemoveImage(ImageId imageId)
+    {
+        Images.RemoveAll(i => i.Id == imageId);
+        AddDomainEvent(new ProductUpdatedDomainEvent(this));
+    }
         
     public void IncreaseQuantity(uint quantity) => StockQuantity = StockQuantity.Create(StockQuantity.Value + quantity).Value;
     public void DecreaseQuantity(uint quantity)
