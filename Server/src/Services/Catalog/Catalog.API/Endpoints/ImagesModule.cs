@@ -10,7 +10,7 @@ public class ImagesModule : CarterModule
 {
     public ImagesModule() : base("/api/images")
     {
-        WithTags("Products");
+        WithTags("Images");
     }
 
     public override void AddRoutes(IEndpointRouteBuilder app)
