@@ -42,6 +42,13 @@ public class Result
         return this;
     }
 
+    public Result AddErrors(IEnumerable<Error> errors)
+    {
+        if(IsFailure)
+            _errors.AddRange(errors);
+        return this;
+    }
+
     public TResult Map<TResult>(Func<TResult> onSuccess, Func<IEnumerable<Error>, TResult> onFailure) =>
         IsSuccess ? onSuccess() : onFailure(Errors!);
 

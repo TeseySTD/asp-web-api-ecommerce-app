@@ -40,9 +40,21 @@ public class ResultBuilder<TResult>
             _result.Fail();
             _result.AddError(error);
         }
+
         return this;
     }
-    
+
+    public ResultBuilder<TResult> Check(TResult result)
+    {
+        if (result.IsFailure && _continueValidation)
+        {
+            _result.Fail();
+            _result.AddErrors(result.Errors);
+        }
+
+        return this;
+    }
+
     public ResultBuilder<TResult> CheckIf(bool checkCondition, bool errorCondition, Error error)
     {
         if (checkCondition)
@@ -50,10 +62,25 @@ public class ResultBuilder<TResult>
         return this;
     }
 
+    public ResultBuilder<TResult> CheckIf(bool checkCondition, TResult result)
+    {
+        if (checkCondition)
+            return Check(result);
+        return this;
+    }
+
+
     public ResultBuilder<TResult> Check(Func<bool> errorConditionFunc, Error error)
     {
         if (_continueValidation)
             return Check(errorConditionFunc(), error);
+        return this;
+    }
+
+    public ResultBuilder<TResult> Check(Func<TResult> errorConditionFunc)
+    {
+        if (_continueValidation)
+            return Check(errorConditionFunc());
         return this;
     }
 
@@ -64,6 +91,13 @@ public class ResultBuilder<TResult>
         return this;
     }
 
+    public ResultBuilder<TResult> CheckIf(bool checkCondition, Func<TResult> errorConditionFunc)
+    {
+        if (checkCondition && _continueValidation)
+            return Check(errorConditionFunc());
+        return this;
+    }
+
     public async Task<ResultBuilder<TResult>> CheckAsync(Func<Task<bool>> errorConditionFunc, Error error)
     {
         if (_continueValidation)
@@ -71,6 +105,15 @@ public class ResultBuilder<TResult>
             bool errorCondition = await errorConditionFunc();
             return Check(errorCondition, error);
         }
+
+        return this;
+    }
+
+
+    public async Task<ResultBuilder<TResult>> CheckAsync(Func<Task<TResult>> errorConditionFunc)
+    {
+        if (_continueValidation)
+            return Check(await errorConditionFunc());
         return this;
     }
 
@@ -84,22 +127,36 @@ public class ResultBuilder<TResult>
             bool errorCondition = await errorConditionFunc();
             return Check(errorCondition, error);
         }
+
+        return this;
+    }
+
+    public async Task<ResultBuilder<TResult>> CheckIfAsync(
+        bool checkCondition,
+        Func<Task<TResult>> errorConditionFunc)
+    {
+        if (checkCondition && _continueValidation)
+            return Check(await errorConditionFunc());
         return this;
     }
 
     public ResultBuilder<TResult> Combine(params Result[] results)
     {
-        var failures = results
-            .Where(r => r.IsFailure)
-            .SelectMany(r => r.Errors)
-            .ToList();
-        
-        if (failures.Any())
+        if (_continueValidation)
         {
-            _result.Fail();
-            foreach (var e in failures)
-                _result.AddError(e);
+            var failures = results
+                .Where(r => r.IsFailure)
+                .SelectMany(r => r.Errors)
+                .ToList();
+
+            if (failures.Any())
+            {
+                _result.Fail();
+                foreach (var e in failures)
+                    _result.AddError(e);
+            }
         }
+
         return this;
     }
 
