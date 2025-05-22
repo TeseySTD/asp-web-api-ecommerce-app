@@ -46,6 +46,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basket.API", "src\Services\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Core.Tests", "tests\Shared\Shared.Core.Tests\Shared.Core.Tests.csproj", "{006320D2-27B5-4E08-8726-42947541D18B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Users.Core.Tests", "tests\Users\Users.Core.Tests\Users.Core.Tests.csproj", "{836F1EDA-4E0D-47E2-A03C-70232542548C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +130,10 @@ Global
 		{006320D2-27B5-4E08-8726-42947541D18B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{006320D2-27B5-4E08-8726-42947541D18B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{006320D2-27B5-4E08-8726-42947541D18B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{836F1EDA-4E0D-47E2-A03C-70232542548C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{836F1EDA-4E0D-47E2-A03C-70232542548C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{836F1EDA-4E0D-47E2-A03C-70232542548C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{836F1EDA-4E0D-47E2-A03C-70232542548C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
