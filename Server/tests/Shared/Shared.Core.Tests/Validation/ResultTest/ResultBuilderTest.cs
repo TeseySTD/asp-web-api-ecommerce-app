@@ -82,6 +82,26 @@ public class ResultBuilderTest
     }
 
     [Fact]
+    public void Check_FuncWithSuccess_KeepsSuccess()
+    {
+        var result = Result.Try()
+            .Check(() => false, new Error("m", "d"))
+            .Build();
+        result.IsSuccess.Should().BeTrue();
+    }
+    
+    [Fact]
+    public void Check_FuncWithFailure_PropagatesFailure()
+    {
+        var result = Result.Try()
+            .Check(() => true, new Error("m", "d"))
+            .Build();
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e => e.Message == "m" && e.Description == "d");
+    }
+    
+    
+    [Fact]
     public void CheckIf_ConditionTrue_EvaluatesCheck()
     {
         var result = Result.Try()
