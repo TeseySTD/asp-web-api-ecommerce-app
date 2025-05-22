@@ -61,7 +61,7 @@ public class CustomValidatorsTest
 
         result.IsValid.Should().BeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Number)
-            .WithErrorMessage($" {TestVo.NonPositiveErrorMessage}: {TestVo.NonPositiveErrorDescription}");
+            .WithErrorMessage($"{TestVo.NonPositiveErrorMessage}: {TestVo.NonPositiveErrorDescription}");
     }
 
     [Fact]

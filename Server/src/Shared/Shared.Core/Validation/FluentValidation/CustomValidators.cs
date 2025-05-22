@@ -41,7 +41,7 @@ public static class CustomValidators
             {
                 var propertyName = context.PropertyPath;
                 var failure = new ValidationFailure(propertyName,
-                    $" {error.Message}: {error.Description}");
+                    $"{error.Message}: {error.Description}");
                 context.AddFailure(failure);
             }
         });
