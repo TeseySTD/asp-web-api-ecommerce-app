@@ -15,7 +15,7 @@ public record Email
     public static Result<Email> Create(string email)
     {
         return Result<Email>.Try(new Email(email))
-            .Check(string.IsNullOrEmpty(email),
+            .Check(string.IsNullOrEmpty(email) || string.IsNullOrWhiteSpace(email),
                 new Error("Email is required", "Email cannot be null or empty"))
             .DropIfFail()
             .Check(!Regex.IsMatch(email, RegexEmail),

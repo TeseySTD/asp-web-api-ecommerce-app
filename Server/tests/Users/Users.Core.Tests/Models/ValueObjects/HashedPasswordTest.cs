@@ -22,7 +22,8 @@ public class HashedPasswordTest
     
     [Theory]
     [InlineData("")]
-    public void Create_NullOrEmpty_ReturnsFailure_HashPasswordCannnotBeEmpty(string password)
+    [InlineData("   ")]
+    public void Create_EmptyOrWhitespace_ReturnsFailure_HashPasswordCannnotBeEmpty(string password)
     {
         // Act
         var createHashedPasswordResult = HashedPassword.Create(password);

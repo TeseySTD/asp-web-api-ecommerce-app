@@ -15,7 +15,7 @@ public record UserName
     public static Result<UserName> Create(string name)
     {
         return Result<UserName>.Try(new UserName(name))
-            .Check(string.IsNullOrEmpty(name),
+            .Check(string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name),
                 new Error("Name is required", "Name cannot be null or empty."))
             .DropIfFail()
             .Check(name.Length < MinNameLength || name.Length > MaxNameLength,

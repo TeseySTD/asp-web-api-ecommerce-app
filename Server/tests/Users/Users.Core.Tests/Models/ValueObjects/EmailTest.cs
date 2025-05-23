@@ -32,7 +32,7 @@ public class EmailTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_NullEmptyOrWhitespaceEmail_ReturnsFailure_EmailIsRequired(string emailString)
+    public void Create_EmptyOrWhitespaceEmail_ReturnsFailure_EmailIsRequired(string emailString)
     {
         // Act
         var result = Email.Create(emailString);

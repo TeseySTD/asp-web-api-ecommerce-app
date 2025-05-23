@@ -15,7 +15,7 @@ public record PhoneNumber
     public static Result<PhoneNumber> Create(string phoneNumber)
     {
         return Result<PhoneNumber>.Try(new PhoneNumber(phoneNumber))
-            .Check(string.IsNullOrEmpty(phoneNumber),
+            .Check(string.IsNullOrEmpty(phoneNumber) || string.IsNullOrWhiteSpace(phoneNumber),
                 new Error("Phone number is required", "Phone number must be not null or empty."))
             .DropIfFail()
             .Check(!Regex.IsMatch(phoneNumber, RegexPhoneNumber),

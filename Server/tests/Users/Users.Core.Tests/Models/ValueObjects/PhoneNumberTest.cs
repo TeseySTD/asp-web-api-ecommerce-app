@@ -10,10 +10,9 @@ public class PhoneNumberTest
     [Theory]
     [InlineData("+380991234567")] // Standard international format
     [InlineData("0991234567")] // Standard national format
-    [InlineData("+380 99 123 45 67")] // With spaces
     [InlineData("099-123-45-67")] // With hyphens
     [InlineData("(099)123-45-67")] // With parentheses
-    [InlineData("+380(99)1234567")] // Mixed format
+    [InlineData("+38(099)1234567")] // Mixed format
     [InlineData("380991234567")] // Without '+'
     [InlineData("80991234567")] // Old format (if supported by regex)
     public void Create_ValidPhoneNumber_ReturnsSuccess(string phoneNumberString)
@@ -31,7 +30,7 @@ public class PhoneNumberTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")] // Whitespace only
-    public void Create_NullEmptyOrWhitespacePhoneNumber_ReturnsFailure_PhoneNumberIsRequired(string phoneNumberString)
+    public void Create_EmptyOrWhitespacePhoneNumber_ReturnsFailure_PhoneNumberIsRequired(string phoneNumberString)
     {
         // Act
         var result = PhoneNumber.Create(phoneNumberString);

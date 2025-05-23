@@ -21,12 +21,11 @@ public class UserNameTest
         Assert.True(userNameCreateResult.IsSuccess);
     }
 
-    [Fact]
-    public void Create_WithEmptyString_ReturnsFailureAndAppropriateError()
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_WithEmptyOrWhitespaceString_ReturnsFailureAndAppropriateError(string userNameString)
     {
-        // Arrange
-        var userNameString = string.Empty;
-        
         // Act
         var userNameCreateResult = UserName.Create(userNameString);
         
