@@ -14,7 +14,10 @@ public class ResultBuilderTest
     [Fact]
     public void Ctor_WithFailureResult_Throws()
     {
+        // Arrange
         Action act = () => new ResultBuilder<Result>(CreateFailure());
+        
+        // Assert
         act.Should().Throw<ArgumentException>()
             .WithMessage("*cannot be created with failed result*");
     }
@@ -22,10 +25,12 @@ public class ResultBuilderTest
     [Fact]
     public void Check_ErrorCondition_FailsResult()
     {
+        // Arrange
         var result = Result.Try()
             .Check(true, new Error("msg", "desc"))
             .Build();
 
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e.Message == "msg" && e.Description == "desc");
     }
@@ -33,20 +38,24 @@ public class ResultBuilderTest
     [Fact]
     public void Check_ErrorConditionFalse_KeepsSuccess()
     {
+        // Arrange
         var result = Result.Try()
             .Check(false, new Error("m", "d"))
             .Build();
 
+        // Assert
         result.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
     public void Check_ResultWithSuccess_PropagatesSuccess()
     {
+        // Arrange
         var result = Result.Try()
             .Check(Result.Success())
             .Build();
         
+        // Assert
         result.IsSuccess.Should().BeTrue();
     }
 
@@ -54,16 +63,18 @@ public class ResultBuilderTest
     [Fact]
     public void Check_ResultWithFailure_PropagatesFailure()
     {
+        // Arrange
         var result = Result.Try()
             .Check(CreateFailure())
             .Build();
-
+        // Assert
         result.IsFailure.Should().BeTrue();
     }
 
     [Fact]
     public void Check_ResultWithNestedFailure_PropagatesFailure()
     {
+        // Arrange
         var result = Result.Try()
             .Check(
                 Result.Try()
@@ -74,6 +85,7 @@ public class ResultBuilderTest
             )
             .Build();
         
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should()
             .ContainSingle(e => e.Message == "m" && e.Description == "d").And
@@ -84,18 +96,24 @@ public class ResultBuilderTest
     [Fact]
     public void Check_FuncWithSuccess_KeepsSuccess()
     {
+        // Arrange
         var result = Result.Try()
             .Check(() => false, new Error("m", "d"))
             .Build();
+        
+        // Assert
         result.IsSuccess.Should().BeTrue();
     }
     
     [Fact]
     public void Check_FuncWithFailure_PropagatesFailure()
     {
+        // Arrange
         var result = Result.Try()
             .Check(() => true, new Error("m", "d"))
             .Build();
+        
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e.Message == "m" && e.Description == "d");
     }
@@ -104,10 +122,12 @@ public class ResultBuilderTest
     [Fact]
     public void CheckIf_ConditionTrue_EvaluatesCheck()
     {
+        // Arrange
         var result = Result.Try()
             .CheckIf(true, true, new Error("X", "Y"))
             .Build();
 
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.First().Message.Should().Be("X");
     }
@@ -115,16 +135,19 @@ public class ResultBuilderTest
     [Fact]
     public void CheckIf_ConditionFalse_SkipsCheck()
     {
+        // Arrange
         var result = Result.Try()
             .CheckIf(false, true, new Error("X", "Y"))
             .Build();
 
+        // Assert
         result.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
     public void CheckIf_ConditionFalse_SkipsCheckFuncCall()
     {
+        // Arrange
         var trigger = false;
 
         var result = Result.Try()
@@ -135,6 +158,7 @@ public class ResultBuilderTest
             }, new Error("X", "Y"))
             .Build();
 
+        // Assert
         result.IsSuccess.Should().BeTrue();
         trigger.Should().BeFalse();
     }
@@ -142,14 +166,17 @@ public class ResultBuilderTest
     [Fact]
     public void Combine_MultipleFailures_AccumulatesErrors()
     {
+        // Arrange
         var r1 = Result.Failure(new Error("A", "1"));
         var r2 = Result.Failure(new Error("B", "2"));
         var r3 = Result.Success();
 
+        // Act
         var result = Result.Try()
             .Combine(r1, r2, r3)
             .Build();
 
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().Contain(e => e.Message == "A")
             .And.Contain(e => e.Message == "B");
@@ -158,12 +185,14 @@ public class ResultBuilderTest
     [Fact]
     public void DropIfFail_StopsFurtherChecks()
     {
+        // Arrange
         var result = Result.Try()
             .Check(true, new Error("E", "1"))
             .DropIfFail()
             .Check(true, new Error("E2", "2"))
             .Build();
 
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e.Message == "E");
     }
@@ -171,6 +200,7 @@ public class ResultBuilderTest
     [Fact]
     public void DropIfFail_StopsFuncCalls()
     {
+        // Arrange
         bool triggered = false;
         var result = Result.Try()
             .Check(true, new Error("E", "1"))
@@ -182,6 +212,7 @@ public class ResultBuilderTest
             }, new Error("E2", "2"))
             .Build();
 
+        // Assert
         result.IsFailure.Should().BeTrue();
         triggered.Should().BeFalse();
     }
@@ -189,22 +220,26 @@ public class ResultBuilderTest
     [Fact]
     public async Task AsyncChain_SuccessScenario_BuildsSuccessfully()
     {
+        // Arrange
         var result = await Result.Try()
             .CheckAsync(async () => await Task.FromResult(false), "Error", "Desc")
             .Check(false, "Another error", "Desc")
             .BuildAsync();
 
+        // Assert
         result.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
     public async Task AsyncChain_FailureScenario_BuildsFailure()
     {
+        // Arrange
         var result = await Result.Try()
             .CheckAsync(async () => await Task.FromResult(false), "Error1", "Desc1")
             .CheckAsync(async () => await Task.FromResult(true), "Error2", "Desc2")
             .BuildAsync();
 
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e.Message == "Error2");
     }
@@ -212,6 +247,7 @@ public class ResultBuilderTest
     [Fact]
     public async Task CheckIfAsync_CondittionTrue_SkipsFuncCalls()
     {
+        // Arrange
         var triggered = false;
         
         var result = await Result.Try()
@@ -223,6 +259,7 @@ public class ResultBuilderTest
                 }, new Error("X", "Y"))
             .BuildAsync();
         
+        // Assert
         result.IsSuccess.Should().BeTrue();
         triggered.Should().BeFalse();
     }
@@ -230,7 +267,9 @@ public class ResultBuilderTest
     [Fact]
     public async Task AsyncChain_DropIfFail_StopsFurtherAsyncChecks()
     {
+        // Arrange
         var triggered = false;
+        
         var result = await Result.Try()
             .CheckAsync(async () => await Task.FromResult(true), "Error1", "Desc1")
             .DropIfFail() 
@@ -241,6 +280,8 @@ public class ResultBuilderTest
             }, "Error2", "Desc2")
             .BuildAsync();
 
+        
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e.Message == "Error1");
         triggered.Should().BeFalse();
@@ -249,16 +290,20 @@ public class ResultBuilderTest
     [Fact]
     public void LargeChain_Performance_CompletesInReasonableTime()
     {
+        // Arrange
         var stopwatch = Stopwatch.StartNew();
     
         var builder = Result.Try();
+        
+        // Act
         for (int i = 0; i < NumberOfPreformanceChecks; i++)
         {
             builder = builder.Check(false, new Error($"E{i}", $"D{i}"));
         }
         var result = builder.Build();
-    
         stopwatch.Stop();
+        
+        // Assert
         stopwatch.ElapsedMilliseconds.Should().BeLessThan(MaxReasonablePreformanceTimeMs);
         result.IsSuccess.Should().BeTrue();
     }
@@ -266,9 +311,11 @@ public class ResultBuilderTest
     [Fact]
     public async Task LargeAsyncChain_Performance_CompletesInReasonableTime()
     {
+        // Arrange
         var stopwatch = Stopwatch.StartNew();
         var builder = Result.Try().CheckAsync(async () => await Task.FromResult(false), new Error("E", "D"));
         
+        // Act
         for (int i = 0; i < NumberOfPreformanceChecks; i++)
         {
             builder = builder.CheckAsync(async () => await Task.FromResult(false), new Error($"E{i}", $"D{i}"));
@@ -276,6 +323,7 @@ public class ResultBuilderTest
         var result = await builder.BuildAsync();
         stopwatch.Stop();
         
+        // Assert
         stopwatch.ElapsedMilliseconds.Should().BeLessThan(MaxReasonablePreformanceTimeMs);
         result.IsSuccess.Should().BeTrue();
     }
@@ -286,10 +334,12 @@ public class ResultBuilderTest
     [InlineData("d", "description")]
     public void CheckWithStringParams_ErrorCondition_FailsResult(string msg, string desc)
     {
+        // Arrange
         var result = Result.Try()
             .Check(true, msg, desc)
             .Build();
         
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.First().Message.Should().Be(msg);
         result.Errors.First().Description.Should().Be(desc);
@@ -301,10 +351,12 @@ public class ResultBuilderTest
     [InlineData("d", "description")]
     public async Task CheckAsyncWithStringParams_ErrorCondition_FailsResult(string msg, string desc)
     {
+        // Arrange
         var result = await Result.Try()
             .CheckAsync(async () => await Task.FromResult(true), msg, desc)
             .BuildAsync();
         
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.First().Message.Should().Be(msg);
         result.Errors.First().Description.Should().Be(desc);

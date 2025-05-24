@@ -42,10 +42,13 @@ public class CustomValidatorsTest
     [Fact]
     public void When_NumberIsPositive_ShouldNotHaveError()
     {
+        // Arrange
         var dto = new TestDto { Number = 5 };
 
+        // Act
         var result = _validator.TestValidate(dto);
 
+        // Assert
         result.IsValid.Should().BeTrue();
         result.ShouldNotHaveValidationErrorFor(x => x.Number);
     }
@@ -55,10 +58,13 @@ public class CustomValidatorsTest
     [InlineData(-1)]
     public void When_NumberIsNonPositive_ShouldHaveError(int invalid)
     {
+        // Arrange
         var dto = new TestDto { Number = invalid };
 
+        // Act
         var result = _validator.TestValidate(dto);
 
+        // Assert
         result.IsValid.Should().BeFalse();
         result.ShouldHaveValidationErrorFor(x => x.Number)
             .WithErrorMessage($"{TestVo.NonPositiveErrorMessage}: {TestVo.NonPositiveErrorDescription}");
@@ -67,6 +73,7 @@ public class CustomValidatorsTest
     [Fact]
     public void CanContainValidationAfterCustomValidator_ShouldHaveError()
     {
+        // Arrange
         var customValidator = new InlineValidator<TestDto>();
         var dto = new TestDto { Number = 9 };
         
@@ -74,8 +81,10 @@ public class CustomValidatorsTest
             .MustBeCreatedWith<TestDto, int, TestVo>(v => TestVo.Create(v))
             .GreaterThanOrEqualTo(10).WithMessage("Number must be greater than 10");
 
+        // Act
         var result = customValidator.TestValidate(dto);
 
+        // Assert
         result.ShouldHaveValidationErrorFor(x => x.Number)
             .WithErrorMessage("Number must be greater than 10");
     }
