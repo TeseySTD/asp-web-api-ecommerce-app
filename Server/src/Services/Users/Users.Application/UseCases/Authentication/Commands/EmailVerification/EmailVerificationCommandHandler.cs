@@ -21,13 +21,14 @@ public class EmailVerificationCommandHandler(IApplicationDbContext _context) : I
                 new Error("Email verification token not found", $"Email verification token {tokenId.Value} not found"))
             .DropIfFail()
             .CheckAsync(async () =>
-                {
-                    token = await _context.EmailVerificationTokens.FirstOrDefaultAsync(t => t.Id == tokenId,
-                        cancellationToken)!;
-                    return token!.ExpiresOnUtc < DateTime.UtcNow;
-                },
-                new Error("Email verification token has expired",
-                    $"Email verification token expiration was in {token.ExpiresOnUtc}"))
+            {
+                token = await _context.EmailVerificationTokens.FirstOrDefaultAsync(t => t.Id == tokenId, cancellationToken);
+                return Result.Try()
+                    .Check(token!.ExpiresOnUtc < DateTime.UtcNow,
+                        new Error("Email verification token has expired",
+                            $"Email verification token expiration was in {token.ExpiresOnUtc}"))
+                    .Build();
+            })
             .CheckAsync(async () =>
                 {
                     user = await _context.Users.FirstOrDefaultAsync(u => u.Id == token.UserId);

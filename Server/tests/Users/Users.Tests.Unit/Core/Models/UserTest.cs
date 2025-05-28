@@ -4,7 +4,7 @@ using Users.Core.Models;
 using Users.Core.Models.Events;
 using Users.Core.Models.ValueObjects;
 
-namespace Users.Tests.Unit.Models;
+namespace Users.Tests.Unit.Core.Models;
 
 public class UserTest
 {

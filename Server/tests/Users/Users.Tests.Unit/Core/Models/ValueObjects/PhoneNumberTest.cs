@@ -2,7 +2,7 @@
 using JetBrains.Annotations;
 using Users.Core.Models.ValueObjects;
 
-namespace Users.Tests.Unit.Models.ValueObjects;
+namespace Users.Tests.Unit.Application.Models.ValueObjects;
 
 [TestSubject(typeof(PhoneNumber))]
 public class PhoneNumberTest
