@@ -4,23 +4,23 @@ using Users.Persistence;
 
 namespace Users.Tests.Integration.Common;
 
-[Collection(nameof(IntegrationTestsCollection))]
-public class IntegrationTest
+public class IntegrationTest : BaseIntegrationTest, IAsyncLifetime
 {
+    private DatabaseFixture _databaseFixture;
     protected readonly IApplicationDbContext ApplicationDbContext; 
     protected IntegrationTest(DatabaseFixture databaseFixture)
     {
-        var options = new DbContextOptionsBuilder<TestDbContext>()
-            .UseNpgsql(databaseFixture.ConnectionString, b => 
-                b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+        _databaseFixture = databaseFixture;
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseNpgsql(databaseFixture.ConnectionString)
             .Options;
 
-        var dbContext = new TestDbContext(options);
+        var dbContext = new ApplicationDbContext(options);
 
-        dbContext.Database.EnsureDeleted();
-        dbContext.Database.EnsureCreated();
-        dbContext.Database.Migrate();
-        
         ApplicationDbContext = dbContext;
     }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public Task DisposeAsync() => _databaseFixture.ResetAsync();
 }

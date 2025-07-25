@@ -18,7 +18,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     private readonly IPasswordHelper _passwordHelperMock;
     
     private const string DefaultEmail = "test@test.com";
-    private const string DefaultPhoneNumber = "+3809912345678";
+    private const string DefaultPhoneNumber = "+380991234567";
 
     private User CreateDefaultUser(Guid userId, string email = DefaultEmail, string phoneNumber = DefaultPhoneNumber) => User.Create(
         id: UserId.Create(userId).Value,
@@ -32,7 +32,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     private UserUpdateDto CreateDefaultUserUpdateDto() => new(
         Name: "test2",
         Email: "test2@test.com",
-        PhoneNumber: "+3809912345778",
+        PhoneNumber: "+380991234577",
         Password: "123456",
         Role: UserRole.Admin.ToString()
     );
@@ -96,7 +96,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
         // Arrange
         var userToUpdateId = Guid.NewGuid();
         var user = CreateDefaultUser(Guid.NewGuid());
-        var userToUpdate = CreateDefaultUser(userToUpdateId, phoneNumber: "+3809912345778");
+        var userToUpdate = CreateDefaultUser(userToUpdateId, phoneNumber: "+380991234577");
         var dto = CreateDefaultUserUpdateDto() with {PhoneNumber = DefaultPhoneNumber};
         
         var cmd = new UpdateUserCommand(userToUpdateId, dto);

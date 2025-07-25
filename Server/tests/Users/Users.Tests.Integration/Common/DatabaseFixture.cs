@@ -1,4 +1,8 @@
-﻿using Testcontainers.PostgreSql;
+﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using Respawn;
+using Testcontainers.PostgreSql;
+using Users.Persistence;
 
 namespace Users.Tests.Integration.Common;
 
@@ -9,17 +13,40 @@ public class DatabaseFixture : IAsyncLifetime
         .WithDatabase("users-api")
         .WithUsername("postgres")
         .WithPassword("postgres")
+        .WithName("users.test.database")
         .Build();
+
+    private Respawner _respawner = null!;
+    private NpgsqlConnection _connection = null!;
 
     public string ConnectionString => _dbContainer.GetConnectionString();
     
-    public Task InitializeAsync()
+    public async Task InitializeAsync()
     {
-        return _dbContainer.StartAsync();
+        await _dbContainer.StartAsync();
+        
+        _connection = new NpgsqlConnection(ConnectionString);
+        await _connection.OpenAsync();
+        
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseNpgsql(_dbContainer.GetConnectionString())
+            .Options;
+        
+        using var migrationContext = new ApplicationDbContext(options);
+        migrationContext.Database.Migrate();
+        
+        _respawner = await Respawner.CreateAsync(_connection , new()
+        {
+            DbAdapter = DbAdapter.Postgres,
+            SchemasToInclude = ["public"]
+        });
     }
+    
+    public async Task ResetAsync() => await _respawner.ResetAsync(_connection);
 
-    public Task DisposeAsync()
+    public async Task DisposeAsync()
     {
-        return _dbContainer.StopAsync();
+        await _connection.DisposeAsync();
+        await _dbContainer.StopAsync();
     }
 }
