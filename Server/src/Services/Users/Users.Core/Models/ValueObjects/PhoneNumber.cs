@@ -16,10 +16,15 @@ public record PhoneNumber
     {
         return Result<PhoneNumber>.Try(new PhoneNumber(phoneNumber))
             .Check(string.IsNullOrEmpty(phoneNumber) || string.IsNullOrWhiteSpace(phoneNumber),
-                new Error("Phone number is required", "Phone number must be not null or empty."))
+                new PhoneNumberRequiredError())
             .DropIfFail()
             .Check(!Regex.IsMatch(phoneNumber, RegexPhoneNumber),
-                new Error("Phone number is incorrect.", "Phone number is not a valid phone number."))
+                new PhoneNumberFormatError(phoneNumber))
             .Build();
     }
+
+    public sealed record PhoneNumberRequiredError()
+        : Error("Phone number is required", "Phone number must be not null or empty.");
+    public sealed record PhoneNumberFormatError(string Number) : Error("Phone number is not valid.", $"Phone number '{Number}' is not valid.");
+    
 }

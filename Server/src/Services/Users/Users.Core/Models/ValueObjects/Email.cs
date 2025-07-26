@@ -16,10 +16,14 @@ public record Email
     {
         return Result<Email>.Try(new Email(email))
             .Check(string.IsNullOrEmpty(email) || string.IsNullOrWhiteSpace(email),
-                new Error("Email is required", "Email cannot be null or empty"))
+                new EmailRequiredError())
             .DropIfFail()
             .Check(!Regex.IsMatch(email, RegexEmail),
-                new Error("Email is not a valid email", "Email is not a valid email"))
+                new EmailFormatError(email))
             .Build();
     }
+    
+    public sealed record EmailRequiredError() : Error("Email is required", "Email cannot be null or empty");
+    public sealed record EmailFormatError(string Email) : Error("Invalid email format", $"Email '{Email}' is not in valid format");
+
 }

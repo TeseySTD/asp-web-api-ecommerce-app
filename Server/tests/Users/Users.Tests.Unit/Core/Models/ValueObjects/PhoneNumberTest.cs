@@ -37,8 +37,7 @@ public class PhoneNumberTest
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Phone number is required" && e.Description == "Phone number must be not null or empty.");
+        result.Errors.Should().ContainSingle(e => e == new PhoneNumber.PhoneNumberRequiredError());
     }
 
     // Test for failure with various invalid phone number formats
@@ -58,7 +57,6 @@ public class PhoneNumberTest
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Phone number is incorrect." && e.Description == "Phone number is not a valid phone number.");
+        result.Errors.Should().ContainSingle(e => e == new PhoneNumber.PhoneNumberFormatError(phoneNumberString));
     }
 }

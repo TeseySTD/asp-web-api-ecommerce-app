@@ -39,8 +39,7 @@ public class EmailTest
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Email is required" && e.Description == "Email cannot be null or empty");
+        result.Errors.Should().ContainSingle(e => e == new Email.EmailRequiredError());
     }
 
     [Theory]
@@ -65,8 +64,6 @@ public class EmailTest
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Email is not a valid email" && e.Description == "Email is not a valid email");
+        result.Errors.Should().ContainSingle(e => e == new Email.EmailFormatError(emailString));
     }
-    
 }

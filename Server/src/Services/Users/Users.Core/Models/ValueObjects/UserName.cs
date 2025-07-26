@@ -16,10 +16,13 @@ public record UserName
     {
         return Result<UserName>.Try(new UserName(name))
             .Check(string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name),
-                new Error("Name is required", "Name cannot be null or empty."))
+                new UserNameRequiredError())
             .DropIfFail()
             .Check(name.Length < MinNameLength || name.Length > MaxNameLength,
-                new Error("Name is out of range.", $"Name must be between {MinNameLength} and {MaxNameLength}"))
+                new UserNameOutOfRangeError())
             .Build();
     }
+    
+    public sealed record UserNameRequiredError() : Error("Name is required.", "Name cannot be null or empty.");
+    public sealed record UserNameOutOfRangeError() : Error("Name is out of range.", $"Name must be between {MinNameLength} and {MaxNameLength}");
 }

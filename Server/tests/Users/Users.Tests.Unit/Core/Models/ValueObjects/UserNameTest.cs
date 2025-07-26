@@ -31,6 +31,7 @@ public class UserNameTest
         
         // Assert
         userNameCreateResult.IsFailure.Should().BeTrue();
+        userNameCreateResult.Errors.Should().Contain(new UserName.UserNameRequiredError());
     }
 
     [Fact]
@@ -44,7 +45,7 @@ public class UserNameTest
         
         // Assert
         userNameCreateResult.IsFailure.Should().BeTrue();
-        userNameCreateResult.Errors.Should().Contain(e => e.Message == "Name is out of range.");
+        userNameCreateResult.Errors.Should().Contain(new UserName.UserNameOutOfRangeError());
     }
     
     [Fact]
@@ -58,6 +59,6 @@ public class UserNameTest
         
         // Assert
         userNameCreateResult.IsFailure.Should().BeTrue();
-        userNameCreateResult.Errors.Should().Contain(e => e.Message == "Name is out of range." || e.Message == "Name is required");
+        userNameCreateResult.Errors.Should().Contain(e => e == new UserName.UserNameOutOfRangeError() || e == new UserName.UserNameRequiredError());
     }
 }

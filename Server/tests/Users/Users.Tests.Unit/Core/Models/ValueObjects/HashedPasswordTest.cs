@@ -30,6 +30,6 @@ public class HashedPasswordTest
         
         // Assert
         createHashedPasswordResult.IsFailure.Should().BeTrue();
-        createHashedPasswordResult.Errors.Should().ContainSingle(e => e.Description == "Hashed password cannot be empty");
+        createHashedPasswordResult.Errors.Should().ContainSingle(e => e == new HashedPassword.HashedPasswordEmptyError());
     }
 }
