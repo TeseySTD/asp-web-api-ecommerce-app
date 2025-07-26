@@ -14,9 +14,11 @@ public record CustomerId
 
     public static Result<CustomerId> Create(Guid value)
     {
-        if(value == Guid.Empty)
-            return new Error("User id cannot be empty", nameof(value));
+        if (value == Guid.Empty)
+            return new CustomerIdRequiredError(); 
         
         return new CustomerId(value);
     }
+    
+    public sealed record CustomerIdRequiredError() : Error("Customer id can not be empty", "Customer id must be provided");
 }

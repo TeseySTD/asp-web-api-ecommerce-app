@@ -16,7 +16,7 @@ public record OrderItemPrice
     public static Result<OrderItemPrice> Create(decimal price){
         var result = Result<OrderItemPrice>.Try()
             .Check(price < MinPrice || price > MaxPrice,
-                new Error("Price is out of range", $"Price must be between {MinPrice} and {MaxPrice}"))
+                new OrderItemPriceOutOfRangeError())
             .Build();
         
         if(result.IsFailure)
@@ -24,4 +24,5 @@ public record OrderItemPrice
         return new OrderItemPrice(price);
     }
 
+    public sealed record OrderItemPriceOutOfRangeError(): Error("Price is out of range", $"Price must be between {MinPrice} and {MaxPrice}");
 }

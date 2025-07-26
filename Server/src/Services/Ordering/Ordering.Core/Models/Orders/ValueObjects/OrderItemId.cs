@@ -15,8 +15,10 @@ public record OrderItemId
     public static Result<OrderItemId> Create(Guid orderItemId)
     {
         if (orderItemId == Guid.Empty)
-            return new Error("OrderItemId is required","OrderItemId cannot be empty");
+            return new OrderItemIdRequiredError();
         return new OrderItemId(orderItemId);
     }
+    
+    public sealed record OrderItemIdRequiredError() : Error("OrderItemId is required", "OrderItemId cannot be empty");
 }
 

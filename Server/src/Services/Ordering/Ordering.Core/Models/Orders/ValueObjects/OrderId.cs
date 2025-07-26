@@ -15,7 +15,9 @@ public record OrderId
     public static Result<OrderId> Create(Guid orderId)
     {
         if (orderId == Guid.Empty)
-            return new Error("Invalid order Id", "Order Id cannot be empty");
+            return new OrderIdRequiredError();
         return new OrderId(orderId);
     }
+    
+    public sealed record OrderIdRequiredError() : Error("Invalid Order Id.", "Order Id cannot be empty.");
 }

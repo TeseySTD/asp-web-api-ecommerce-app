@@ -15,8 +15,9 @@ public record OrderItemQuantity
     public static Result<OrderItemQuantity> Create(uint quantity)
     {
         if (quantity < 1)
-            return new Error("Quantity must be greater than zero", nameof(quantity));
+            return new QuantityLessThenZeroError(); 
         return new OrderItemQuantity(quantity);
     }
     
+    public sealed record QuantityLessThenZeroError() : Error(nameof(OrderItemQuantity), $"Quantity must be greater than zero");
 }

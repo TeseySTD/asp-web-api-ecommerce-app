@@ -15,12 +15,15 @@ public record ProductId
     {
         var result = Result<ProductId>.Try()
                 .Check(productId == Guid.Empty,
-                    new Error("Product Id cannot be empty", "ProductId value object failure"))
+                    new ProductIdRequiredError()) 
                 .Build();
         
         if(result.IsFailure)
             return result;
         return new ProductId(productId);
     }
+
+    public sealed record ProductIdRequiredError()
+        : Error("Product Id cannot be empty", "ProductId value object failure");
 }
 
