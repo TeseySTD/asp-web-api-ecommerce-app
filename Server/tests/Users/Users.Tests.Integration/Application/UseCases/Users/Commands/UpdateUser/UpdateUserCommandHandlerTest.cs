@@ -61,8 +61,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "User not exists." && e.Description == $"User with id: {userToUpdateId} not exists.");
+        result.Errors.Should().ContainSingle(e => e == UpdateUserCommandHandler.UpdateUserCommandErrors.UserNotFound(userToUpdateId));
     }
 
     [Fact]

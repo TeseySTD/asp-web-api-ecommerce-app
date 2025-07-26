@@ -61,7 +61,13 @@ public class UsersModule : CarterModule
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                onFailure: errors =>
+                {
+                    var enumerable = errors.ToList();
+                    if (enumerable.Any(e => e is UpdateUserCommandHandler.UserNotFoundError))
+                        return Results.NotFound(Envelope.Of(enumerable));
+                    return Results.BadRequest(Envelope.Of(enumerable));
+                } 
             );
         });
 

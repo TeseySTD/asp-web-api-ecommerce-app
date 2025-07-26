@@ -59,6 +59,8 @@ public class ApiTest : BaseIntegrationTest, IClassFixture<IntegrationTestWebAppl
         return result.Replace("\n", "").Replace("\r", "").Trim();
     }
 
+    public string MakeSystemErrorApiOutput(Error error) => MakeSystemErrorApiOutput(error.Message, error.Description);
+    
     public string MakePropertyErrorApiOutput(string propertyName, IEnumerable<Error> errors)
     {
         var stringErrors = errors

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Users.Tests.Integration.Common;
 
@@ -57,6 +58,23 @@ public class IntegrationTestWebApplicationFactory : WebApplicationFactory<Progra
         Environment.SetEnvironmentVariable("JWT_PRIVATE_KEY_PATH",
             "D:/projects/ASP/WebApiEcommerceProject/Server/secrets/jwt_private_key.pem");
         
-        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+    }
+        
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        builder.UseEnvironment("Testing");
+        return base.CreateHost(builder);
+    }
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            base.Dispose(disposing);
+        }
+        catch (AggregateException ex) when (ex.InnerExceptions.All(e =>
+                   e is ObjectDisposedException od && od.ObjectName == "EventLogInternal"))
+        {
+            // Ignore logging error 
+        }
     }
 }

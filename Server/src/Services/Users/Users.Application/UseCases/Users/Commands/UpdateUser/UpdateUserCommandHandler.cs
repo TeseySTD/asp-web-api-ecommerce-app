@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.InteropServices.JavaScript;
+using Microsoft.EntityFrameworkCore;
 using Shared.Core.Auth;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
@@ -25,23 +26,25 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
     {
         var result = await Result.Try()
             .CheckAsync(
-                async () => !await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value, cancellationToken),
-                new Error("User not exists.", $"User with id: {request.Id} not exists."))
+                async () => !await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value,
+                    cancellationToken), UpdateUserCommandErrors.UserNotFound(request.Id))
             .DropIfFail()
             .CheckAsync(
                 async () => await _context.Users.AnyAsync(
-                    u => u.Email == Email.Create(request.Value.Email).Value && u.Id != UserId.Create(request.Id).Value, cancellationToken),
-                new Error("Incorrect email.", $"User with email: {request.Value.Email} already exists."))
+                    u => u.Email == Email.Create(request.Value.Email).Value && u.Id != UserId.Create(request.Id).Value,
+                    cancellationToken), UpdateUserCommandErrors.IncorrectEmail(request.Value.Email)
+            )
             .CheckAsync(
                 async () => await _context.Users.AnyAsync(
                     u => u.PhoneNumber == PhoneNumber.Create(request.Value.PhoneNumber).Value &&
                          u.Id != UserId.Create(request.Id).Value, cancellationToken),
-                new Error("Incorrect phone number.", $"User with number: {request.Value.PhoneNumber} already exists."))
+                UpdateUserCommandErrors.IncorrectPhone(request.Value.PhoneNumber)
+            )
             .BuildAsync();
 
         if (result.IsFailure)
             return result;
-        
+
         var hashedPassword = _passwordHelper.HashPassword(request.Value.Password);
 
         var userToUpdate = await _context.Users.FindAsync([UserId.Create(request.Id).Value], cancellationToken);
@@ -53,7 +56,25 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
             role: Enum.Parse<UserRole>(request.Value.Role)
         );
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         return result;
     }
+
+    public static class UpdateUserCommandErrors
+    {
+        public static Error UserNotFound(Guid id) =>
+            new UserNotFoundError("User does not exist.", $"User with id: {id} not exists.");
+
+        public static Error IncorrectEmail(string email) =>
+            new IncorrectEmailError("Incorrect email.", $"User with email: {email} already exists.");
+
+        public static Error IncorrectPhone(string number) =>
+            new IncorrectPhoneNumberError("Incorrect phone number.", $"User with number: {number} already exists.");
+    }
+
+    public sealed record UserNotFoundError(string Message, string Description) : Error(Message, Description);
+
+    public sealed record IncorrectEmailError(string Message, string Description) : Error(Message, Description);
+
+    public sealed record IncorrectPhoneNumberError(string Message, string Description) : Error(Message, Description);
 }

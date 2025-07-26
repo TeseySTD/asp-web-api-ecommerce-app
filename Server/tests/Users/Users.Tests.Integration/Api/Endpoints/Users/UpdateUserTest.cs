@@ -3,6 +3,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Shared.Core.Auth;
 using Users.API.Http.User.Requests;
+using Users.Application.UseCases.Users.Commands.UpdateUser;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
@@ -62,7 +63,7 @@ public class UpdateUserTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userId}");
         request.Content = GenerateRequestBody();
 
-        var expectedContent = MakeSystemErrorApiOutput("User not exists.", $"User with id: {userId} not exists.");
+        var expectedContent = MakeSystemErrorApiOutput(UpdateUserCommandHandler.UpdateUserCommandErrors.UserNotFound(userId));
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -89,8 +90,7 @@ public class UpdateUserTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userToUpdate.Id.Value}");
         request.Content = GenerateRequestBody(userToUpdate, email: newEmail);
 
-        var expectedContent = MakeSystemErrorApiOutput("Incorrect email.",
-            $"User with email: {DefaultEmail} already exists.");
+        var expectedContent = MakeSystemErrorApiOutput(UpdateUserCommandHandler.UpdateUserCommandErrors.IncorrectEmail(newEmail));
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -117,8 +117,7 @@ public class UpdateUserTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userToUpdate.Id.Value}");
         request.Content = GenerateRequestBody(userToUpdate, phoneNumber: newPhoneNumber);
 
-        var expectedContent = MakeSystemErrorApiOutput("Incorrect phone number.",
-            $"User with number: {DefaultPhoneNumber} already exists.");
+        var expectedContent = MakeSystemErrorApiOutput(UpdateUserCommandHandler.UpdateUserCommandErrors.IncorrectPhone(newPhoneNumber));
 
         // Act
         var response = await HttpClient.SendAsync(request);
