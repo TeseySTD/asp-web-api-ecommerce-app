@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Shared.Core.Auth;
+using Users.Application.UseCases.Users.Commands.DeleteUser;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
@@ -23,7 +24,7 @@ public class DeleteUserTest : ApiTest
 
         var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{userId}");
 
-        var expectedContent = MakeSystemErrorApiOutput("User not exists.", $"User with id: {userId} not exists.");
+        var expectedContent = MakeSystemErrorApiOutput(new DeleteUserCommandHandler.UserNotFoundError(userId));
 
         // Act
         var response = await HttpClient.SendAsync(request);

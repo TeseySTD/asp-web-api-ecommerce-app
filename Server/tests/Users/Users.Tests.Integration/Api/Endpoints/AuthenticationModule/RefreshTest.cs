@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using FluentAssertions;
 using Shared.Core.Auth;
+using Users.Application.UseCases.Authentication.Commands.RefreshToken;
 using Users.Core.Models;
 using Users.Core.Models.Entities;
 using Users.Core.Models.ValueObjects;
@@ -35,7 +36,8 @@ public class RefreshTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Post, $"{RequestUrl}?refreshToken={refreshToken}");
 
         var expectedJson =
-            MakeSystemErrorApiOutput("Refresh token not found", $"Refresh token {refreshToken} not found");
+            MakeSystemErrorApiOutput(
+                new RefreshTokenCommandHandler.TokenNotFoundError(refreshToken));
 
         // Act 
         var response = await HttpClient.SendAsync(request);
@@ -64,8 +66,9 @@ public class RefreshTest : ApiTest
 
         var request = new HttpRequestMessage(HttpMethod.Post, $"{RequestUrl}?refreshToken={refreshToken.Token}");
 
-        var expectedJson = MakeSystemErrorApiOutput("Refresh token has expired",
-            $"Refresh token expiration was in {refreshToken.ExpiresOnUtc}");
+        var expectedJson =
+            MakeSystemErrorApiOutput(
+                new RefreshTokenCommandHandler.TokenExpiredError(refreshToken.ExpiresOnUtc));
         // Act
         var response = await HttpClient.SendAsync(request);
         var actualJson = await response.Content.ReadAsStringAsync();
@@ -79,7 +82,7 @@ public class RefreshTest : ApiTest
     public async Task WhenRefreshTokenIsValid_ThenReturnsOk()
     {
         // Arrange
-        var testUser = CreateTestUser(); 
+        var testUser = CreateTestUser();
 
         var refreshToken = RefreshToken.Create(
             "token",

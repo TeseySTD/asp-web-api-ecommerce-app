@@ -20,7 +20,7 @@ public class DeleteUserCommandHandler : ICommandHandler<DeleteUserCommand>
     {
         var result = Result.Try()
             .Check(!await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value, cancellationToken),
-                new Error("User not exists.", $"User with id: {request.Id} not exists."))
+                new UserNotFoundError(request.Id))
             .Build();
         if (result.IsFailure)
             return result;
@@ -29,4 +29,8 @@ public class DeleteUserCommandHandler : ICommandHandler<DeleteUserCommand>
 
         return Result.Success();
     }
+
+    public sealed record UserNotFoundError(Guid UserId) : Error("User does not exist.", $"User with id: {UserId} does not exist.");
+
+
 }

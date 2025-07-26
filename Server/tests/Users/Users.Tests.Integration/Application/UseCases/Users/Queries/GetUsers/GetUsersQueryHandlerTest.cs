@@ -55,8 +55,7 @@ public class GetUsersQueryHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Users not found" && e.Description == "There is no users in the database.");
+        result.Errors.Should().ContainSingle(e => e == new GetUsersQueryHandler.UserNotFoundError());
     }
 
     [Fact]
@@ -75,8 +74,7 @@ public class GetUsersQueryHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Users not found" && e.Description == "There is no users in the database.");
+        result.Errors.Should().ContainSingle(e => e == new GetUsersQueryHandler.UserNotFoundError());
     }
 
     [Fact]

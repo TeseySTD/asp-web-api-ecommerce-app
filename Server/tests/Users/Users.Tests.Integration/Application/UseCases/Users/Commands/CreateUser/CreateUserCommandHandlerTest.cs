@@ -57,8 +57,7 @@ public class CreateUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e => e.Message == "User already exists." && e.Description ==
-            $"User with email: {cmd.Value.Email} already exists.");
+        result.Errors.Should().ContainSingle(e => e == new CreateUserCommandHandler.EmailIsTakenError(user.Email.Value));
         
         users.Should().HaveCount(1);
     }
@@ -82,8 +81,7 @@ public class CreateUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e => e.Message == "User already exists." && e.Description ==
-            $"User with number: {cmd.Value.PhoneNumber} already exists.");
+        result.Errors.Should().ContainSingle(e => e == new CreateUserCommandHandler.PhoneIsTakenError(user.PhoneNumber.Value));
         
         users.Should().HaveCount(1);
     }

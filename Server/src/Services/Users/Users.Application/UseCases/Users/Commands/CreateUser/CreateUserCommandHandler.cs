@@ -27,12 +27,12 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, User>
             .CheckAsync(
                 async () => await _context.Users.AnyAsync(u => u.Email == Email.Create(request.Value.Email).Value,
                     cancellationToken),
-                new Error("User already exists.", $"User with email: {request.Value.Email} already exists."))
+                new EmailIsTakenError(request.Value.Email))
             .CheckAsync(
                 async () => await _context.Users.AnyAsync(
                     u => u.PhoneNumber == PhoneNumber.Create(request.Value.PhoneNumber).Value,
                     cancellationToken),
-                new Error("User already exists.", $"User with number: {request.Value.PhoneNumber} already exists."))
+                new PhoneIsTakenError(request.Value.PhoneNumber))
             .BuildAsync();
 
         if (result.IsFailure)
@@ -53,4 +53,11 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, User>
 
         return user;
     }
+
+    public sealed record EmailIsTakenError(string Email)
+        : Error("User already exists.", $"User with email: {Email} already exists.");
+
+    public sealed record PhoneIsTakenError(string Number) : Error("User already exists.",
+        $"User with number: {Number} already exists.");
+
 }

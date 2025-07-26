@@ -29,8 +29,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, TokensD
         User user = default!;
 
         var result = await Result<TokensDto>.Try()
-            .Check(!await _context.Users.AnyAsync(u => u.Email == email),
-                new Error("Incorrect email", $"User with email {request.Email} does not exist"))
+            .Check(!await _context.Users.AnyAsync(u => u.Email == email),new EmailNotFoundError(email.Value))
             .DropIfFail()
             .CheckAsync(async () =>
                 {
@@ -38,21 +37,26 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, TokensD
                         .AsNoTracking()
                         .FirstOrDefaultAsync(u => u.Email == email, cancellationToken) ?? default!;
 
-                    return !_passwordHelper.VerifyPassword(user!.HashedPassword.Value, request.Password);
+                    return !_passwordHelper.VerifyPassword(user.HashedPassword.Value, request.Password);
                 },
-                new Error("Incorrect password",
-                    $"User with email {request.Email} and password '{request.Password}' does not exist"))
+                new IncorrectPasswordError(email.Value, request.Password))
             .BuildAsync();
 
         if (result.IsFailure)
             return result;
 
-        var refreshToken = _tokenProvider.GenerateRefreshToken(user!);
-        var jwtToken = _tokenProvider.GenerateJwtToken(user!);
+        var refreshToken = _tokenProvider.GenerateRefreshToken(user);
+        var jwtToken = _tokenProvider.GenerateJwtToken(user);
 
         await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         return new TokensDto(jwtToken, refreshToken.Token);
     }
+
+    public sealed record EmailNotFoundError(string Email) : Error("Incorrect email.", $"User with email {Email} does not exist.");
+
+    public sealed record IncorrectPasswordError(string Email, string Password) : Error("Incorrect password.",
+            $"User with email {Email} and password '{Password}' does not exist.");
+
 }

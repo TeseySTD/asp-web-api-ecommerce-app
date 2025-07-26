@@ -45,8 +45,7 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
 
         // Arrange
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e => e.Message == "Email verification token not found" &&
-                                                  e.Description == $"Email verification token {tokenId} not found");
+        result.Errors.Should().ContainSingle(e => e == new EmailVerificationCommandHandler.TokenNotFoundError(tokenId));
     }
 
     [Fact]
@@ -68,9 +67,7 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().Contain(e =>
-            e.Message == "Email verification token has expired" &&
-            e.Description == $"Email verification token expiration was in {token.ExpiresOnUtc}");
+        result.Errors.Should().Contain(new EmailVerificationCommandHandler.TokenExpiredError(token.ExpiresOnUtc));
     }
 
     [Fact]

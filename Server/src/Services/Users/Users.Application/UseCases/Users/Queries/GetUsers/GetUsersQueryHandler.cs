@@ -41,8 +41,11 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PaginatedResult
         ).ToListAsync();
 
         if (!userDtos.Any())
-            return new Error("Users not found", "There is no users in the database.");
+            return new UserNotFoundError();
         
         return new PaginatedResult<UserReadDto>(pageIndex, pageSize, userDtos);
     }
+
+    public sealed record UserNotFoundError() : Error("Users not found", "There is no users in the database.");
+
 }

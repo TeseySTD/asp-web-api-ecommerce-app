@@ -30,7 +30,7 @@ public class LogoutUserCommandHandlerTest : IntegrationTest
         // Assert
         Assert.True(result.IsFailure);
         result.Errors.Should().ContainSingle(e =>
-            e.Message == "User does not exists" && e.Description == $"User with id {userId} does not exists.");
+            e == new LogoutUserCommandHandler.UserNotFoundError(userId));
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public class LogoutUserCommandHandlerTest : IntegrationTest
         // Act
         var result = await handler.Handle(cmd, default);
         var isRefreshTokenInDb = await ApplicationDbContext.RefreshTokens.AnyAsync(t => t.Id == refreshToken.Id);
-        
+
         // Assert
         Assert.True(result.IsSuccess);
         Assert.False(isRefreshTokenInDb);

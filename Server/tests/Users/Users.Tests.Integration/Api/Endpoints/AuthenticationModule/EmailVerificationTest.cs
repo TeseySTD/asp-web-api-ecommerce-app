@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Shared.Core.Auth;
+using Users.Application.UseCases.Authentication.Commands.EmailVerification;
 using Users.Core.Models;
 using Users.Core.Models.Entities;
 using Users.Core.Models.ValueObjects;
@@ -33,8 +34,7 @@ public class EmailVerificationTest : ApiTest
 
         var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUrl}?tokenId={tokenId}");
 
-        var expectedContent = MakeSystemErrorApiOutput("Email verification token not found",
-            $"Email verification token {tokenId} not found");
+        var expectedContent = MakeSystemErrorApiOutput(new EmailVerificationCommandHandler.TokenNotFoundError(tokenId));
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -59,8 +59,7 @@ public class EmailVerificationTest : ApiTest
 
         var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUrl}?tokenId={tokenId}");
 
-        var expectedContent = MakeSystemErrorApiOutput("Email verification token has expired",
-            $"Email verification token expiration was in {token.ExpiresOnUtc}");
+        var expectedContent = MakeSystemErrorApiOutput(new EmailVerificationCommandHandler.TokenExpiredError(token.ExpiresOnUtc));
 
         // Act
         var response = await HttpClient.SendAsync(request);

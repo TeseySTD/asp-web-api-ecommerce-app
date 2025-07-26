@@ -5,6 +5,7 @@ using Shared.Core.CQRS;
 using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 using Users.Application.Common.Interfaces;
+using Users.Application.UseCases.Users.Commands.DeleteUser;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 
@@ -27,18 +28,18 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
         var result = await Result.Try()
             .CheckAsync(
                 async () => !await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value,
-                    cancellationToken), UpdateUserCommandErrors.UserNotFound(request.Id))
+                    cancellationToken), new UserNotFoundError(request.Id))
             .DropIfFail()
             .CheckAsync(
                 async () => await _context.Users.AnyAsync(
                     u => u.Email == Email.Create(request.Value.Email).Value && u.Id != UserId.Create(request.Id).Value,
-                    cancellationToken), UpdateUserCommandErrors.IncorrectEmail(request.Value.Email)
+                    cancellationToken), new IncorrectEmailError(request.Value.Email)
             )
             .CheckAsync(
                 async () => await _context.Users.AnyAsync(
                     u => u.PhoneNumber == PhoneNumber.Create(request.Value.PhoneNumber).Value &&
                          u.Id != UserId.Create(request.Id).Value, cancellationToken),
-                UpdateUserCommandErrors.IncorrectPhone(request.Value.PhoneNumber)
+                new IncorrectPhoneNumberError(request.Value.PhoneNumber)
             )
             .BuildAsync();
 
@@ -60,21 +61,11 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
         return result;
     }
 
-    public static class UpdateUserCommandErrors
-    {
-        public static Error UserNotFound(Guid id) =>
-            new UserNotFoundError("User does not exist.", $"User with id: {id} not exists.");
+    public sealed record UserNotFoundError(Guid Id) : Error("User does not exist.", $"User with id: {Id} not exists.");
 
-        public static Error IncorrectEmail(string email) =>
-            new IncorrectEmailError("Incorrect email.", $"User with email: {email} already exists.");
+    public sealed record IncorrectEmailError(string Email)
+        : Error("Incorrect email.", $"User with email: {Email} already exists.");
 
-        public static Error IncorrectPhone(string number) =>
-            new IncorrectPhoneNumberError("Incorrect phone number.", $"User with number: {number} already exists.");
-    }
-
-    public sealed record UserNotFoundError(string Message, string Description) : Error(Message, Description);
-
-    public sealed record IncorrectEmailError(string Message, string Description) : Error(Message, Description);
-
-    public sealed record IncorrectPhoneNumberError(string Message, string Description) : Error(Message, Description);
+    public sealed record IncorrectPhoneNumberError(string Number)
+        : Error("Incorrect phone number.", $"User with number: {Number} already exists.");
 }

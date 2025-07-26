@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using Shared.Core.Auth;
+using Users.Application.UseCases.Authentication.Commands.Logout;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
@@ -49,7 +50,7 @@ public class LogoutTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Delete, RequestUrl);
 
         var expectedContent =
-            MakeSystemErrorApiOutput("User does not exists", $"User with id {user.Id.Value} does not exists.");
+            MakeSystemErrorApiOutput( new LogoutUserCommandHandler.UserNotFoundError(user.Id.Value));
 
         // Act
         var response = await HttpClient.SendAsync(request);

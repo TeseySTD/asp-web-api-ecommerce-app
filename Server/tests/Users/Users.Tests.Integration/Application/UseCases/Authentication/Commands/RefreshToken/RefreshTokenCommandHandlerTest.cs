@@ -43,8 +43,7 @@ public class RefreshTokenCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Refresh token not found" && e.Description == $"Refresh token {refreshTokenString} not found");
+        result.Errors.Should().ContainSingle(e => e == new RefreshTokenCommandHandler.TokenNotFoundError(refreshTokenString));
     }
 
     [Fact]
@@ -70,9 +69,7 @@ public class RefreshTokenCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Refresh token has expired" &&
-            e.Description == $"Refresh token expiration was in {refreshToken.ExpiresOnUtc}");
+        result.Errors.Should().ContainSingle(e => e == new RefreshTokenCommandHandler.TokenExpiredError(refreshToken.ExpiresOnUtc));
     }
 
     [Fact]

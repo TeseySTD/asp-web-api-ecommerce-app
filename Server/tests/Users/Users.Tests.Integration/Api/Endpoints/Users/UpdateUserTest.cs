@@ -63,7 +63,7 @@ public class UpdateUserTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userId}");
         request.Content = GenerateRequestBody();
 
-        var expectedContent = MakeSystemErrorApiOutput(UpdateUserCommandHandler.UpdateUserCommandErrors.UserNotFound(userId));
+        var expectedContent = MakeSystemErrorApiOutput(new UpdateUserCommandHandler.UserNotFoundError(userId));
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -90,7 +90,7 @@ public class UpdateUserTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userToUpdate.Id.Value}");
         request.Content = GenerateRequestBody(userToUpdate, email: newEmail);
 
-        var expectedContent = MakeSystemErrorApiOutput(UpdateUserCommandHandler.UpdateUserCommandErrors.IncorrectEmail(newEmail));
+        var expectedContent = MakeSystemErrorApiOutput(new UpdateUserCommandHandler.IncorrectEmailError(newEmail));
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -117,7 +117,7 @@ public class UpdateUserTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userToUpdate.Id.Value}");
         request.Content = GenerateRequestBody(userToUpdate, phoneNumber: newPhoneNumber);
 
-        var expectedContent = MakeSystemErrorApiOutput(UpdateUserCommandHandler.UpdateUserCommandErrors.IncorrectPhone(newPhoneNumber));
+        var expectedContent = MakeSystemErrorApiOutput(new UpdateUserCommandHandler.IncorrectPhoneNumberError(newPhoneNumber));
 
         // Act
         var response = await HttpClient.SendAsync(request);

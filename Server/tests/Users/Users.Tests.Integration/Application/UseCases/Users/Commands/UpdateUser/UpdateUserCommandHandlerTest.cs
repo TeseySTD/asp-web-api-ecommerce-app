@@ -61,7 +61,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e => e == UpdateUserCommandHandler.UpdateUserCommandErrors.UserNotFound(userToUpdateId));
+        result.Errors.Should().ContainSingle(e => e == new UpdateUserCommandHandler.UserNotFoundError(userToUpdateId));
     }
 
     [Fact]
@@ -85,8 +85,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Incorrect email." && e.Description == $"User with email: {DefaultEmail} already exists.");
+        result.Errors.Should().ContainSingle(e => e == new UpdateUserCommandHandler.IncorrectEmailError(DefaultEmail));
     }
     
     [Fact]
@@ -110,8 +109,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Incorrect phone number." && e.Description == $"User with number: {DefaultPhoneNumber} already exists.");
+        result.Errors.Should().ContainSingle(e => e == new UpdateUserCommandHandler.IncorrectPhoneNumberError(DefaultPhoneNumber));
     }
 
     [Fact]

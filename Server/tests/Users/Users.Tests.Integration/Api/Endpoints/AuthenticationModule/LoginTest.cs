@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Shared.Core.Validation.Result;
 using Users.API.Http.Auth.Requests;
+using Users.Application.UseCases.Authentication.Commands.Login;
 using Users.Tests.Integration.Common;
 
 namespace Users.Tests.Integration.Api.Endpoints.AuthenticationModule;
@@ -30,7 +31,7 @@ public class LoginTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
         request.Content = content;
 
-        var expectedJson = MakeSystemErrorApiOutput("Incorrect email", $"User with email {userEmail} does not exist");
+        var expectedJson = MakeSystemErrorApiOutput(new LoginUserCommandHandler.EmailNotFoundError(userEmail));
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -71,8 +72,7 @@ public class LoginTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
         request.Content = content;
 
-        var expectedJson = MakeSystemErrorApiOutput("Incorrect password",
-            $"User with email {userEmail} and password '{userIncorrectPassword}' does not exist");
+        var expectedJson = MakeSystemErrorApiOutput(new LoginUserCommandHandler.IncorrectPasswordError(userEmail, userIncorrectPassword));
 
         // Act
         var response = await HttpClient.SendAsync(request);

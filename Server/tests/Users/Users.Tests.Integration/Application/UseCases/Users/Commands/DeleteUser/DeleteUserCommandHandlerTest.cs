@@ -44,8 +44,7 @@ public class DeleteUserCommandHandlerTest : IntegrationTest
 
         //Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "User not exists." && e.Description == $"User with id: {userToDeleteId} not exists.");
+        result.Errors.Should().ContainSingle(e => e == new DeleteUserCommandHandler.UserNotFoundError(userToDeleteId));
         users.Should().ContainSingle(u => u == user);
     }
 

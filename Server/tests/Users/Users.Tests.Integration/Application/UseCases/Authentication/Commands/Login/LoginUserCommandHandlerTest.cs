@@ -36,8 +36,7 @@ public class LoginUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Incorrect email" && e.Description == $"User with email {email} does not exist");
+        result.Errors.Should().ContainSingle(e => e == new LoginUserCommandHandler.EmailNotFoundError(email));
     }
 
     [Fact]
@@ -54,12 +53,12 @@ public class LoginUserCommandHandlerTest : IntegrationTest
             phoneNumber: PhoneNumber.Create("+380991444743").Value,
             role: UserRole.Default
         );
-        
+
         _passwordHelperMock.VerifyPassword(userPassword, password).Returns(false);
-        
+
         var cmd = new LoginUserCommand(email, password);
         var handler = new LoginUserCommandHandler(_tokenProviderMock, _passwordHelperMock, ApplicationDbContext);
-        
+
         ApplicationDbContext.Users.Add(user);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -68,9 +67,7 @@ public class LoginUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e =>
-            e.Message == "Incorrect password" &&
-            e.Description == $"User with email {email} and password '{password}' does not exist");
+        result.Errors.Should().ContainSingle(e => e == new LoginUserCommandHandler.IncorrectPasswordError(email, password));
     }
 
     [Fact]
@@ -96,17 +93,17 @@ public class LoginUserCommandHandlerTest : IntegrationTest
         _passwordHelperMock.VerifyPassword(user.HashedPassword.Value, password).Returns(true);
         _tokenProviderMock.GenerateRefreshToken(Arg.Any<User>()).Returns(refreshToken);
         _tokenProviderMock.GenerateJwtToken(Arg.Any<User>()).Returns(jwt);
-        
+
         var cmd = new LoginUserCommand(email, password);
         var handler = new LoginUserCommandHandler(_tokenProviderMock, _passwordHelperMock, ApplicationDbContext);
-        
+
         ApplicationDbContext.Users.Add(user);
         await ApplicationDbContext.SaveChangesAsync(default);
-        
+
         // Act
         var result = await handler.Handle(cmd, default);
         var isRefeshTokenInDb = await ApplicationDbContext.RefreshTokens.FindAsync(refreshToken.Id) is not null;
-        
+
         // Assert
         Assert.True(result.IsSuccess);
         Assert.True(isRefeshTokenInDb);
