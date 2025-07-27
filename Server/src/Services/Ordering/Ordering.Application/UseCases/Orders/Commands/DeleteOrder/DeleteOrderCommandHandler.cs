@@ -20,7 +20,7 @@ public class DeleteOrderCommandHandler : ICommandHandler<DeleteOrderCommand>
     {
         var result = Result.Try()
             .Check(!await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken),
-                new Error(nameof(Order), $"Order with id: {request.OrderId.Value} does not exist"))
+                new OrderNotFoundError(request.OrderId.Value))
             .Build();
 
         if (result.IsFailure)
@@ -30,4 +30,6 @@ public class DeleteOrderCommandHandler : ICommandHandler<DeleteOrderCommand>
 
         return Result.Success();
     }
+    
+    public sealed record OrderNotFoundError(Guid OrderId) : Error("Order not found.", $"Order with id: {OrderId} does not exist");
 }

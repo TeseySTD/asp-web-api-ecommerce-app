@@ -26,11 +26,8 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
         var orderId = OrderId.Create(Guid.NewGuid()).Value;
 
         var result = Result<Guid>.Try()
-            .Check(await _context.Orders.AnyAsync(o => o.Id == orderId, cancellationToken),
-                new Error(nameof(Order), $"Order with id: {orderId.Value} already exists"))
-            .DropIfFail()
             .Check(() => request.Value.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
-                new Error("Order items error", "Each order item must be unique."))
+                new OrderItemIsNotUniqueError())
             .Build();
         if (result.IsFailure)
             return result;
@@ -78,4 +75,6 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
         await _publishEndpoint.Publish(makeOrderEvent);
         await _context.SaveChangesAsync(cancellationToken);
     }
+    
+    public sealed record OrderItemIsNotUniqueError() : Error("Order item is not unique.", $"Each order item must be unique.");
 }

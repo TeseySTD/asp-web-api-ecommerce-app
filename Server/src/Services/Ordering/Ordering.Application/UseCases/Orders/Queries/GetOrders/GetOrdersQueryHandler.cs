@@ -33,7 +33,7 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PaginatedResu
             .ToListAsync(cancellationToken);
 
         if (!orders.Any())
-            return new Error("No orders found", "There are no orders in the database.");
+            return new OrdersNotFoundError(); 
         
         var orderDtos = orders.Select(o =>
         {
@@ -51,7 +51,7 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PaginatedResu
                 OrderDate: o.OrderDate.ToString(),
                 Status: o.Status.ToString(),
                 CardName: o.Payment.CardName,
-                ShortCardNumber: o.Payment.CardNumber,
+                ShortCardNumber: o.Payment.CardNumber.Substring(0, 3),
                 Address: o.DestinationAddress.AddressLine,
                 Products: products,
                 TotalPrice: o.TotalPrice
@@ -60,4 +60,6 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PaginatedResu
 
         return new PaginatedResult<OrderReadDto>(pageIndex, pageSize, orderDtos);
     }
+
+    public sealed record OrdersNotFoundError() : Error("No orders found", "There are no orders in the database.");
 }

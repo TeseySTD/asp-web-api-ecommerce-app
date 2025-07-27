@@ -19,7 +19,7 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, OrderRe
     public async Task<Result<OrderReadDto>> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
     {
         if (!await _context.Orders.AnyAsync(o => o.Id == request.OrderId, cancellationToken))
-            return new Error("No orders found", "There are no orders in the database.");
+            return new OrderNotFoundError(request.OrderId.Value);
 
         var order = await _context.Orders
             .AsNoTracking()
@@ -41,7 +41,7 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, OrderRe
             OrderDate: order.OrderDate.ToString(),
             Status: order.Status.ToString(),
             CardName: order.Payment.CardName,
-            ShortCardNumber: order.Payment.CardNumber,
+            ShortCardNumber: order.Payment.CardNumber.Substring(0, 3),
             Address: order.DestinationAddress.AddressLine,
             Products: products,
             TotalPrice: order.TotalPrice
@@ -49,4 +49,6 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, OrderRe
 
         return orderDto;
     }
+
+    public sealed record OrderNotFoundError(Guid OrderId) : Error("No order found", $"There are no order with id '{OrderId}' in the database.");
 }
