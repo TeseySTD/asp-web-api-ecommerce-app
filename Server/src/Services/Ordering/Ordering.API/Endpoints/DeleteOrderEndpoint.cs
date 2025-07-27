@@ -16,7 +16,7 @@ public class DeleteOrderEndpoint : OrdersEndpoint
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                onFailure: errors => Results.NotFound(Envelope.Of(errors))
             );
         });
     }

@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Dto.Order;
 using Ordering.Application.UseCases.Orders.Commands.UpdateOrder;
 using Ordering.Core.Models.Orders;
@@ -119,7 +120,7 @@ public class UpdateOrderCommandHandlerTest : IntegrationTest
         // Assert
         Assert.True(result.IsSuccess);
 
-        var newOrder = ApplicationDbContext.Orders.SingleOrDefault(o => o.Id == order.Id);
+        var newOrder = await ApplicationDbContext.Orders.SingleOrDefaultAsync(o => o.Id == order.Id);
         Assert.NotNull(newOrder);
         newOrder.Payment.Should().Satisfy<Payment>(p =>
         {

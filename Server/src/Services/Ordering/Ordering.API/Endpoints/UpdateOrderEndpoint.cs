@@ -5,6 +5,7 @@ using Ordering.Application.Dto.Order;
 using Ordering.Application.UseCases.Orders.Commands.UpdateOrder;
 using Ordering.Core.Models.Orders.ValueObjects;
 using Shared.Core.API;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.API.Endpoints;
 
@@ -36,14 +37,19 @@ public class UpdateOrderEndpoint : OrdersEndpoint
 
             var customerIdString = user.FindFirstValue("userId");
             Guid customerId = Guid.TryParse(customerIdString, out Guid parsed) ? parsed : Guid.Empty;
-            
+
             var cmd = new UpdateOrderCommand(customerId, id, dto);
             var result = await sender.Send(cmd);
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
-            );
+                onFailure: errors =>
+                {
+                    var enumerable = errors as Error[] ?? errors.ToArray();
+                    return enumerable.Any(e => e is UpdateOrderCommandHandler.OrderNotFoundError)
+                        ? Results.NotFound(Envelope.Of(enumerable))
+                        : Results.BadRequest(Envelope.Of(enumerable));
+                });
         }).RequireAuthorization();
     }
 }
