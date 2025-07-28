@@ -16,11 +16,13 @@ public record CategoryId
     {
         var result = Result<CategoryId>.Try()
             .Check(categoryId == Guid.Empty,
-                new Error("Category Id is invalid",  nameof(CategoryId)))
+                new IdIsRequiredError())
             .Build();
         
         if(result.IsFailure)
             return result;
         return new CategoryId(categoryId);
     }
+    
+    public sealed record IdIsRequiredError() : Error($"Category Id is required", "CategoryId cannot be empty.");
 }

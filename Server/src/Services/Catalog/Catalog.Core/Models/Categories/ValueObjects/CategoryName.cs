@@ -18,9 +18,9 @@ public record CategoryName
     {
         var result = Result<CategoryName>.Try()
             .Check(string.IsNullOrWhiteSpace(value),
-                new Error("Name cannot be null or whitespace", nameof(CategoryName)))
+                new NameRequiredError())
             .Check(value.Length > MaxNameLength,
-                new Error($"Name must be less than {MaxNameLength} symbols", nameof(CategoryName)))
+                new NameIsOutOfLengthError())
             .Build();
         
         if(result.IsFailure)
@@ -28,4 +28,6 @@ public record CategoryName
         return new CategoryName(value);
     }
     
+    public sealed record NameRequiredError() : Error($"Name cannot be empty", "Name cannot be empty or whitespace");
+    public sealed record NameIsOutOfLengthError() : Error("Name is out of length",$"Name must be less than {MaxNameLength} symbols");
 }
