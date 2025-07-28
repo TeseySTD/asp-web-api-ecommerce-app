@@ -16,7 +16,9 @@ public record StockQuantity
     
     public static Result<StockQuantity> Create(int stockQuantity)
     {
-        if(stockQuantity < 0) return new Error(nameof(stockQuantity), "Quantity must be greater than -1");
+        if (stockQuantity < 0) return new QuantityLesserThanZeroError();
         return Create((uint)stockQuantity);
     }
+    
+    public sealed record QuantityLesserThanZeroError() : Error("Quantity must be greater.", "Quantity must be greater than -1.");
 }
