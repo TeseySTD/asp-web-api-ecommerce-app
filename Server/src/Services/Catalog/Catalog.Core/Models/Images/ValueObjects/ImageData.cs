@@ -15,10 +15,14 @@ public record ImageData
     public static Result<ImageData> Create(byte[] value)
     {
         return Result<ImageData>.Try(new ImageData(value))
-            .Check(value == null || value.Length == 0, new("Data is required", "Data cannot be null."))
+            .Check(value.Length == 0, new ImageDataRequiredError())
             .DropIfFail()
-            .Check(value!.Length > MaxSize,
-                new("Image size is out of range", $"Image size must be between 0 and {MaxSize / (1024 * 1024)}mb"))
+            .Check(value.Length > MaxSize, new OutOfLengthError() )
             .Build();
     }
+
+    public sealed record ImageDataRequiredError() : Error("Data is required", "Data cannot be null.");
+
+    public sealed record OutOfLengthError() : Error("Image size is out of range",
+        $"Image size must be between 1 and {MaxSize / (1024 * 1024)}mb");
 }

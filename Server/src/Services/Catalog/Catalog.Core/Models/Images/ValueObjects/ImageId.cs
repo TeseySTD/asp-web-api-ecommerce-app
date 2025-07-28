@@ -13,10 +13,12 @@ public record ImageId
     
     public static Result<ImageId> Create(Guid imageId)
     {
-        if (imageId == null || imageId == Guid.Empty)
+        if (imageId == Guid.Empty)
         {
-            return new Error("ImageId is required", "ImageId cannot be null or empty");
+            return new ImageIdRequiredError();
         }
         return new ImageId(imageId);
     }
+
+    public sealed record ImageIdRequiredError() : Error("ImageId is required", "ImageId cannot be null or empty");
 }

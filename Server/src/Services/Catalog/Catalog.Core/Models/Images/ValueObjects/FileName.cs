@@ -16,10 +16,16 @@ public record FileName
     public static Result<FileName> Create(string value)
     {
         return Result<FileName>.Try(new FileName(value))
-            .Check(value.IsNullOrEmpty(), new("File name is required", "File name cannot be null or empty."))
+            .Check(string.IsNullOrWhiteSpace(value), new FileNameRequiredError())
             .DropIfFail()
             .Check(value.Length > MaxLength,
-                new("File name is out of range", "File name cannot be longer than " + MaxLength + " characters."))
+                new OutOfLengthError())
             .Build();
     }
+
+    public sealed record FileNameRequiredError()
+        : Error("File name is required", "File name cannot be whitespace or empty.");
+
+    public sealed record OutOfLengthError() : Error("File name is out of length.",
+        "File name cannot be longer than " + MaxLength + " characters.");
 }
