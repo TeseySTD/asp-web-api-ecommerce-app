@@ -31,7 +31,7 @@ public class IncreaseQuantityCommandHandler : ICommandHandler<IncreaseQuantityCo
             .FirstOrDefaultAsync(p => p.Id == ProductId.Create(request.Id).Value, cancellationToken);
 
         var validationResult = Result.Try()
-            .Check(product is null, new Error("Product not found", $"Product not found, incorrect id:{request.Id}"))
+            .Check(product is null, new ProductNotFoundError(request.Id))
             .Build();
 
         if (validationResult.IsSuccess)
@@ -50,4 +50,7 @@ public class IncreaseQuantityCommandHandler : ICommandHandler<IncreaseQuantityCo
 
         return validationResult;
     }
+    
+    public sealed record ProductNotFoundError(Guid ProductId) : Error("Product not found",
+        $"Product to update with id: {ProductId} not found");
 }

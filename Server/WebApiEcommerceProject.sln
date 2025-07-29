@@ -56,6 +56,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordering.Tests.Integration"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog.Tests.Unit", "tests\Catalog\Catalog.Tests.Unit\Catalog.Tests.Unit.csproj", "{176C1E2D-DE9B-418B-8012-A32CCFB20298}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog.Tests.Integration", "tests\Catalog\Catalog.Tests.Integration\Catalog.Tests.Integration.csproj", "{3CF846EE-7CD1-4DA1-9340-B84F865F3A33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -158,6 +160,10 @@ Global
 		{176C1E2D-DE9B-418B-8012-A32CCFB20298}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{176C1E2D-DE9B-418B-8012-A32CCFB20298}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{176C1E2D-DE9B-418B-8012-A32CCFB20298}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CF846EE-7CD1-4DA1-9340-B84F865F3A33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CF846EE-7CD1-4DA1-9340-B84F865F3A33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CF846EE-7CD1-4DA1-9340-B84F865F3A33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CF846EE-7CD1-4DA1-9340-B84F865F3A33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

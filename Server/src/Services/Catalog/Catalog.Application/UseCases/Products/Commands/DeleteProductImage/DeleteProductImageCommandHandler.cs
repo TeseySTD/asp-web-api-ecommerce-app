@@ -35,10 +35,9 @@ public class DeleteProductImageCommandHandler : ICommandHandler<DeleteProductIma
             .FirstOrDefaultAsync(i => i.Id == imageId, cancellationToken);
         
         if (product is null)
-            return new Error("Product not found", $"Product not found, incorrect id:{request.ProductId}");
+            return new ProductNotFoundError(request.ProductId);
         if (image is null || !product.Images.Any(i => i.Id == imageId))
-            return new Error("Image not found",
-                $"Image not found, incorrect id:{request.ImageId} or not belong to product with id:{request.ProductId}");
+            return new ImageNotFoundError(request.ImageId, request.ProductId);
         
         product.RemoveImage(imageId);
         await _context.SaveChangesAsync(cancellationToken);
@@ -52,4 +51,9 @@ public class DeleteProductImageCommandHandler : ICommandHandler<DeleteProductIma
         
         return Result.Success();
     }
+    
+    public sealed record ProductNotFoundError(Guid ProductId) : Error("Product not found, incorrect id",
+                                                                                          $"Product not found, incorrect id:{ProductId}");
+    public sealed record ImageNotFoundError(Guid ImageId, Guid ProductId) : Error("Image not found",
+                                                                                                 $"Image not found, incorrect id:{ImageId} or not belong to product with id:{ProductId}");
 }

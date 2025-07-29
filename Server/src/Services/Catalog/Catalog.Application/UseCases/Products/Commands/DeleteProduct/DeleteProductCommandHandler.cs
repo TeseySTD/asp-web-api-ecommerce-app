@@ -21,12 +21,14 @@ public class DeleteProductCommandHandler : ICommandHandler<DeleteProductCommand>
     public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
     {
         if (!await _context.Products.AnyAsync(p => p.Id == request.ProductId))
-            return new Error("Product not found, incorrect id",
-                $"Product not found, incorrect id:{request.ProductId.Value}");
+            return new ProductNotFoundError(request.ProductId.Value);
 
         await _context.Products.Where(p => p.Id == request.ProductId).ExecuteDeleteAsync();
         await _cache.RemoveAsync($"product-{request.ProductId.Value}");
         
         return Result.Success();
     }
+    
+    public sealed record ProductNotFoundError(Guid ProductId) : Error("Product not found, incorrect id",
+                                                                                      $"Product not found, incorrect id:{ProductId}");
 }

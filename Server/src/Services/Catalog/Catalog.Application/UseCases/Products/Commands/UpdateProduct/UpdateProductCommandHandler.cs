@@ -26,12 +26,12 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
     {
         var result = await Result.Try()
             .Check(!await _context.Products.AnyAsync(p => p.Id == ProductId.Create(request.Value.Id).Value),
-                new Error("Product not found", $"Product to update with id: {request.Value.Id} not found"))
+                new ProductNotFoundError(request.Value.Id))
             .CheckIfAsync(
                 request.Value.CategoryId != null,
                 async () => !await _context.Categories.AnyAsync(p =>
                     p.Id == CategoryId.Create(request.Value.CategoryId ?? Guid.Empty).Value),
-                new Error("Category not found", $"Category not found, incorrect id:{request.Value.CategoryId}"))
+                new CategoryNotFoundError(request.Value.CategoryId ?? Guid.Empty))
             .BuildAsync();
 
         if (result.IsSuccess)
@@ -74,4 +74,10 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
         return result;
     }
+
+    public sealed record ProductNotFoundError(Guid ProductId) : Error("Product not found",
+        $"Product to update with id: {ProductId} not found");
+
+    public sealed record CategoryNotFoundError(Guid CategoryId) : Error("Category not found",
+        $"Category not found, incorrect id:{CategoryId}");
 }

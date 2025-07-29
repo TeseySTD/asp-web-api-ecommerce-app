@@ -52,9 +52,9 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
     {
         var result = Result<ProductReadDto>.Try()
             .Check(await _context.Products.AnyAsync(p => p.Id == product.Id),
-                new Error("Product already exists", $"Product already exists, incorrect id:{product.Id}"))
+                new ProductExistsError(product.Id.Value))
             .Check(!await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
-                new Error("Category not found", $"Category not found, incorrect id:{product.CategoryId}"))
+                new CategoryNotFoundError(product.CategoryId.Value))
             .Build();
 
         if (result.IsSuccess)
@@ -75,4 +75,10 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
 
         return result;
     }
+
+    public sealed record ProductExistsError(Guid ProductId) : Error("Product already exists",
+        $"Product already exists, incorrect id:{ProductId}");
+
+    public sealed record CategoryNotFoundError(Guid CategoryId)
+        : Error("Category not found", $"Category not found, incorrect id:{CategoryId}");
 }

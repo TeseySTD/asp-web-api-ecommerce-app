@@ -31,7 +31,7 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
         Product? product = null;
         var result = await Result.Try()
             .Check(!await _context.Products.AnyAsync(p => p.Id == productId),
-                new("Product not found!", $"Product with id: {request.ProductId} was not found!"))
+                new ProductNotFoundError(request.ProductId))
             .DropIfFail()
             .CheckAsync(async () =>
                 {
@@ -43,13 +43,11 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
 
                     return product!.Images.Count + request.Images.Count() > Product.MaxImagesCount;
                 },
-                new("Max images in product.",
-                    $"Product with id: {request.ProductId} has maximum ({Product.MaxImagesCount}) images."))
+                new MaxImagesError(request.ProductId))
             .BuildAsync();
 
         if (result.IsFailure)
             return result;
-
 
         foreach (var imageDto in request.Images)
         {
@@ -73,4 +71,10 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
 
         return Result.Success();
     }
+
+    public sealed record ProductNotFoundError(Guid Id)
+        : Error("Product not found!", $"Product with id: {Id} was not found!");
+
+    public sealed record MaxImagesError(Guid ProductId) : Error("Max images in product.",
+        $"Product with id: {ProductId} has maximum ({Product.MaxImagesCount}) images.");
 }

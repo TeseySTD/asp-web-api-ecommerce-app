@@ -71,7 +71,7 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
         var products = await _dbContext.Products
             .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
-            .Select(p => new { p.Id, Quantity = p.StockQuantity.Value})
+            .Select(p => new { p.Id, Quantity = p.StockQuantity.Value })
             .ToListAsync();
 
         var existingProductIds = products.Select(p => p.Id).ToList();
@@ -79,8 +79,7 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
 
         if (missingProducts.Any())
         {
-            var missingProductsMessage =
-                $"Missing products with IDs: {string.Join(", ", missingProducts.Select(id => id.Value))}";
+            var missingProductsMessage = GenerateMissingProductMessage(missingProducts.Select(p => p.Value));
             await PublishFailedReservation(context.Message.OrderId, missingProductsMessage);
             Logger.LogWarning(missingProductsMessage);
             return false;
@@ -93,7 +92,7 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
 
             if (product!.Quantity < orderProduct.ProductQuantity)
             {
-                var insufficientQuantityMessage = $"Insufficient quantity for product {productId.Value}";
+                var insufficientQuantityMessage = GenerateIssuficientQuantityMessage(productId.Value);
                 await PublishFailedReservation(context.Message.OrderId, insufficientQuantityMessage);
                 Logger.LogWarning(insufficientQuantityMessage);
                 return false;
@@ -127,4 +126,9 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
             OrderId: orderId,
             Reason: reason));
     }
+
+    public static string GenerateMissingProductMessage(IEnumerable<Guid> missingProductIds) =>
+        $"Missing products with IDs: {string.Join(", ", missingProductIds)}";
+    public static string GenerateIssuficientQuantityMessage(Guid productId) =>
+        $"Insufficient quantity for product {productId}";
 }
