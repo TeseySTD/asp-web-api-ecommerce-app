@@ -21,8 +21,10 @@ public class GetImageByIdQueryHandler : IQueryHandler<GetImageByIdQuery, Image>
         
         var image = await _context.Images.FindAsync(imageId);
         if (image == null)
-            return new Error("Image not found", $"Image with id:{request.Id} not found");
+            return new ImageNotFoundError(imageId.Value);
         else
             return image;
     }
+
+    public sealed record ImageNotFoundError(Guid Id) : Error("Image not found", $"Image with id:{Id} not found");
 }

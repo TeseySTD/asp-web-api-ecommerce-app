@@ -33,7 +33,7 @@ public class AddCategoryImagesCommandHandler : ICommandHandler<AddCategoryImages
         Category? category = null;
         var result = await Result.Try()
             .Check(!await _context.Categories.AnyAsync(p => p.Id == categoryId),
-                new("Сategory not found!", $"Сategory with id: {request.CategoryId} was not found!"))
+                new CategoryNotFoundError(categoryId.Value))
             .DropIfFail()
             .CheckAsync(async () =>
                 {
@@ -43,8 +43,7 @@ public class AddCategoryImagesCommandHandler : ICommandHandler<AddCategoryImages
 
                     return category!.Images.Count + request.Images.Count() > Category.MaxImagesCount;
                 },
-                new("Max images in category.",
-                    $"Categoru with id: {request.CategoryId} has maximum ({Category.MaxImagesCount}) images."))
+                new ImagesOutOfRangeError(categoryId.Value))
             .BuildAsync();
 
         if (result.IsFailure)
@@ -73,4 +72,10 @@ public class AddCategoryImagesCommandHandler : ICommandHandler<AddCategoryImages
 
         return Result.Success();
     }
+
+    public sealed record CategoryNotFoundError(Guid CategoryId) : Error("Сategory not found!",
+        $"Сategory with id: {CategoryId} was not found!");
+
+    public sealed record ImagesOutOfRangeError(Guid CategoryId) : Error("Max images in category.",
+        $"Categoru with id: {CategoryId} has maximum ({Category.MaxImagesCount}) images.");
 }

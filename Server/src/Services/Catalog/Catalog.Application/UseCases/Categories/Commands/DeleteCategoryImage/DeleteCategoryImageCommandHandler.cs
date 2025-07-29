@@ -32,12 +32,11 @@ public class DeleteCategoryImageCommandHandler : ICommandHandler<DeleteCategoryI
         var image = await _context.Images
             .AsNoTracking()
             .FirstOrDefaultAsync(i => i.Id == imageId, cancellationToken);
-        
+
         if (category is null)
-            return new Error("Category not found", $"Category not found, incorrect id:{request.CategoryId}");
+            return new CategoryNotFoundError(request.CategoryId);
         if (image is null || !category.Images.Any(i => i.Id == imageId))
-            return new Error("Image not found",
-                $"Image not found, incorrect id:{request.ImageId} or not belong to category with id:{request.CategoryId}");
+            return new ImageNotFoundError(request.ImageId, request.CategoryId);
         
         category.RemoveImage(imageId);
         await _context.SaveChangesAsync(cancellationToken);
@@ -51,4 +50,9 @@ public class DeleteCategoryImageCommandHandler : ICommandHandler<DeleteCategoryI
         
         return Result.Success();
     }
+
+    public sealed record CategoryNotFoundError(Guid CategoryId)
+        : Error("Category not found", $"Category not found, incorrect id:{CategoryId}");
+    public sealed record ImageNotFoundError(Guid ImageId, Guid CategoryId) : Error("Image not found",
+                $"Image not found, incorrect id:{ImageId} or not belong to category with id:{CategoryId}");
 }
