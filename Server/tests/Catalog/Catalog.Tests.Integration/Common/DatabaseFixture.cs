@@ -10,10 +10,10 @@ public class DatabaseFixture : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
         .WithImage("postgres:latest")
-        .WithDatabase("users-api")
+        .WithDatabase("catalog-api")
         .WithUsername("postgres")
         .WithPassword("postgres")
-        .WithName("users.test.database")
+        .WithName("catalog.test.database")
         .Build();
 
     private Respawner _respawner = null!;

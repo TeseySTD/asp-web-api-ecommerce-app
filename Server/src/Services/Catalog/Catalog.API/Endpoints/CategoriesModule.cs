@@ -32,8 +32,8 @@ public class CategoryModule : CarterModule
 
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", async (ISender sender, 
-            [AsParameters]PaginationRequest request) =>
+        app.MapGet("/", async (ISender sender,
+            [AsParameters] PaginationRequest request) =>
         {
             var query = new GetCategoriesQuery(request);
             var result = await sender.Send(query);
@@ -75,23 +75,24 @@ public class CategoryModule : CarterModule
             {
                 var imageDtos = new List<ImageDto>();
                 var validationResult = Result.Try()
-                    .Check(images == null, CategoriesModuleErrors.RequiredImageError)
-                    .Check(images!.Count() == 0 || images.Count() > Category.MaxImagesCount,
-                        CategoriesModuleErrors.ImageCountOutOfRangeError)
+                    .Check(images == null, new RequiredImageError())
+                    .DropIfFail()
+                    .Check(images!.Count() == 0 || images!.Count() > Category.MaxImagesCount, new ImageCountOutOfRangeError())
                     .Check(() =>
                     {
-                        foreach (var image in images)
+                        foreach (var image in images!)
                             if (!Enum.GetNames<ImageContentType>().Select(t => $"image/{t.ToLower()}")
                                     .Contains(image.ContentType))
                                 return true;
 
                         return false;
-                    }, CategoriesModuleErrors.FilesMustBeImages)
+                    }, new InvalidImagesTypeError())
                     .Build();
+
                 if (validationResult.IsFailure)
                     return Results.BadRequest(Envelope.Of(validationResult.Errors));
 
-                foreach (var image in images)
+                foreach (var image in images!)
                 {
                     using var ms = new MemoryStream();
                     await image.CopyToAsync(ms, cancellationToken);
@@ -108,7 +109,13 @@ public class CategoryModule : CarterModule
 
                 return result.Map(
                     onSuccess: () => Results.Ok(id),
-                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                    onFailure: errors =>
+                    {
+                        var enumerable = errors as Error[] ?? errors.ToArray();
+                        if (enumerable.Any(e => e is AddCategoryImagesCommandHandler.CategoryNotFoundError))
+                            return Results.NotFound(Envelope.Of(enumerable));
+                        return Results.BadRequest(Envelope.Of(enumerable));
+                    } 
                 );
             })
             .DisableAntiforgery();
@@ -118,29 +125,36 @@ public class CategoryModule : CarterModule
             {
                 var cmd = new DeleteCategoryImageCommand(id, imageId);
                 var result = await sender.Send(cmd, cancellationToken);
-                
+
                 return result.Map(
                     onSuccess: () => Results.Ok(),
-                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
                 );
             });
-        
-        app.MapPut("/{id:guid}", async (ISender sender, Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken) =>
-        {
-            var categoryDto = new CategoryWriteDto(
-                Id: id,
-                Name: request.Name,
-                Description: request.Description
-            );
 
-            var cmd = new UpdateCategoryCommand(categoryDto);
-            var result = await sender.Send(cmd, cancellationToken);
+        app.MapPut("/{id:guid}",
+            async (ISender sender, Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken) =>
+            {
+                var categoryDto = new CategoryWriteDto(
+                    Id: id,
+                    Name: request.Name,
+                    Description: request.Description
+                );
 
-            return result.Map(
-                onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
-            );
-        });
+                var cmd = new UpdateCategoryCommand(categoryDto);
+                var result = await sender.Send(cmd, cancellationToken);
+
+                return result.Map(
+                    onSuccess: () => Results.Ok(),
+                    onFailure: errors =>
+                    {
+                        var enumerable = errors as Error[] ?? errors.ToArray();
+                        if(enumerable.Any(e => e == Error.NotFound))
+                            return Results.NotFound(Envelope.Of(enumerable));
+                        return Results.BadRequest(Envelope.Of(enumerable));
+                    }
+                );
+            });
 
         app.MapDelete("/{id:guid}", async (ISender sender, Guid id, CancellationToken cancellationToken) =>
         {
@@ -153,15 +167,12 @@ public class CategoryModule : CarterModule
             );
         });
     }
-}
 
-public static class CategoriesModuleErrors
-{
-    public static Error RequiredImageError => new("Images are required", "Image files are required");
+    public sealed record RequiredImageError() : Error("Images are required", "Image files are required");
 
-    public static Error ImageCountOutOfRangeError =>
-        new("Images count is out of range", $"Images count must be between 1 and {Category.MaxImagesCount}");
+    public sealed record ImageCountOutOfRangeError() : Error("Images count is out of range",
+        $"Images count must be between 1 and {Category.MaxImagesCount}");
 
-    public static Error FilesMustBeImages => new("All files must be images",
+    public sealed record InvalidImagesTypeError() : Error("All files must be images",
         $"All files must be images with content type:{string.Join(" ,", Enum.GetNames<ImageContentType>())}");
 }

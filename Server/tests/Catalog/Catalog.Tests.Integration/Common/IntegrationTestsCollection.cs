@@ -2,6 +2,8 @@
 
 [CollectionDefinition(nameof(IntegrationTestsCollection))]
 public class IntegrationTestsCollection :
-    ICollectionFixture<DatabaseFixture>
+    ICollectionFixture<DatabaseFixture>,
+    ICollectionFixture<MessageBrokerFixture>,
+    ICollectionFixture<CacheFixture>
 {
 }

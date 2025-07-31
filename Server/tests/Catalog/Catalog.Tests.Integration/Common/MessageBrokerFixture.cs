@@ -1,12 +1,12 @@
-﻿namespace Ordering.Tests.Integration.Common;
-using Testcontainers.RabbitMq;
+﻿using Testcontainers.RabbitMq;
 
+namespace Catalog.Tests.Integration.Common;
 
 public class MessageBrokerFixture : IAsyncLifetime
 {
     private RabbitMqContainer _messageBrokerContainer = new RabbitMqBuilder()
         .WithImage("rabbitmq:management")
-        .WithName("ordering.test.messagebroker")
+        .WithName("catalog.test.messagebroker")
         .WithHostname("ecommerce-mq")
         .WithUsername("guest")
         .WithPassword("guest")
