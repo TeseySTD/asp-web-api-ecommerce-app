@@ -32,8 +32,4 @@
       <ProjectReference Include="..\..\..\src\Services\Catalog\Catalog.Application\Catalog.Application.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Api\Endpoints\ProductsModule\" />
-    </ItemGroup>
-
 </Project>

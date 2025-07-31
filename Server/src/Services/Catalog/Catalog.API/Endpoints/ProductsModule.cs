@@ -33,7 +33,7 @@ public class ProductModule : CarterModule
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
         app.MapGet("/", async (ISender sender,
-            [AsParameters]PaginationRequest paginationRequest,
+            [AsParameters] PaginationRequest paginationRequest,
             CancellationToken cancellationToken) =>
         {
             var query = new GetProductsQuery(paginationRequest);
@@ -85,22 +85,24 @@ public class ProductModule : CarterModule
             {
                 var imageDtos = new List<ImageDto>();
                 var validationResult = Result.Try()
-                    .Check(images == null, ProductsModuleErrors.RequiredImageError)
-                    .Check(images!.Count() == 0 || images.Count() > Product.MaxImagesCount, ProductsModuleErrors.ImageCountOutOfRangeError)
+                    .Check(images == null, new RequiredImageError())
+                    .DropIfFail()
+                    .Check(images!.Count() == 0 || images!.Count() > Product.MaxImagesCount,
+                        new ImageCountOutOfRangeError())
                     .Check(() =>
                     {
-                        foreach (var image in images)
+                        foreach (var image in images!)
                             if (!Enum.GetNames<ImageContentType>().Select(t => $"image/{t.ToLower()}")
                                     .Contains(image.ContentType))
                                 return true;
 
                         return false;
-                    }, ProductsModuleErrors.FilesMustBeImages)
+                    }, new InvalidImagesTypeError())
                     .Build();
                 if (validationResult.IsFailure)
                     return Results.BadRequest(Envelope.Of(validationResult.Errors));
 
-                foreach (var image in images)
+                foreach (var image in images!)
                 {
                     using var ms = new MemoryStream();
                     await image.CopyToAsync(ms, cancellationToken);
@@ -117,24 +119,30 @@ public class ProductModule : CarterModule
 
                 return result.Map(
                     onSuccess: () => Results.Ok(id),
-                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                    onFailure: errors =>
+                    {
+                        var enumerable = errors as Error[] ?? errors.ToArray();
+                        if (enumerable.Any(e => e is AddProductImagesCommandHandler.ProductNotFoundError))
+                            return Results.NotFound(Envelope.Of(enumerable));
+                        return Results.BadRequest(Envelope.Of(enumerable));
+                    } 
                 );
             })
             .DisableAntiforgery()
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
-        app.MapDelete("/{id:guid}/images{imageId:guid}", async (ISender sender,
-            Guid id, Guid imageId, CancellationToken cancellationToken) =>
-        {
-            var cmd = new DeleteProductImageCommand(id, imageId);
-            var result = await sender.Send(cmd, cancellationToken);
+        app.MapDelete("/{id:guid}/images/{imageId:guid}", async (ISender sender,
+                Guid id, Guid imageId, CancellationToken cancellationToken) =>
+            {
+                var cmd = new DeleteProductImageCommand(id, imageId);
+                var result = await sender.Send(cmd, cancellationToken);
 
-            return result.Map(
-                onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
-            );
-        })
-        .RequireAuthorization(Policies.RequireSellerPolicy);
+                return result.Map(
+                    onSuccess: () => Results.Ok(),
+                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                );
+            })
+            .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/{id:guid}",
             async (ISender sender, Guid id, UpdateProductRequest request, CancellationToken cancellationToken) =>
@@ -153,9 +161,10 @@ public class ProductModule : CarterModule
 
                 return result.Map(
                     onSuccess: () => Results.Ok(),
-                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
                 );
-            });
+            })
+            .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/increase-quantity/{id:guid}/{quantity:int}",
             async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
@@ -165,10 +174,11 @@ public class ProductModule : CarterModule
 
                 return result.Map(
                     onSuccess: () => Results.Ok(),
-                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
                 );
-            });
-        
+            })
+            .RequireAuthorization(Policies.RequireSellerPolicy);
+
         app.MapPut("/decrease-quantity/{id:guid}/{quantity:int}",
             async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
             {
@@ -177,9 +187,10 @@ public class ProductModule : CarterModule
 
                 return result.Map(
                     onSuccess: () => Results.Ok(),
-                    onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
                 );
-            });
+            })
+            .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapDelete("/{id:guid}", async (ISender sender, Guid id) =>
         {
@@ -188,19 +199,17 @@ public class ProductModule : CarterModule
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                onFailure: errors => Results.NotFound(Envelope.Of(errors))
             );
-        });
+        })
+        .RequireAuthorization(Policies.RequireSellerPolicy);
     }
-}
 
-public static class ProductsModuleErrors
-{
-    public static Error RequiredImageError => new("Images are required", "Image files are required");
+    public sealed record RequiredImageError() : Error("Images are required", "Image files are required");
 
-    public static Error ImageCountOutOfRangeError =>
-        new("Images count is out of range", $"Images count must be between 1 and {Product.MaxImagesCount}");
-
-    public static Error FilesMustBeImages => new("All files must be images",
+    public sealed record ImageCountOutOfRangeError() : Error("Images count is out of range",
+        $"Images count must be between 1 and {Product.MaxImagesCount}");
+    
+    public sealed record InvalidImagesTypeError() : Error("All files must be images",
         $"All files must be images with content type:{string.Join(" ,", Enum.GetNames<ImageContentType>())}");
 }

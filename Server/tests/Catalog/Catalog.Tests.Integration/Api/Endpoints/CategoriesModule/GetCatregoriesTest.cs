@@ -33,7 +33,7 @@ public class GetCatregoriesTest : ApiTest
 
 
     [Fact]
-    public async Task WhenCategoriesExist_ReturnsOk()
+    public async Task WhenCategoriesExist_ThenReturnsOk()
     {
         // Arrange
         var category1 = Category.Create(
