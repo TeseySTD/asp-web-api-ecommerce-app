@@ -14,4 +14,15 @@ public interface ICartRepository
     Task<Result> DeleteCart(UserId userId, CancellationToken cancellationToken = default);
     Task <Result> StoreProductInCart(UserId userId, ProductCartItem item, CancellationToken cancellationToken = default);
     Task <Result> RemoveProductFromCart(UserId userId, ProductId productId, CancellationToken cancellationToken = default);
+    public sealed record CartWithUserIdNotFoundError(Guid UserId)
+        : Error("Cart not found", $"Cart for user with id {UserId} not found");
+
+    public sealed record CartWithProductIdNotFoundError(Guid ProductId)
+        : Error("Carts not found", $"Carts with product with id {ProductId} not found");
+
+    public sealed record ProductAlreadyInCartError(Guid ProductId)
+        : Error("Product already in cart", $"Product with id {ProductId} already in cart");
+
+    public sealed record ProductInCartNotFound(Guid ProductId)
+        : Error("Product not in cart", $"Product with id {ProductId} not in cart");
 }

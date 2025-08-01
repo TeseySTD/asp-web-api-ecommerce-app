@@ -22,16 +22,17 @@ public class CartRepository : ICartRepository
         var cart = await _session.LoadAsync<ProductCart>(userId, cancellationToken);
         return cart is not null
             ? Result<ProductCart>.Success(cart)
-            : new Error("Cart not found", $"Cart for user with id {userId.Value} not found");
+            : new ICartRepository.CartWithUserIdNotFoundError(userId.Value);
     }
 
     public async Task<Result<IEnumerable<ProductCart>>> GetCartsByProductId(ProductId productId,
         CancellationToken cancellationToken = default)
     {
-        var carts = await _session.Query<ProductCart>().Where(c => c.Items.Any(i => i.Id.Value == productId.Value)).ToListAsync();
+        var carts = await _session.Query<ProductCart>().Where(c => c.Items.Any(i => i.Id.Value == productId.Value))
+            .ToListAsync();
         return !carts.IsEmpty()
             ? Result<IEnumerable<ProductCart>>.Success(carts)
-            : new Error("Carts not found", $"Carts for product with id {productId.Value} not found");
+            : new ICartRepository.CartWithProductIdNotFoundError(productId.Value);
     }
 
     public async Task<Result<ProductCart>> SaveCart(ProductCart cart, CancellationToken cancellationToken = default)
@@ -55,7 +56,7 @@ public class CartRepository : ICartRepository
         try
         {
             if (await _session.LoadAsync<ProductCart>(userId, cancellationToken) is null)
-                return new Error("Cart not found", $"Cart with user id {userId.Value} not found");
+                return new ICartRepository.CartWithUserIdNotFoundError(userId.Value);
 
             _session.Delete<ProductCart>(userId);
             await _session.SaveChangesAsync();
@@ -76,7 +77,7 @@ public class CartRepository : ICartRepository
             var cart = await _session.LoadAsync<ProductCart>(userId, cancellationToken) ?? ProductCart.Create(userId);
 
             if (cart.HasItem(item.Id))
-                return new Error("Product already in cart", $"Product with id {item.Id.Value} already in cart");
+                return new ICartRepository.ProductAlreadyInCartError(item.Id.Value);
 
             cart.AddItem(item);
             _session.Update(cart);
@@ -97,9 +98,9 @@ public class CartRepository : ICartRepository
         {
             var cart = await _session.LoadAsync<ProductCart>(userId, cancellationToken);
             if (cart is null)
-                return new Error("Cart not found", $"Cart with user id {userId.Value} not found");
+                return new ICartRepository.CartWithUserIdNotFoundError(userId.Value);
             else if (!cart.HasItem(productId))
-                return new Error("Product not in cart", $"Product with id {productId.Value} not in cart");
+                return new ICartRepository.ProductInCartNotFound(productId.Value);
 
             cart.RemoveItem(productId);
             _session.Update(cart);
