@@ -21,14 +21,17 @@ public record ProductTitle
     public static Result<ProductTitle> Create(string title)
     {
         var result = Result<ProductTitle>.Try()
-            .Check(string.IsNullOrEmpty(title), 
-                new Error("Title is required", "Title must be not empty"))
+            .Check(string.IsNullOrWhiteSpace(title), 
+                new TitleRequiredError())
             .Check(title.Length > MaxTitleLength || title.Length < MinTitleLength,
-                new Error("Title is too long", $"Product title must be between {MinTitleLength} and {MaxTitleLength} characters"))
+                new OutOfLengthError()) 
             .Build();
         
         if(result.IsFailure)
             return result;
         return new ProductTitle(title);
     }
+
+    public sealed record TitleRequiredError() : Error("Title is required", "Title must be not empty");
+    public sealed record OutOfLengthError() : Error("Title is out of range.", $"Product title must be between {MinTitleLength} and {MaxTitleLength} characters.");
 }

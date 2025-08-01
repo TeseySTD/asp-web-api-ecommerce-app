@@ -20,11 +20,13 @@ public struct UserId
     {
         var result = Result<UserId>.Try()
             .Check(productId == Guid.Empty,
-                new Error("User Id cannot be empty", "UserId value object failure"))
+                new IdRequiredError())
             .Build();
         
         if(result.IsFailure)
             return result;
         return new UserId(productId);
     }
+
+    public sealed record IdRequiredError() : Error("User Id cannot be empty", "UserId value object failure");
 }

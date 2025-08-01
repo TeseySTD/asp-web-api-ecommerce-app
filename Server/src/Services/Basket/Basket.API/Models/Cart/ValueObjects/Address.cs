@@ -23,13 +23,18 @@ public record Address
     {
         return Result<Address>.Try(new Address(addressLine, country, state, zipCode))
             .Check(string.IsNullOrWhiteSpace(addressLine),
-                new Error("Address line is required", "Address line cannot be whitespace or empty"))
+                new AddressLineRequiredError())
             .CheckIf(
                 checkCondition: !string.IsNullOrWhiteSpace(zipCode), 
-                errorCondition:!Regex.IsMatch(zipCode, RegexZipCode),
-                error: new Error("Zip code is invalid", "Zip code is invalid"))
+                () => !Regex.IsMatch(zipCode!, RegexZipCode),
+                new ZipCodeFormatError(zipCode))
             .Build();
+
     }
+    
+    public sealed record AddressLineRequiredError()
+        : Error("Address line is required", "Address line cannot be whitespace or empty");
 
-
+    public sealed record ZipCodeFormatError(string ZipCode)
+        : Error("Zip code is invalid", $"Zip code '{ZipCode}' is invalid.");
 }
