@@ -1,5 +1,4 @@
 ﻿using Basket.API.Data.Abstractions;
-using Basket.API.Models;
 using Basket.API.Models.Cart;
 using Basket.API.Models.Cart.Entities;
 using Basket.API.Models.Cart.ValueObjects;
