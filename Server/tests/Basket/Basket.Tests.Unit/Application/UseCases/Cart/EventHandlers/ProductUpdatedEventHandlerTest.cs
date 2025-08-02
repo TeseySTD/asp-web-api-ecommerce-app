@@ -25,7 +25,7 @@ public class ProductUpdatedEventHandlerTest
         _handler = new ProductUpdatedEventHandler(_logger, _cartRepository);
     }
 
-    private static ProductUpdatedEvent CreateEvent(Guid productId)
+    private ProductUpdatedEvent CreateEvent(Guid productId)
     {
         return new ProductUpdatedEvent(
             ProductId: productId,
@@ -38,7 +38,7 @@ public class ProductUpdatedEventHandlerTest
     }
 
     [Fact]
-    public async Task WhenNoCartsFound_LogsInfoAndDoesNotSave()
+    public async Task WhenNoCartsFound_ThenLogsInfoAndDoesNotSave()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -62,7 +62,7 @@ public class ProductUpdatedEventHandlerTest
     }
 
     [Fact]
-    public async Task WhenCartsFound_UpdatesItemsAndSavesEachCart()
+    public async Task WhenCartsFound_ThenUpdatesItemsAndSavesEachCart()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -97,11 +97,11 @@ public class ProductUpdatedEventHandlerTest
 
         // Assert
         var updatedItem = cartWithItem.Items.Single(i => i.Id.Value == productId);
-        updatedItem.Title.Value.Should().Be("NewTitle");
-        updatedItem.Price.Value.Should().Be(42m);
-        updatedItem.ImageUrls.Should().Equal(["url1", "url2"]);
+        updatedItem.Title.Value.Should().Be(@event.Title);
+        updatedItem.Price.Value.Should().Be(@event.Price);
+        updatedItem.ImageUrls.Should().BeEquivalentTo(@event.ImageUrls);
         updatedItem.Category.Should().NotBeNull();
-        updatedItem.Category!.CategoryName.Value.Should().Be("CatName");
+        updatedItem.Category!.CategoryName.Value.Should().Be(@event.Category!.Title);
 
         // SaveCart called once for each cart (including the one without matching items)
         await _cartRepository.Received(1).SaveCart(cartWithItem);

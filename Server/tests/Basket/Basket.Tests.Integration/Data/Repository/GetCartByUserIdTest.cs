@@ -33,7 +33,8 @@ public class GetCartByUserIdTest : IntegrationTest
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
         var cart = ProductCart.Create(userId);
-        cart.AddItem(ProductCartItem.Create(
+        cart.AddItem(
+            ProductCartItem.Create(
                 ProductId.Create(Guid.NewGuid()).Value,
                 ProductTitle.Create("T").Value,
                 StockQuantity.Create(1).Value,

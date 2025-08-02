@@ -25,7 +25,7 @@ public class CheckoutBasketCommandHandlerTest
         _handler = new CheckoutBasketCommandHandler(_cartRepository, _publishEndpoint);
     }
 
-    private  CheckoutBasketDto CreateValidCheckoutBasketDto(Guid userId)
+    private CheckoutBasketDto CreateValidCheckoutBasketDto(Guid userId)
     {
         return new CheckoutBasketDto(
             UserId: userId,
@@ -34,7 +34,7 @@ public class CheckoutBasketCommandHandlerTest
         );
     }
 
-    private  (string addressLine, string? country, string? state, string? zipCode) CreateValidAddress()
+    private (string addressLine, string? country, string? state, string? zipCode) CreateValidAddress()
     {
         return (
             addressLine: "123 Test Street",
@@ -44,7 +44,7 @@ public class CheckoutBasketCommandHandlerTest
         );
     }
 
-    private  (string cardName, string cardNumber, string? expiration, string cvv, string? paymentMethod)
+    private (string cardName, string cardNumber, string? expiration, string cvv, string? paymentMethod)
         CreateValidPayment()
     {
         return (
@@ -56,7 +56,7 @@ public class CheckoutBasketCommandHandlerTest
         );
     }
 
-    private static ProductCartItem CreateProductCartItem(Guid productId, uint quantity, decimal price)
+    private ProductCartItem CreateProductCartItem(Guid productId, uint quantity, decimal price)
     {
         return ProductCartItem.Create(
             ProductId.Create(productId).Value,
@@ -70,7 +70,7 @@ public class CheckoutBasketCommandHandlerTest
         );
     }
 
-    private static ProductCart CreateProductCart(Guid userId, List<ProductCartItem> items)
+    private ProductCart CreateProductCart(Guid userId, List<ProductCartItem> items)
     {
         var cart = ProductCart.Create(UserId.From(userId));
 
@@ -155,7 +155,7 @@ public class CheckoutBasketCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenDeleteCartFails_ReturnsFailure()
+    public async Task WhenDeleteCartFails_ThenReturnsFailure()
     {
         // Arrange
         var userId = Guid.NewGuid();

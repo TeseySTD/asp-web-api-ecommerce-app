@@ -57,10 +57,10 @@ public class RemoveProductFromCartTest : IntegrationTest
         var productId = ProductId.Create(Guid.NewGuid()).Value;
         var item = ProductCartItem.Create(
             productId,
-            ProductTitle.Create("T").Value,
+            ProductTitle.Create("Test").Value,
             StockQuantity.Create(2).Value,
             ProductPrice.Create(10m).Value,
-            ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("C").Value)
+            ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("Test").Value)
         );
 
         cart.AddItem(item);

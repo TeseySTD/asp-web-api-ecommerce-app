@@ -38,19 +38,19 @@ public class GetCartsByProductIdTest : IntegrationTest
         var cart1 = ProductCart.Create(userId1);
         cart1.AddItem(ProductCartItem.Create(
                 productId,
-                ProductTitle.Create("A").Value,
+                ProductTitle.Create("Test A").Value,
                 StockQuantity.Create(2).Value,
                 ProductPrice.Create(10m).Value,
-                ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("X").Value)
+                ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("Test X").Value)
             )
         );
         var cart2 = ProductCart.Create(userId2);
         cart2.AddItem(ProductCartItem.Create(
                 productId,
-                ProductTitle.Create("B").Value,
+                ProductTitle.Create("Test B").Value,
                 StockQuantity.Create(3).Value,
                 ProductPrice.Create(15m).Value,
-                ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("Y").Value)
+                ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("Test Y").Value)
             )
         );
         

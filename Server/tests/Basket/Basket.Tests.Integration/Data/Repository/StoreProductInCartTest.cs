@@ -13,19 +13,22 @@ public class StoreProductInCartTest : IntegrationTest
     {
     }
 
+    private ProductCartItem CreateTestProductCartItem() =>
+        ProductCartItem.Create(
+            ProductId.Create(Guid.NewGuid()).Value,
+            ProductTitle.Create("Test").Value,
+            StockQuantity.Create(1).Value,
+            ProductPrice.Create(5m).Value,
+            ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("Test").Value)
+        );
+
     [Fact]
     public async Task WhenNewCart_ThenAddsItemAndReturnsSuccessfullResult()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
         var cart = ProductCart.Create(userId);
-        var item = ProductCartItem.Create(
-            ProductId.Create(Guid.NewGuid()).Value,
-            ProductTitle.Create("T").Value,
-            StockQuantity.Create(1).Value,
-            ProductPrice.Create(5m).Value,
-            ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("C").Value)
-        );
+        var item = CreateTestProductCartItem();
 
         Session.Store(cart);
         await Session.SaveChangesAsync();
@@ -46,14 +49,7 @@ public class StoreProductInCartTest : IntegrationTest
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
         var cart = ProductCart.Create(userId);
-        var item = ProductCartItem.Create(
-            ProductId.Create(Guid.NewGuid()).Value,
-            ProductTitle.Create("T").Value,
-            StockQuantity.Create(1).Value,
-            ProductPrice.Create(5m).Value,
-            ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("C").Value)
-        );
-
+        var item = CreateTestProductCartItem();
         cart.AddItem(item);
         Session.Store(cart);
         await Session.SaveChangesAsync();
@@ -71,13 +67,7 @@ public class StoreProductInCartTest : IntegrationTest
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
-        var item = ProductCartItem.Create(
-            ProductId.Create(Guid.NewGuid()).Value,
-            ProductTitle.Create("T").Value,
-            StockQuantity.Create(1).Value,
-            ProductPrice.Create(5m).Value,
-            ProductCartItemCategory.Create(CategoryId.Create(Guid.NewGuid()).Value, CategoryName.Create("C").Value)
-        );
+        var item = CreateTestProductCartItem();
 
         // Act
         var result = await CartRepository.StoreProductInCart(userId, item);

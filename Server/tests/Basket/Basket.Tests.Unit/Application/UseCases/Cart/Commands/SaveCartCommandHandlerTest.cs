@@ -23,7 +23,7 @@ public class SaveCartCommandHandlerTest
         _handler = new SaveCartCommandHandler(_cartRepository);
     }
 
-    private static ProductCartDto CreateCartDto(Guid userId)
+    private  ProductCartDto CreateCartDto(Guid userId)
     {
         return new ProductCartDto(
             UserId: userId,

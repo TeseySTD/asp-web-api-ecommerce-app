@@ -30,7 +30,7 @@ public class RemoveProductFromCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
     {
         // Arrange
         var userId = Guid.NewGuid();

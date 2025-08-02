@@ -17,13 +17,13 @@ public class StoreProductCommandHandlerTest
 
     public StoreProductCommandHandlerTest()
     {
-        MapsterConfig.Configure(Substitute.For<IServiceProvider>()); 
+        MapsterConfig.Configure(Substitute.For<IServiceProvider>());
 
         _cartRepository = Substitute.For<ICartRepository>();
         _handler = new StoreProductCommandHandler(_cartRepository);
     }
 
-    private static ProductCartItemDto CreateValidProductDto(Guid productId)
+    private ProductCartItemDto CreateValidProductDto(Guid productId)
     {
         var categoryDto = new ProductCartItemCategoryDto(
             Guid.NewGuid(),
