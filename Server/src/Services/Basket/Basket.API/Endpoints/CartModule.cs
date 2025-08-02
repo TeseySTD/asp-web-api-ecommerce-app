@@ -4,6 +4,7 @@ using Basket.API.Application.UseCases.Cart.Commands.RemoveProduct;
 using Basket.API.Application.UseCases.Cart.Commands.SaveCart;
 using Basket.API.Application.UseCases.Cart.Commands.StoreProduct;
 using Basket.API.Application.UseCases.Cart.Queries.GetCartByUserId;
+using Basket.API.Data.Abstractions;
 using Basket.API.Dto.Cart;
 using Basket.API.Http.Cart.Requests;
 using Basket.API.Http.Cart.Responses;
@@ -11,6 +12,8 @@ using Carter;
 using Mapster;
 using MediatR;
 using Shared.Core.API;
+using Shared.Core.Auth;
+using Shared.Core.Validation.Result;
 
 namespace Basket.API.Endpoints;
 
@@ -19,6 +22,7 @@ public class CartModule : CarterModule
     public CartModule() : base("/api/cart")
     {
         WithTags("Cart");
+        RequireAuthorization(Policies.RequireDefaultPolicy);
     }
 
     public override void AddRoutes(IEndpointRouteBuilder app)
@@ -51,7 +55,13 @@ public class CartModule : CarterModule
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                onFailure: errors =>
+                {
+                    var enumerable = errors as Error[] ?? errors.ToArray();
+                    if(enumerable.Any(e => e is ICartRepository.CartWithUserIdNotFoundError))
+                        return Results.NotFound(Envelope.Of(enumerable));
+                    return Results.BadRequest(Envelope.Of(enumerable));
+                }
             );
         }).WithName("Checkout Basket");
 
@@ -97,7 +107,7 @@ public class CartModule : CarterModule
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                onFailure: errors => Results.NotFound(Envelope.Of(errors))
             );
         }).WithName("Delete Cart");
 
@@ -113,7 +123,7 @@ public class CartModule : CarterModule
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
+                onFailure: errors => Results.NotFound(Envelope.Of(errors))
             );
         }).WithName("Remove Product From Cart");
     }

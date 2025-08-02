@@ -23,7 +23,7 @@ public class SaveCartTest : IntegrationTest
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        var loaded = await Session.LoadAsync<ProductCart>(userId, default);
+        var loaded = await Session.LoadAsync<ProductCart>(userId);
         loaded.Should().BeEquivalentTo(cart);
     }
 }

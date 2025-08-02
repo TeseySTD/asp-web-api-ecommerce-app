@@ -34,7 +34,10 @@ public class RemoveProductFromCartTest : IntegrationTest
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
         var cart = ProductCart.Create(userId);
-        await CartRepository.SaveCart(cart);
+        
+        Session.Store(cart);
+        await Session.SaveChangesAsync();
+        
         var productId = ProductId.Create(Guid.NewGuid()).Value;
 
         // Act
@@ -46,7 +49,7 @@ public class RemoveProductFromCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task RemoveProductFromCart_WhenItemExists_RemovesItem()
+    public async Task WhenItemExists_ThenRemovesItemAndReturnsSuccessResult()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
