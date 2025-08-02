@@ -73,9 +73,17 @@ public class CartRepository : ICartRepository
     {
         try
         {
-            var cart = await _session.LoadAsync<ProductCart>(userId, cancellationToken) ?? ProductCart.Create(userId);
+            var cart = await _session.LoadAsync<ProductCart>(userId, cancellationToken);
 
-            if (cart.HasItem(item.Id))
+            if (cart is null)
+            {
+                cart = ProductCart.Create(userId);
+                cart.AddItem(item);
+                _session.Store(cart);
+                await _session.SaveChangesAsync();
+                return Result.Success();
+            }
+            else if (cart.HasItem(item.Id))
                 return new ICartRepository.ProductAlreadyInCartError(item.Id.Value);
 
             cart.AddItem(item);

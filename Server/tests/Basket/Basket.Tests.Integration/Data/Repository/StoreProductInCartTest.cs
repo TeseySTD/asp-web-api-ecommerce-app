@@ -67,7 +67,7 @@ public class StoreProductInCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartDoesNotExist_ThenReturnsFailureResult()
+    public async Task WhenCartDoesNotExist_ThenCreatesNewAndReturnsSuccess()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
@@ -83,6 +83,9 @@ public class StoreProductInCartTest : IntegrationTest
         var result = await CartRepository.StoreProductInCart(userId, item);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsSuccess.Should().BeTrue();
+        var loaded = await Session.LoadAsync<ProductCart>(userId);
+        loaded.Should().NotBeNull();
+        loaded.Items.Should().ContainSingle(i => i.Id == item.Id);
     }
 }
