@@ -17,6 +17,17 @@ public class IncreaseQuantityTest : ApiTest
 
     private const string RequestUrl = "/api/products/increase-quantity";
 
+    private HttpRequestMessage GenerateRequest(Guid productId, int quantityPlus, string role = "Seller")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantityPlus}");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return request;
+    }
+
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
     {
@@ -36,12 +47,7 @@ public class IncreaseQuantityTest : ApiTest
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantityPlus}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, quantityPlus);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -62,12 +68,7 @@ public class IncreaseQuantityTest : ApiTest
         var productId = Guid.NewGuid();
         var quantityPlus = 10;
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantityPlus}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, quantityPlus);
         var expectedJson = MakeSystemErrorApiOutput(new IncreaseQuantityCommandHandler.ProductNotFoundError(productId));
 
         // Act
@@ -93,18 +94,14 @@ public class IncreaseQuantityTest : ApiTest
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
-    [Fact] public async Task WhenNotSeller_ThenReturnsForbidden()
+    [Fact]
+    public async Task WhenNotSeller_ThenReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();
         var quantityPlus = 10;
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantityPlus}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, quantityPlus, "Default");
 
         // Act
         var response = await HttpClient.SendAsync(request);

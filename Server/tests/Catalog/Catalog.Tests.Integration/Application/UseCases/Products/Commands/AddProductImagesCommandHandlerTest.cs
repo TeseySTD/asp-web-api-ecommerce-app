@@ -22,11 +22,19 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Product CreateTestProduct(Guid id) => Product.Create(
+        ProductId.Create(id).Value,
+        ProductTitle.Create("Test Title").Value,
+        ProductDescription.Create("Test Description").Value,
+        ProductPrice.Create(10).Value,
+        categoryId: null
+    );
+
     [Fact]
     public async Task WhenProductNotFound_ThenReturnsFailureResult()
     {
         // Arrange
-        var cmd = new AddProductImagesCommand(Guid.NewGuid(), new[] { new ImageDto("f.jpg", "Png", [ 1 ]) });
+        var cmd = new AddProductImagesCommand(Guid.NewGuid(), new[] { new ImageDto("f.jpg", "Png", [1]) });
         var handler = new AddProductImagesCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -42,25 +50,20 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var id = Guid.NewGuid();
-        var product = Product.Create(
-            ProductId.Create(id).Value,
-            ProductTitle.Create("Test Title").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(10).Value,
-            categoryId: null
-        );
+        var product = CreateTestProduct(id);
         product.StockQuantity = StockQuantity.Create(100).Value;
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var images = Enumerable.Range(1, Product.MaxImagesCount + 1).Select(i => new ImageDto(i.ToString(), "Png", [1])).ToList(); 
+        var images = Enumerable.Range(1, Product.MaxImagesCount + 1).Select(i => new ImageDto(i.ToString(), "Png", [1]))
+            .ToList();
 
         var cmd = new AddProductImagesCommand(id, images);
         var handler = new AddProductImagesCommandHandler(ApplicationDbContext, _cache);
-        
+
         // Act
         var result = await handler.Handle(cmd, default);
-        
+
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e is AddProductImagesCommandHandler.MaxImagesError);
@@ -71,13 +74,7 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var id = Guid.NewGuid();
-        var product = Product.Create(
-            ProductId.Create(id).Value,
-            ProductTitle.Create("Test Title").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(10).Value,
-            categoryId: null
-        );
+        var product = CreateTestProduct(id);
         product.StockQuantity = StockQuantity.Create(100).Value;
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);

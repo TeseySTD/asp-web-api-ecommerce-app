@@ -20,18 +20,31 @@ public class DeleteProductImageTest : ApiTest
 
     private const string RequestUrl = "/api/products";
 
+    private HttpRequestMessage GenerateRequest(Guid productId, Guid imageId, string role = "Seller")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}/images/{imageId}");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return request;
+    }
+
+    private Product CreateTestProduct(Guid productId) => Product.Create(
+        id: ProductId.Create(productId).Value,
+        title: ProductTitle.Create("Test Product").Value,
+        description: ProductDescription.Create("Test Product").Value,
+        price: ProductPrice.Create(10).Value,
+        null
+    );
+
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = Product.Create(
-            id: ProductId.Create(productId).Value,
-            title: ProductTitle.Create("Test Product").Value,
-            description: ProductDescription.Create("Test Product").Value,
-            price: ProductPrice.Create(10).Value,
-            null
-        );
+        var product = CreateTestProduct(productId);
         product.StockQuantity = StockQuantity.Create(1).Value;
         var image = Image.Create(
             FileName.Create("test.jpg").Value,
@@ -46,12 +59,7 @@ public class DeleteProductImageTest : ApiTest
         product.AddImage(image);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}/images/{image.Id.Value}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, image.Id.Value);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -72,13 +80,7 @@ public class DeleteProductImageTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = Product.Create(
-            id: ProductId.Create(productId).Value,
-            title: ProductTitle.Create("Test Product").Value,
-            description: ProductDescription.Create("Test Product").Value,
-            price: ProductPrice.Create(10).Value,
-            null
-        );
+        var product = CreateTestProduct(productId);
         product.StockQuantity = StockQuantity.Create(1).Value;
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
@@ -89,13 +91,7 @@ public class DeleteProductImageTest : ApiTest
             MakeSystemErrorApiOutput(
                 new DeleteProductImageCommandHandler.ImageNotFoundError(nonExistentImageId, productId));
 
-        var request =
-            new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}/images/{nonExistentImageId}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, nonExistentImageId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -117,12 +113,7 @@ public class DeleteProductImageTest : ApiTest
         var expectedJson =
             MakeSystemErrorApiOutput(new DeleteProductImageCommandHandler.ProductNotFoundError(productId));
 
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}/images/{imageId}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, imageId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -151,13 +142,7 @@ public class DeleteProductImageTest : ApiTest
     public async Task WhenNotSeller_ThenReturnsUnauthorized()
     {
         // Arrange
-        var request =
-            new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{Guid.NewGuid()}/images/{Guid.NewGuid()}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(Guid.NewGuid(), Guid.NewGuid(), "Default");
 
         // Act
         var response = await HttpClient.SendAsync(request);

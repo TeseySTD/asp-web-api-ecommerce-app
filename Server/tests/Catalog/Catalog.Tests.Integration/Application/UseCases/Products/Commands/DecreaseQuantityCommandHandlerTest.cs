@@ -23,6 +23,14 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Product CreateTestProduct(Guid id) => Product.Create(
+        ProductId.Create(id).Value,
+        ProductTitle.Create("Test Product").Value,
+        ProductDescription.Create("Test Description").Value,
+        ProductPrice.Create(10).Value,
+        null 
+    );
+
     [Fact]
     public async Task WhenProductNotFound_ThenReturnsFailureResult()
     {
@@ -44,24 +52,9 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var id = Guid.NewGuid();
-        var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
-        var product = Product.Create(
-            ProductId.Create(id).Value,
-            ProductTitle.Create("Test Product").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(10).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product = CreateTestProduct(id);
         product.StockQuantity = StockQuantity.Create(5).Value; // Only 5 in stock
-        
-        ApplicationDbContext.Categories.Add(category);
+
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -81,25 +74,10 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var id = Guid.NewGuid();
-        var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
-        var product = Product.Create(
-            ProductId.Create(id).Value,
-            ProductTitle.Create("Test Product").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(25.99m).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product = CreateTestProduct(id);
         uint initQuantity = 100;
         product.StockQuantity = StockQuantity.Create(initQuantity).Value;
-        
-        ApplicationDbContext.Categories.Add(category);
+
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -120,8 +98,8 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
                 .ThenInclude(c => c.Images)
             .Include(p => p.Images)
             .FirstAsync(p => p.Id == product.Id);
-        
-        updatedProduct.StockQuantity.Value.Should().Be(initQuantity - minusQuantity); 
+
+        updatedProduct.StockQuantity.Value.Should().Be(initQuantity - minusQuantity);
 
         // Verify cache update
         var bytes = JsonSerializer.SerializeToUtf8Bytes(updatedProduct.Adapt<ProductReadDto>());

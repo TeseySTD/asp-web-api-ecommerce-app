@@ -25,24 +25,26 @@ public class GetCategoryByIdQueryHandlerTest : IntegrationTest
         ConfigureMapster();
     }
 
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("Test").Value,
+        CategoryDescription.Create("Test description").Value
+    );
+
     [Fact]
     public async Task WhenCached_ReturnsFromCacheWithoutDbCall()
     {
         // Arrange
-        var existingCategory = Category.Create(
-            CategoryId.Create(Guid.NewGuid()).Value,
-            CategoryName.Create("SampleCategory").Value,
-            CategoryDescription.Create("Sample description").Value
-        );
+        var existingCategory = CreateTestCategory(Guid.NewGuid()); 
         ApplicationDbContext.Categories.Add(existingCategory);
         await ApplicationDbContext.SaveChangesAsync(default);
-        
+
         var categoryIdValue = existingCategory.Id.Value;
-        
+
         var dto = new CategoryReadDto(categoryIdValue, "CachedName", "CachedDescription", Array.Empty<string>());
         var serializedDto = JsonSerializer.SerializeToUtf8Bytes(dto);
         _cache.GetAsync($"category-{categoryIdValue}").Returns(serializedDto);
-        
+
         // Act
         var result = await _handler.Handle(new GetCategoryByIdQuery(CategoryId.Create(categoryIdValue).Value), default);
 
@@ -58,14 +60,10 @@ public class GetCategoryByIdQueryHandlerTest : IntegrationTest
     public async Task WhenNotCachedAndExists_CachesAndReturnsCategory()
     {
         // Arrange
-        var category = Category.Create(
-            CategoryId.Create(Guid.NewGuid()).Value,
-            CategoryName.Create("SampleCategory").Value,
-            CategoryDescription.Create("Sample description").Value
-        );
+        var category = CreateTestCategory(Guid.NewGuid());
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync(default);
-        
+
         _cache.GetAsync($"category-{category.Id.Value}").Returns([]);
 
         // Act
@@ -74,7 +72,7 @@ public class GetCategoryByIdQueryHandlerTest : IntegrationTest
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Id.Should().Be(category.Id.Value);
-        
+
         var bytes = JsonSerializer.SerializeToUtf8Bytes(category.Adapt<CategoryReadDto>());
         await _cache.Received(1).SetAsync(
             $"category-{category.Id.Value}",

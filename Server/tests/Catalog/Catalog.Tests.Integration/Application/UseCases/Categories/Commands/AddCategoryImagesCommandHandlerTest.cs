@@ -25,6 +25,12 @@ public class AddCategoryImagesCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("Category").Value,
+        CategoryDescription.Create("Description").Value
+    );
+
     [Fact]
     public async Task WhenCategoryNotFound_ThenReturnsFailureResult()
     {
@@ -43,16 +49,12 @@ public class AddCategoryImagesCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenImagesExceedMax_ThenReturnsFailureResult()
+    public async Task WhenImagesExceedMaximum_ThenReturnsFailureResult()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Category").Value,
-            CategoryDescription.Create("Description").Value
-        );
-        for (int i = 0; i < Category.MaxImagesCount + 1; i++)
+        var category = CreateTestCategory(categoryId);
+        for (int i = 0; i < Category.MaxImagesCount; i++)
         {
             var img = Image.Create(FileName.Create($"f{i}.jpg").Value, ImageData.Create(new byte[0]).Value,
                 ImageContentType.JPEG);
@@ -81,13 +83,9 @@ public class AddCategoryImagesCommandHandlerTest : IntegrationTest
     [Fact]
     public async Task WhenValidImages_ThenAddsImages_SavesContext_AndCachesDto()
     {
-        // Arrange: empty category
+        // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Category").Value,
-            CategoryDescription.Create("Description").Value
-        );
+        var category = CreateTestCategory(categoryId); 
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -97,6 +95,7 @@ public class AddCategoryImagesCommandHandlerTest : IntegrationTest
             new ImageDto("b.png", "Png", new byte[] { 4, 5, 6 })
         };
         var cmd = new AddCategoryImagesCommand(categoryId, images);
+        
         ConfigureMapster();
         var handler = new AddCategoryImagesCommandHandler(ApplicationDbContext, _cache);
 
@@ -105,7 +104,7 @@ public class AddCategoryImagesCommandHandlerTest : IntegrationTest
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        
+
         var updated = await ApplicationDbContext.Categories
             .Include(c => c.Images)
             .FirstOrDefaultAsync(c => c.Id == CategoryId.Create(categoryId).Value);

@@ -16,6 +16,17 @@ public class DeleteProductTest : ApiTest
 
     private const string RequestUrl = "/api/products";
 
+    private HttpRequestMessage GenerateRequest(Guid productId, string role = "Seller")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return request;
+    }
+
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
     {
@@ -33,12 +44,7 @@ public class DeleteProductTest : ApiTest
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -53,12 +59,7 @@ public class DeleteProductTest : ApiTest
         // Arrange
         var productId = Guid.NewGuid();
 
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId);
 
         var expectedJson = MakeSystemErrorApiOutput(new DeleteProductCommandHandler.ProductNotFoundError(productId));
 
@@ -90,16 +91,11 @@ public class DeleteProductTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Defaults"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        
+        var request = GenerateRequest(productId, "Default");
+
         // Act
         var response = await HttpClient.SendAsync(request);
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }

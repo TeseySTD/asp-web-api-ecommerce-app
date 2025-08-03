@@ -24,19 +24,35 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("Test Category").Value,
+        CategoryDescription.Create("Test Description").Value
+    );
+
+    private Product CreateTestProduct(Guid id, CategoryId? categoryId = null) => Product.Create(
+        ProductId.Create(id).Value,
+        ProductTitle.Create("Test Product").Value,
+        ProductDescription.Create("Test Description").Value,
+        ProductPrice.Create(10).Value,
+        categoryId
+    );
+
+    private ProductUpdateDto GenerateProductUpdateDto(Guid productId, Guid? categoryId = null) => new(
+        Id: productId,
+        Title: "Updated",
+        Description: "Updated description",
+        Price: 2m,
+        CategoryId: categoryId,
+        Quantity: 2
+    );
+
     [Fact]
     public async Task WhenProductNotFound_ThenReturnsFailureResult()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
-        var dto = new ProductUpdateDto(
-            Id: nonExistentId,
-            Title: "Any",
-            Description: "Any",
-            Price: 5m,
-            CategoryId: null,
-            Quantity: 1
-        );
+        var dto = GenerateProductUpdateDto(nonExistentId);
         var cmd = new UpdateProductCommand(dto);
         var handler = new UpdateProductCommandHandler(ApplicationDbContext, _cache);
 
@@ -53,28 +69,14 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-
-        var product = Product.Create(
-            ProductId.Create(productId).Value,
-            ProductTitle.Create("Title").Value,
-            ProductDescription.Create("Description").Value,
-            ProductPrice.Create(1m).Value,
-            null
-        );
+        var product = CreateTestProduct(productId);
         product.StockQuantity = StockQuantity.Create(1).Value;
 
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var invalidCategoryId = Guid.NewGuid();
-        var dto = new ProductUpdateDto(
-            Id: productId,
-            Title: "Updated",
-            Description: "Updated description",
-            Price: 2m,
-            CategoryId: invalidCategoryId,
-            Quantity: 2
-        );
+        var dto = GenerateProductUpdateDto(productId, invalidCategoryId);
         var cmd = new UpdateProductCommand(dto);
         var handler = new UpdateProductCommandHandler(ApplicationDbContext, _cache);
 
@@ -87,44 +89,24 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidData_ThenUpdatesProduct_SavesContext_AndCachesDto()
+    public async Task WhenValidData_ThenUpdatesProductSavesContextAndCachesDto()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Old Category").Value,
-            CategoryDescription.Create("Old Description").Value
-        );
-        var prodId = Guid.NewGuid();
-        var product = Product.Create(
-            ProductId.Create(prodId).Value,
-            ProductTitle.Create("Old Title").Value,
-            ProductDescription.Create("Old Description").Value,
-            ProductPrice.Create(10m).Value,
-            category.Id
-        );
-        product.StockQuantity = StockQuantity.Create(10).Value;
-        var newCategoryId = Guid.NewGuid();
-        var newCategory = Category.Create(
-            CategoryId.Create(newCategoryId).Value,
-            CategoryName.Create("New Category").Value,
-            CategoryDescription.Create("New Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
 
-        ApplicationDbContext.Categories.Add(category);
-        ApplicationDbContext.Categories.Add(newCategory);
+        var prodId = Guid.NewGuid();
+        var product = CreateTestProduct(prodId, category.Id);
+        product.StockQuantity = StockQuantity.Create(10).Value;
+
+        var newCategoryId = Guid.NewGuid();
+        var newCategory = CreateTestCategory(newCategoryId);
+
+        ApplicationDbContext.Categories.AddRange(category, newCategory);
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var dto = new ProductUpdateDto(
-            Id: prodId,
-            Title: "New Title",
-            Description: "New Description",
-            Price: 20.5m,
-            CategoryId: newCategoryId,
-            Quantity: 25
-        );
+        var dto = GenerateProductUpdateDto(prodId, newCategoryId);
 
         ConfigureMapster();
         var cmd = new UpdateProductCommand(dto);

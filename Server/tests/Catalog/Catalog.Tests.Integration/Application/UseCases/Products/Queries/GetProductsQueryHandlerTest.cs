@@ -41,11 +41,11 @@ public class GetProductsQueryHandlerTest : IntegrationTest
     public async Task WhenProductsExist_ThenReturnsPaginatedResult()
     {
         // Arrange
-        var catId = Guid.NewGuid();
+        var categoryId = Guid.NewGuid();
         var category = Category.Create(
-            CategoryId.Create(catId).Value,
-            CategoryName.Create("Cat1").Value,
-            CategoryDescription.Create("Desc1").Value
+            CategoryId.Create(categoryId).Value,
+            CategoryName.Create("Category").Value,
+            CategoryDescription.Create("Description").Value
         );
         ApplicationDbContext.Categories.Add(category);
 

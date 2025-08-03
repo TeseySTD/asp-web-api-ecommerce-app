@@ -24,6 +24,31 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("Test").Value,
+        CategoryDescription.Create("Test description").Value
+    );
+
+    private List<Product> CreateTestProducts(CategoryId? categoryId = null)
+    {
+        var products = new List<Product>();
+        for (int i = 0; i < 3; i++)
+        {
+            var product = Product.Create(
+                ProductId.Create(Guid.NewGuid()).Value,
+                ProductTitle.Create($"Title {i}").Value,
+                ProductDescription.Create("Desccription").Value,
+                ProductPrice.Create(1m).Value,
+                categoryId
+            );
+            product.StockQuantity = StockQuantity.Create(1).Value;
+            products.Add(product);
+        }
+
+        return products;
+    }
+
     [Fact]
     public async Task WhenCategoryNotFound_ThenReturnsFailureResult()
     {
@@ -34,7 +59,7 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
             Name: "Updated Category",
             Description: "Updated Description"
         );
-        
+
         var cmd = new UpdateCategoryCommand(updateDto);
         var handler = new UpdateCategoryCommandHandler(ApplicationDbContext, _cache);
 
@@ -51,34 +76,11 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Electronics").Value,
-            CategoryDescription.Create("Electronic devices").Value
-        );
-
-        var product1Id = Guid.NewGuid();
-        var product1 = Product.Create(
-            ProductId.Create(product1Id).Value,
-            ProductTitle.Create("Laptop").Value,
-            ProductDescription.Create("Gaming laptop").Value,
-            ProductPrice.Create(1500).Value,
-            CategoryId.Create(categoryId).Value
-        );
-        product1.StockQuantity = StockQuantity.Create(1).Value;
-
-        var product2Id = Guid.NewGuid();
-        var product2 = Product.Create(
-            ProductId.Create(product2Id).Value,
-            ProductTitle.Create("Phone").Value,
-            ProductDescription.Create("Smart phone").Value,
-            ProductPrice.Create(800).Value,
-            CategoryId.Create(categoryId).Value
-        );
-        product2.StockQuantity = StockQuantity.Create(1).Value;
-        
+        var category = CreateTestCategory(categoryId);
         ApplicationDbContext.Categories.Add(category);
-        ApplicationDbContext.Products.AddRange(product1, product2);
+
+        var products = CreateTestProducts(category.Id);
+        ApplicationDbContext.Products.AddRange(products);
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var updateDto = new CategoryWriteDto(
@@ -100,7 +102,7 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
         // Verify category updated
         var updatedCategory = await ApplicationDbContext.Categories
             .FirstAsync(c => c.Id == category.Id);
-        
+
         updatedCategory.Name.Value.Should().Be(updateDto.Name);
         updatedCategory.Description.Value.Should().Be(updateDto.Description);
 
@@ -113,8 +115,11 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
         );
 
         // Verify product cache invalidation
-        await _cache.Received(1).RemoveAsync($"product-{product1Id}");
-        await _cache.Received(1).RemoveAsync($"product-{product2Id}");
+        foreach (var p in products)
+        {
+            await _cache.Received(1).RemoveAsync($"product-{p.Id.Value}");
+        }
+
     }
 
     [Fact]
@@ -122,14 +127,13 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Empty Category").Value,
-            CategoryDescription.Create("Category with no products").Value
-        );
-        
+        var category = CreateTestCategory(categoryId);
         ApplicationDbContext.Categories.Add(category);
+        
+        var products = CreateTestProducts();
+        ApplicationDbContext.Products.AddRange(products);
         await ApplicationDbContext.SaveChangesAsync(default);
+
 
         var updateDto = new CategoryWriteDto(
             Id: categoryId,
@@ -150,7 +154,7 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
         // Verify category updated
         var updatedCategory = await ApplicationDbContext.Categories
             .FirstAsync(c => c.Id == category.Id);
-        
+
         updatedCategory.Name.Value.Should().Be(updateDto.Name);
         updatedCategory.Description.Value.Should().Be(updateDto.Description);
 
@@ -162,11 +166,10 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
             Arg.Any<CancellationToken>()
         );
 
-        // Verify no product cache invalidation calls (since no products exist)
-        var removeCalls = _cache.ReceivedCalls()
-            .Where(call => call.GetMethodInfo().Name == "RemoveAsync")
-            .ToList();
-        
-        removeCalls.Should().BeEmpty();
+        // Check that only category cache was cleared
+        foreach (var p in products)
+        {
+            await _cache.DidNotReceive().RemoveAsync($"product-{p.Id.Value}");
+        }
     }
 }

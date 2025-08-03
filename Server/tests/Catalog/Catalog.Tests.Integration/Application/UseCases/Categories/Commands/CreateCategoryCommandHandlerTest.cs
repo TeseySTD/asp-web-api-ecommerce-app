@@ -61,9 +61,10 @@ public class CreateCategoryCommandHandlerTest : IntegrationTest
         
         // Replace context to throw on save
         var faultyContext = Substitute.For<IApplicationDbContext>();
+        var exception = new InvalidOperationException("Database error");
         faultyContext.Categories.Returns(ApplicationDbContext.Categories);
         faultyContext.When(c => c.SaveChangesAsync(Arg.Any<CancellationToken>()))
-            .Do(_ => throw new InvalidOperationException("Database error"));
+            .Do(_ => throw exception );
 
         var command = new CreateCategoryCommand(categoryName, categoryDescription);
         var handler = new CreateCategoryCommandHandler(faultyContext, _cache);
@@ -73,6 +74,6 @@ public class CreateCategoryCommandHandlerTest : IntegrationTest
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().Contain(e => e.Message.Contains("Database error"));
+        result.Errors.Should().Contain(e => e.Message.Contains(exception.Message));
     }
 }

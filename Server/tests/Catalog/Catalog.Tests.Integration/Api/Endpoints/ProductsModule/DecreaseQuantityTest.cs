@@ -16,8 +16,18 @@ public class DecreaseQuantityTest : ApiTest
     {
     }
 
-
     private const string RequestUrl = "/api/products/decrease-quantity";
+
+    private HttpRequestMessage GenerateRequest(Guid productId, int quantity,string role = "Seller")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantity}");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return request;
+    }
 
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
@@ -38,12 +48,7 @@ public class DecreaseQuantityTest : ApiTest
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantityMinus}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, quantityMinus);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -64,12 +69,7 @@ public class DecreaseQuantityTest : ApiTest
         var productId = Guid.NewGuid();
         var quantityMinus = 10;
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantityMinus}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, quantityMinus);
         var expectedJson = MakeSystemErrorApiOutput(new DecreaseQuantityCommandHandler.ProductNotFoundError(productId));
 
         // Act
@@ -102,12 +102,7 @@ public class DecreaseQuantityTest : ApiTest
         var productId = Guid.NewGuid();
         var quantityMinus = 10;
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantityMinus}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var request = GenerateRequest(productId, quantityMinus, "Default"); 
 
         // Act
         var response = await HttpClient.SendAsync(request);

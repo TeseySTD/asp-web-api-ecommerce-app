@@ -20,6 +20,14 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Product CreateTestProduct(Guid id) => Product.Create(
+        ProductId.Create(id).Value,
+        ProductTitle.Create("Test Product").Value,
+        ProductDescription.Create("Test Description").Value,
+        ProductPrice.Create(10).Value,
+        null
+    );
+
     [Fact]
     public async Task WhenProductNotFound_ThenReturnsFailureResult()
     {
@@ -41,24 +49,9 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var id = Guid.NewGuid();
-        var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
-        var product = Product.Create(
-            ProductId.Create(id).Value,
-            ProductTitle.Create("Test Product").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(25.99m).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product = CreateTestProduct(id);
         product.StockQuantity = StockQuantity.Create(100).Value;
-        
-        ApplicationDbContext.Categories.Add(category);
+
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -85,24 +78,9 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var id = Guid.NewGuid();
-        var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
-        var product = Product.Create(
-            ProductId.Create(id).Value,
-            ProductTitle.Create("Test Product").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(15.50m).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product = CreateTestProduct(id);
         product.StockQuantity = StockQuantity.Create(50).Value;
-        
-        ApplicationDbContext.Categories.Add(category);
+
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -129,34 +107,14 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     public async Task WhenMultipleProductsExist_ThenDeletesOnlySpecifiedProduct()
     {
         // Arrange
-        var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-
         var product1Id = Guid.NewGuid();
-        var product1 = Product.Create(
-            ProductId.Create(product1Id).Value,
-            ProductTitle.Create("Product 1").Value,
-            ProductDescription.Create("Description 1").Value,
-            ProductPrice.Create(10).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product1 = CreateTestProduct(product1Id);
         product1.StockQuantity = StockQuantity.Create(100).Value;
-        
+
         var product2Id = Guid.NewGuid();
-        var product2 = Product.Create(
-            ProductId.Create(product2Id).Value,
-            ProductTitle.Create("Product 2").Value,
-            ProductDescription.Create("Description 2").Value,
-            ProductPrice.Create(20).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product2 = CreateTestProduct(product2Id);
         product2.StockQuantity = StockQuantity.Create(50).Value;
 
-        ApplicationDbContext.Categories.Add(category);
         ApplicationDbContext.Products.AddRange(product1, product2);
         await ApplicationDbContext.SaveChangesAsync(default);
 

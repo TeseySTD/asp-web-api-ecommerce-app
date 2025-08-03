@@ -18,16 +18,19 @@ public class AddCategoryImagesTest : ApiTest
 
     private const string RequestUrl = "/api/categories";
 
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("Test Category").Value,
+        CategoryDescription.Create("Test Description").Value
+    );
+
+
     [Fact]
     public async Task WhenValidImages_ThenReturnsOk()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
 
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();
@@ -61,11 +64,7 @@ public class AddCategoryImagesTest : ApiTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
 
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();
@@ -85,11 +84,7 @@ public class AddCategoryImagesTest : ApiTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
 
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();
@@ -119,11 +114,7 @@ public class AddCategoryImagesTest : ApiTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
 
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();

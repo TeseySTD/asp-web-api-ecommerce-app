@@ -25,6 +25,14 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Product CreateTestProduct(Guid id) => Product.Create(
+        ProductId.Create(id).Value,
+        ProductTitle.Create("Test Product").Value,
+        ProductDescription.Create("Test Description").Value,
+        ProductPrice.Create(10).Value,
+        null
+    );
+
     [Fact]
     public async Task WhenProductNotFound_ThenReturnsFailureResult()
     {
@@ -47,24 +55,9 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
-        var product = Product.Create(
-            ProductId.Create(productId).Value,
-            ProductTitle.Create("Test Product").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(25.99m).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product = CreateTestProduct(productId);
         product.StockQuantity = StockQuantity.Create(1).Value;
-        
-        ApplicationDbContext.Categories.Add(category);
+
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -85,30 +78,15 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
-        var product = Product.Create(
-            ProductId.Create(productId).Value,
-            ProductTitle.Create("Test Product").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(25.99m).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product = CreateTestProduct(productId);
         product.StockQuantity = StockQuantity.Create(33).Value;
-        
+
         var orphanImage = Image.Create(
             FileName.Create("orphan.jpg").Value,
             ImageData.Create([1, 2, 3]).Value,
             ImageContentType.JPEG
         );
-        
-        ApplicationDbContext.Categories.Add(category);
+
         ApplicationDbContext.Products.Add(product);
         ApplicationDbContext.Images.Add(orphanImage);
         await ApplicationDbContext.SaveChangesAsync(default);
@@ -129,40 +107,25 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
-        var product = Product.Create(
-            ProductId.Create(productId).Value,
-            ProductTitle.Create("Test Product").Value,
-            ProductDescription.Create("Test Description").Value,
-            ProductPrice.Create(25.99m).Value,
-            CategoryId.Create(categoryId).Value
-        );
+        var product = CreateTestProduct(productId);
         product.StockQuantity = StockQuantity.Create(33).Value;
-        
+
         var image1 = Image.Create(
             FileName.Create("image1.jpg").Value,
-            ImageData.Create([1, 2, 3 ]).Value,
+            ImageData.Create([1, 2, 3]).Value,
             ImageContentType.JPEG
         );
-        
+
         var image2 = Image.Create(
             FileName.Create("image2.png").Value,
-            ImageData.Create([4, 5, 6 ]).Value,
+            ImageData.Create([4, 5, 6]).Value,
             ImageContentType.PNG
         );
-        
-        ApplicationDbContext.Categories.Add(category);
+
         ApplicationDbContext.Products.Add(product);
         ApplicationDbContext.Images.AddRange(image1, image2);
         await ApplicationDbContext.SaveChangesAsync(default);
-        
+
         product.AddImage(image1);
         product.AddImage(image2);
         await ApplicationDbContext.SaveChangesAsync(default);
@@ -182,7 +145,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
                 .ThenInclude(c => c.Images)
             .Include(p => p.Images)
             .FirstAsync(p => p.Id == product.Id);
-        
+
         updatedProduct.Images.Should().HaveCount(1);
         updatedProduct.Images.Should().NotContain(i => i.Id == image1.Id);
         updatedProduct.Images.Should().Contain(i => i.Id == image2.Id);

@@ -29,6 +29,14 @@ public class ReserveProductsMessageHandlerTest : IntegrationTest
         _logger = Substitute.For<ILogger<IntegrationMessageHandler<ReserveProductsMessage>>>();
     }
 
+    private Product CreateTestProduct(Guid productId) => Product.Create(
+        ProductId.Create(productId).Value,
+        ProductTitle.Create("Title").Value,
+        ProductDescription.Create("Description").Value,
+        ProductPrice.Create(5m).Value,
+        null
+    );
+
     [Fact]
     public async Task WhenMissingProducts_ThenPublishesFailedEvent()
     {
@@ -63,23 +71,10 @@ public class ReserveProductsMessageHandlerTest : IntegrationTest
     public async Task WhenInsufficientQuantity_ThenPublishesFailedEvent()
     {
         // Arrange
-        var categoryId = Guid.NewGuid();
-        var cat = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Category").Value,
-            CategoryDescription.Create("Description").Value
-        );
         var prodId = Guid.NewGuid();
-        var product = Product.Create(
-            ProductId.Create(prodId).Value,
-            ProductTitle.Create("Title").Value,
-            ProductDescription.Create("Description").Value,
-            ProductPrice.Create(5m).Value,
-            cat.Id
-        );
+        var product = CreateTestProduct(prodId);
         product.StockQuantity = StockQuantity.Create(1).Value;
 
-        ApplicationDbContext.Categories.Add(cat);
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -114,23 +109,8 @@ public class ReserveProductsMessageHandlerTest : IntegrationTest
     public async Task WhenValidReservation_ThenUpdatesQuantities_AndPublishesReservedEvent()
     {
         // Arrange
-        var categoryId = Guid.NewGuid();
-        var cat = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Category").Value,
-            CategoryDescription.Create("Description").Value
-        );
-        ApplicationDbContext.Categories.Add(cat);
-        await ApplicationDbContext.SaveChangesAsync(default);
-
         var prodId = Guid.NewGuid();
-        var product = Product.Create(
-            ProductId.Create(prodId).Value,
-            ProductTitle.Create("Title").Value,
-            ProductDescription.Create("Description").Value,
-            ProductPrice.Create(5m).Value,
-            cat.Id
-        );
+        var product = CreateTestProduct(prodId);
         product.StockQuantity = StockQuantity.Create(10).Value;
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);

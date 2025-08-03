@@ -44,24 +44,17 @@ public class IncreaseQuantityCommandHandlerTest : IntegrationTest
     public async Task WhenValidData_ThenIncreasesQuantity_SavesContext_AndCachesDto()
     {
         // Arrange
-        var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
         var prodId = Guid.NewGuid();
         var product = Product.Create(
             ProductId.Create(prodId).Value,
             ProductTitle.Create("Title").Value,
             ProductDescription.Create("Descripction").Value,
             ProductPrice.Create(10m).Value,
-            category.Id
+            null
         );
         product.StockQuantity = StockQuantity.Create(10).Value;
 
         ApplicationDbContext.Products.Add(product);
-        ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var increaseBy = 7u;

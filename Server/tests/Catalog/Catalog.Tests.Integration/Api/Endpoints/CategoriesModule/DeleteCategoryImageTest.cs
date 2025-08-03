@@ -19,16 +19,18 @@ public class DeleteCategoryImageTest : ApiTest
 
     private const string RequestUrl = "/api/categories";
 
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("Test Category").Value,
+        CategoryDescription.Create("Test Description").Value
+    );
+
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
 
         var image = Image.Create(
             FileName.Create("test.jpg").Value,
@@ -62,12 +64,8 @@ public class DeleteCategoryImageTest : ApiTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-
+        var category = CreateTestCategory(categoryId);
+        
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();
 

@@ -35,7 +35,7 @@ public class ProductUpdatedDomainEventHandlerTest : IntegrationTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var cat = Category.Create(
+        var category = Category.Create(
             CategoryId.Create(categoryId).Value,
             CategoryName.Create("Category").Value,
             CategoryDescription.Create("Description").Value
@@ -46,9 +46,11 @@ public class ProductUpdatedDomainEventHandlerTest : IntegrationTest
             ProductTitle.Create("Title").Value,
             ProductDescription.Create("Description").Value,
             ProductPrice.Create(10m).Value,
-            cat.Id
+            category.Id
         );
-        product.StockQuantity = StockQuantity.Create(5).Value;
+        
+        // Update to set nav proprerty 'Category' and quantity
+        product.Update(product.Title, product.Description, product.Price, StockQuantity.Create(5).Value, category);
         var imageId = Guid.NewGuid();
         var image = Image.Create(
             ImageId.Create(imageId).Value,
@@ -78,7 +80,8 @@ public class ProductUpdatedDomainEventHandlerTest : IntegrationTest
                 e.Title == product.Title.Value &&
                 e.Description == product.Description.Value &&
                 e.Price == product.Price.Value &&
-                e.ImageUrls.Single() == expectedUrl
+                e.ImageUrls.Single() == expectedUrl &&
+                e.Category!.CategoryId == categoryId
             )
         );
     }

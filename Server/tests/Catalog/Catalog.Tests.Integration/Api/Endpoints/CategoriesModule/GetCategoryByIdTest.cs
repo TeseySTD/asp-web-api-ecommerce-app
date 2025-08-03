@@ -57,7 +57,7 @@ public class GetCategoryByIdTest : ApiTest
 
         result.Should().NotBeNull();
         result.Id.Should().Be(categoryId);
-        result.Name.Should().Be("Test Category");
-        result.Description.Should().Be("Test Description");
+        result.Name.Should().Be(category.Name.Value);
+        result.Description.Should().Be(category.Description.Value);
     }
 }

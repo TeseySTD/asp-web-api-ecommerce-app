@@ -24,6 +24,12 @@ public class DeleteCategoryImageCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("Category").Value,
+        CategoryDescription.Create("Description").Value
+    );
+
     [Fact]
     public async Task WhenCategoryNotFound_ThenReturnsCategoryNotFoundError()
     {
@@ -45,11 +51,7 @@ public class DeleteCategoryImageCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Category").Value,
-            CategoryDescription.Create("Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync(default);
 
@@ -66,15 +68,11 @@ public class DeleteCategoryImageCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidImage_ThenRemovesImage_SavesContext_AndUpdatesCache()
+    public async Task WhenValidImage_ThenRemovesImageSavesContextAndUpdatesCache()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Category").Value,
-            CategoryDescription.Create("Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
         var imageId = Guid.NewGuid();
         var image = Image.Create(
             ImageId.Create(imageId).Value,

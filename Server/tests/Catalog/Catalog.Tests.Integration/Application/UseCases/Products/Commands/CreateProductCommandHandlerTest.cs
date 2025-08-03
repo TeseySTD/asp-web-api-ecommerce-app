@@ -23,19 +23,29 @@ public class CreateProductCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("SampleCategory").Value,
+        CategoryDescription.Create("Sample description").Value
+    );
+
+    private ProductWriteDto CreateTestProductWriteDto(Guid id, Guid categoryId) => new ProductWriteDto(
+        Id: id,
+        Title: "New Product",
+        Description: "New Description",
+        Price: 20,
+        CategoryId: categoryId,
+        Quantity: 100
+    );
+
     [Fact]
     public async Task WhenProductAlreadyExists_ThenReturnsFailureResult()
     {
         // Arrange
         var id = Guid.NewGuid();
         var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
+        var category = CreateTestCategory(categoryId);
+
         var existingProduct = Product.Create(
             ProductId.Create(id).Value,
             ProductTitle.Create("Existing Product").Value,
@@ -44,20 +54,13 @@ public class CreateProductCommandHandlerTest : IntegrationTest
             CategoryId.Create(categoryId).Value
         );
         existingProduct.StockQuantity = StockQuantity.Create(100).Value;
-        
+
         ApplicationDbContext.Categories.Add(category);
         ApplicationDbContext.Products.Add(existingProduct);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var createProductDto = new ProductWriteDto(
-            Id: id,
-            Title: "New Product",
-            Description: "New Description",
-            Price: 20,
-            CategoryId: categoryId,
-            Quantity: 100
-        );
-        
+        var createProductDto = CreateTestProductWriteDto(id, categoryId);
+
         var cmd = new CreateProductCommand(createProductDto);
         var handler = new CreateProductCommandHandler(ApplicationDbContext, _cache);
 
@@ -76,15 +79,8 @@ public class CreateProductCommandHandlerTest : IntegrationTest
         var id = Guid.NewGuid();
         var nonExistentCategoryId = Guid.NewGuid();
 
-        var createProductDto = new ProductWriteDto(
-            Id: id,
-            Title: "New Product",
-            Description: "New Description",
-            Price: 20,
-            CategoryId: nonExistentCategoryId,
-            Quantity: 100
-        );
-        
+        var createProductDto =  CreateTestProductWriteDto(id, nonExistentCategoryId);
+
         var cmd = new CreateProductCommand(createProductDto);
         var handler = new CreateProductCommandHandler(ApplicationDbContext, _cache);
 
@@ -102,25 +98,13 @@ public class CreateProductCommandHandlerTest : IntegrationTest
         // Arrange
         var id = Guid.NewGuid();
         var categoryId = Guid.NewGuid();
-        
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
-        
+        var category = CreateTestCategory(categoryId);
+
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var createProductDto = new ProductWriteDto(
-            Id: id,
-            Title: "New Product",
-            Description: "New Description",
-            Price: 25.99m,
-            CategoryId: categoryId,
-            Quantity: 150
-        );
-
+        var createProductDto = CreateTestProductWriteDto(id, categoryId);
+        
         ConfigureMapster();
         var cmd = new CreateProductCommand(createProductDto);
         var handler = new CreateProductCommandHandler(ApplicationDbContext, _cache);
@@ -134,9 +118,9 @@ public class CreateProductCommandHandlerTest : IntegrationTest
         // Verify product created in DB
         var createdProduct = await ApplicationDbContext.Products
             .Include(p => p.Category)
-                .ThenInclude(c => c!.Images)
+            .ThenInclude(c => c!.Images)
             .FirstOrDefaultAsync(p => p.Id == ProductId.Create(id).Value);
-        
+
         createdProduct.Should().NotBeNull();
         createdProduct.Title.Value.Should().Be(createProductDto.Title);
         createdProduct.Description.Value.Should().Be(createProductDto.Description);
@@ -147,7 +131,7 @@ public class CreateProductCommandHandlerTest : IntegrationTest
         // Verify cache update
         var expectedDto = createdProduct.Adapt<ProductReadDto>();
         var bytes = JsonSerializer.SerializeToUtf8Bytes(expectedDto);
-        
+
         await _cache.Received(1).SetAsync(
             $"product-{id}",
             Arg.Is<byte[]>(b => b.SequenceEqual(bytes)),

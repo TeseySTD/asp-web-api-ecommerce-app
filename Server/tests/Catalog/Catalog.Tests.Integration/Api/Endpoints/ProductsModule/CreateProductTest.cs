@@ -22,18 +22,38 @@ public class CreateProductTest : ApiTest
 
     private const string RequestUrl = "/api/products";
 
+    private HttpRequestMessage GenerateRequest(AddProductRequest dto, string role = "Seller")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
+        return request;
+    }
+
+    private AddProductRequest GenerateAddProductRequest() => new
+    (
+        "Test Product",
+        "Test Description",
+        99.99m,
+        10,
+        Guid.NewGuid()
+    );
+
+    private Category CreateTestCategory(Guid categoryId) => Category.Create(
+        CategoryId.Create(categoryId).Value,
+        CategoryName.Create("Test Category").Value,
+        CategoryDescription.Create("Test Description").Value
+    );
+
     [Fact]
     public async Task WhenUnauthorized_ThenReturnsUnauthorized()
     {
         // Arrange
-        var request = new AddProductRequest
-        (
-            "Test Product",
-            "Test Description",
-            99.99m,
-            10,
-            Guid.NewGuid()
-        );
+        var request = GenerateAddProductRequest();
         var json = JsonConvert.SerializeObject(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -48,21 +68,8 @@ public class CreateProductTest : ApiTest
     public async Task WhenNotSeller_ThenReturnsForbidden()
     {
         // Arrange
-        var dto = new AddProductRequest
-        (
-            "Test Product",
-            "Test Description",
-            99.99m,
-            10,
-            Guid.NewGuid()
-        );
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
+        var dto = GenerateAddProductRequest();
+        var request = GenerateRequest(dto, "Default");
         // Act
         var response = await HttpClient.SendAsync(request);
 
@@ -76,30 +83,14 @@ public class CreateProductTest : ApiTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
+        
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var dto = new AddProductRequest
-        (
-            "Test Product",
-            "Test Description",
-            99.99m,
-            10,
-            categoryId
-        );
+        var dto = GenerateAddProductRequest() with { CategoryId = categoryId };
 
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
+        var request = GenerateRequest(dto);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -117,32 +108,17 @@ public class CreateProductTest : ApiTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Test Category").Value,
-            CategoryDescription.Create("Test Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
+        
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var dto = new AddProductRequest
-        (
-            "", // Empty title 
-            "Test Description",
-            99.99m,
-            10,
-            categoryId
-        );
+        var dto = GenerateAddProductRequest() with { Title = "", CategoryId = categoryId }; // Empty title
 
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
+        var request = GenerateRequest(dto);
 
-        var expectedJson = MakePropertyErrorApiOutput("Title", [new ProductTitle.TitleRequiredError(), new ProductTitle.OutOfLengthError()]);
+        var expectedJson = MakePropertyErrorApiOutput("Title",
+            [new ProductTitle.TitleRequiredError(), new ProductTitle.OutOfLengthError()]);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -152,31 +128,18 @@ public class CreateProductTest : ApiTest
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal(expectedJson, actualJson, ignoreAllWhiteSpace: true);
     }
-    
+
     [Fact]
     public async Task WhenCategoryNotFound_ThenReturnsBadRequest()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
 
-        var dto = new AddProductRequest
-        (
-            "Test Title", 
-            "Test Description",
-            99.99m,
-            10,
-            categoryId
-        );
+        var dto = GenerateAddProductRequest() with { CategoryId = categoryId };
 
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Seller"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
+        var request = GenerateRequest(dto);
 
-        var expectedJson = MakeSystemErrorApiOutput(new CreateProductCommandHandler.CategoryNotFoundError(categoryId)); 
+        var expectedJson = MakeSystemErrorApiOutput(new CreateProductCommandHandler.CategoryNotFoundError(categoryId));
 
         // Act
         var response = await HttpClient.SendAsync(request);
