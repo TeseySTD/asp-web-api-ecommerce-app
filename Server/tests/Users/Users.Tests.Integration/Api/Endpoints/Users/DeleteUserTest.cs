@@ -22,12 +22,10 @@ public class DeleteUserTest : ApiTest
         // Arrange
         var userId = Guid.NewGuid();
 
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{userId}");
-
         var expectedContent = MakeSystemErrorApiOutput(new DeleteUserCommandHandler.UserNotFoundError(userId));
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.DeleteAsync($"{RequestUrl}/{userId}");
         var actualContent = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -51,10 +49,8 @@ public class DeleteUserTest : ApiTest
         ApplicationDbContext.Users.Add(userToDelete);
         await ApplicationDbContext.SaveChangesAsync();
         
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{userToDelete.Id.Value}");
-        
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.DeleteAsync($"{RequestUrl}/{userToDelete.Id.Value}");
         
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

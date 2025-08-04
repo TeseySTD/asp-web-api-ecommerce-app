@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using Shared.Core.Auth;
 using Users.Application.Common.Interfaces;
@@ -10,7 +9,7 @@ using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Users.Commands.UpdateUser;
+namespace Users.Tests.Integration.Application.UseCases.Users.Commands;
 
 [TestSubject(typeof(UpdateUserCommandHandler))]
 public class UpdateUserCommandHandlerTest : IntegrationTest
@@ -20,7 +19,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     private const string DefaultEmail = "test@test.com";
     private const string DefaultPhoneNumber = "+380991234567";
 
-    private User CreateDefaultUser(Guid userId, string email = DefaultEmail, string phoneNumber = DefaultPhoneNumber) => User.Create(
+    private User CreateTestUser(Guid userId, string email = DefaultEmail, string phoneNumber = DefaultPhoneNumber) => User.Create(
         id: UserId.Create(userId).Value,
         name: UserName.Create("test").Value,
         email: Email.Create(email).Value,
@@ -29,7 +28,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
         hashedPassword: HashedPassword.Create("password").Value
     );
 
-    private UserUpdateDto CreateDefaultUserUpdateDto() => new(
+    private UserUpdateDto CreateTestUserUpdateDto() => new(
         Name: "test2",
         Email: "test2@test.com",
         PhoneNumber: "+380991234577",
@@ -43,12 +42,12 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenIdIsNotInDb_UpdateUserHandle_ShouldReturnFailureResult()
+    public async Task WhenIdIsNotInDb_ThenReturnsFailureResult()
     {
         // Arrange
-        var user = CreateDefaultUser(Guid.NewGuid());
+        var user = CreateTestUser(Guid.NewGuid());
         var userToUpdateId = Guid.NewGuid();
-        var dto = CreateDefaultUserUpdateDto();
+        var dto = CreateTestUserUpdateDto();
         
         var cmd = new UpdateUserCommand(userToUpdateId, dto);
         var handler = new UpdateUserCommandHandler(_passwordHelperMock, ApplicationDbContext);
@@ -65,13 +64,13 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenEmailIsInDb_UpdateUser_ShouldReturnFailureResult()
+    public async Task WhenEmailIsInDb_ThenReturnsFailureResult()
     {
         // Arrange
         var userToUpdateId = Guid.NewGuid();
-        var user = CreateDefaultUser(Guid.NewGuid());
-        var userToUpdate = CreateDefaultUser(userToUpdateId, email: "test2@test.com");
-        var dto = CreateDefaultUserUpdateDto() with {Email = DefaultEmail};
+        var user = CreateTestUser(Guid.NewGuid());
+        var userToUpdate = CreateTestUser(userToUpdateId, email: "test2@test.com");
+        var dto = CreateTestUserUpdateDto() with {Email = DefaultEmail};
         
         var cmd = new UpdateUserCommand(userToUpdateId, dto);
         var handler = new UpdateUserCommandHandler(_passwordHelperMock, ApplicationDbContext);
@@ -89,13 +88,13 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     }
     
     [Fact]
-    public async Task WhenPhoneNumberIsInDb_UpdateUser_ShouldReturnFailureResult()
+    public async Task WhenPhoneNumberIsInDb_ThenReturnsFailureResult()
     {
         // Arrange
         var userToUpdateId = Guid.NewGuid();
-        var user = CreateDefaultUser(Guid.NewGuid());
-        var userToUpdate = CreateDefaultUser(userToUpdateId, phoneNumber: "+380991234577");
-        var dto = CreateDefaultUserUpdateDto() with {PhoneNumber = DefaultPhoneNumber};
+        var user = CreateTestUser(Guid.NewGuid());
+        var userToUpdate = CreateTestUser(userToUpdateId, phoneNumber: "+380991234577");
+        var dto = CreateTestUserUpdateDto() with {PhoneNumber = DefaultPhoneNumber};
         
         var cmd = new UpdateUserCommand(userToUpdateId, dto);
         var handler = new UpdateUserCommandHandler(_passwordHelperMock, ApplicationDbContext);
@@ -113,12 +112,12 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_UpdateUser_ShouldReturnSuccessResult()
+    public async Task WhenDataIsCorrect_ThenReturnSuccessResult()
     {
         // Arrange
         var userToUpdateId = Guid.NewGuid();
-        var user = CreateDefaultUser(userToUpdateId);
-        var dto = CreateDefaultUserUpdateDto();
+        var user = CreateTestUser(userToUpdateId);
+        var dto = CreateTestUserUpdateDto();
         
         var cmd = new UpdateUserCommand(userToUpdateId, dto);
         var handler = new UpdateUserCommandHandler(_passwordHelperMock, ApplicationDbContext);

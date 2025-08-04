@@ -2,12 +2,11 @@
 using JetBrains.Annotations;
 using Users.Core.Models.ValueObjects;
 
-namespace Users.Tests.Unit.Application.Models.ValueObjects;
+namespace Users.Tests.Unit.Core.Models.ValueObjects;
 
 [TestSubject(typeof(HashedPassword))]
 public class HashedPasswordTest
 {
-
     [Theory]
     [InlineData("awdawdawdw")]
     [InlineData("hashashash")]

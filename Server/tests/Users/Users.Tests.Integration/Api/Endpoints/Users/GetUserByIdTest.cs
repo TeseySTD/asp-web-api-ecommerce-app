@@ -17,22 +17,20 @@ public class GetUserByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUserWithIdIsNotFound_ReturnsNotFound()
+    public async Task WhenUserWithIdIsNotFound_ThenReturnsNotFound()
     {
         // Arrange 
         var userId = Guid.NewGuid();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUrl}/{userId}");
-
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.GetAsync( $"{RequestUrl}/{userId}");
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
-    public async Task WhenUserWithIdIsFound_ReturnsUser()
+    public async Task WhenUserWithIdIsFound_ThenReturnsUser()
     {
         // Arrange
         var user = User.Create(
@@ -47,10 +45,8 @@ public class GetUserByIdTest : ApiTest
         ApplicationDbContext.Users.Add(user);
         await ApplicationDbContext.SaveChangesAsync();
         
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUrl}/{user.Id.Value}");
-        
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.GetAsync($"{RequestUrl}/{user.Id.Value}");
         var json = await response.Content.ReadAsStringAsync();
         
         // Assert

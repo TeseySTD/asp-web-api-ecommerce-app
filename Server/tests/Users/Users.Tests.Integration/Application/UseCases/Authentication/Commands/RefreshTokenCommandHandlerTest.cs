@@ -9,14 +9,14 @@ using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands.RefreshToken;
+namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands;
 
 [TestSubject(typeof(RefreshTokenCommandHandler))]
 public class RefreshTokenCommandHandlerTest : IntegrationTest
 {
     private ITokenProvider _tokenProviderMock;
 
-    private User CreateDefaultUser(UserId id) => User.Create(
+    private User CreateTestUser(UserId id) => User.Create(
         id: id,
         name: UserName.Create("test").Value,
         email: Email.Create("test@gmail.com").Value,
@@ -31,7 +31,7 @@ public class RefreshTokenCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenIsNotInDb_handler_ReturnsFailureResult()
+    public async Task WhenRefreshTokenIsNotInDb_ThenReturnsFailureResult()
     {
         // Arrange
         var refreshTokenString = "refreshToken";
@@ -47,11 +47,11 @@ public class RefreshTokenCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenIsExpired_handler_ReturnsFailureResult()
+    public async Task WhenRefreshTokenIsExpired_ThenReturnsFailureResult()
     {
         // Arrange
         var userId = UserId.Create(Guid.NewGuid()).Value;
-        var user = CreateDefaultUser(userId);
+        var user = CreateTestUser(userId);
         var refreshToken = Core.Models.Entities.RefreshToken.Create(
             "refreshToken",
             userId,
@@ -73,11 +73,11 @@ public class RefreshTokenCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenIsValid_handler_ReturnsSuccessResult()
+    public async Task WhenRefreshTokenIsValid_ThenReturnsSuccessResult()
     {
         // Arrange
         var userId = UserId.Create(Guid.NewGuid()).Value;
-        var user = CreateDefaultUser(userId);
+        var user = CreateTestUser(userId);
         var refreshToken = Core.Models.Entities.RefreshToken.Create(
             "refreshToken",
             userId,

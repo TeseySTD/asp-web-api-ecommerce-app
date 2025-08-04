@@ -7,7 +7,7 @@ using Users.Core.Models.Entities;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands.EmailVerification;
+namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands;
 
 [TestSubject(typeof(EmailVerificationCommandHandler))]
 public class EmailVerificationCommandHandlerTest : IntegrationTest
@@ -19,7 +19,7 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
             _defaultUserId,
             expiresOnUtc
         );
-    private User CreateDefaultUser() => User.Create(
+    private User CreateTestUser() => User.Create(
         id: _defaultUserId,
         name: UserName.Create("test").Value,
         email: Email.Create("test").Value,
@@ -33,7 +33,7 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenEmailVerificationTokenIsNotInDb_Handler_ReturnFailureResult()
+    public async Task WhenEmailVerificationTokenIsNotInDb_ThenReturnsFailureResult()
     {
         // Arrange
         var tokenId = Guid.NewGuid();
@@ -49,10 +49,10 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenEmailVerificationTokenExpired_Handler_ReturnFailureResult()
+    public async Task WhenEmailVerificationTokenExpired_ThenReturnsFailureResult()
     {
         // Arrange
-        var user = CreateDefaultUser();
+        var user = CreateTestUser();
         var token = CreateDefaultEmailVerificationToken(DateTime.UtcNow.AddSeconds(-1));
         var tokenId = token.Id;
         var cmd = new EmailVerificationCommand(tokenId.Value);
@@ -71,10 +71,10 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataCorrect_Handler_ReturnSuccessResult()
+    public async Task WhenDataCorrect_ThenReturnsSuccessResult()
     {
         // Arrange
-        var user = CreateDefaultUser();
+        var user = CreateTestUser();
         var token = CreateDefaultEmailVerificationToken(DateTime.UtcNow.AddMinutes(10));
         var tokenId = token.Id;
         var cmd = new EmailVerificationCommand(tokenId.Value);

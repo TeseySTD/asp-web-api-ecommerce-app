@@ -33,14 +33,12 @@ public class RefreshTest : ApiTest
         // Assert
         var refreshToken = "fake-refresh-token";
 
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{RequestUrl}?refreshToken={refreshToken}");
-
         var expectedJson =
             MakeSystemErrorApiOutput(
                 new RefreshTokenCommandHandler.TokenNotFoundError(refreshToken));
 
         // Act 
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PostAsync($"{RequestUrl}?refreshToken={refreshToken}", new StringContent(""));
         var actualJson = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -64,13 +62,11 @@ public class RefreshTest : ApiTest
         ApplicationDbContext.RefreshTokens.Add(refreshToken);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{RequestUrl}?refreshToken={refreshToken.Token}");
-
         var expectedJson =
             MakeSystemErrorApiOutput(
                 new RefreshTokenCommandHandler.TokenExpiredError(refreshToken.ExpiresOnUtc));
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PostAsync($"{RequestUrl}?refreshToken={refreshToken.Token}", new StringContent(""));
         var actualJson = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -94,10 +90,8 @@ public class RefreshTest : ApiTest
         ApplicationDbContext.RefreshTokens.Add(refreshToken);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{RequestUrl}?refreshToken={refreshToken.Token}");
-
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PostAsync($"{RequestUrl}?refreshToken={refreshToken.Token}", new StringContent(""));
         var actualJson = await response.Content.ReadAsStringAsync();
 
         // Assert

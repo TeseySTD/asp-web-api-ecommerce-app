@@ -9,7 +9,7 @@ namespace Users.Tests.Integration.Api.Endpoints.Users;
 
 public class GetAllUsersTest : ApiTest
 {
-    public const string RequestUri = "/api/users/";
+    public const string RequestUrl = "/api/users/";
 
     public GetAllUsersTest(IntegrationTestWebApplicationFactory factory, DatabaseFixture databaseFixture) : base(
         factory, databaseFixture)
@@ -44,11 +44,8 @@ public class GetAllUsersTest : ApiTest
     [Fact]
     public async Task WhenDbHasNoUsers_ThenReturnsNotFound()
     {
-        // Arrange
-        var request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
-
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.GetAsync(RequestUrl);
 
         // Assert 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -59,13 +56,11 @@ public class GetAllUsersTest : ApiTest
     {
         // Arrange 
         var users = CreateTestUsersList();
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUri}?pageIndex=1&pageSize={users.Count}");
-
         ApplicationDbContext.Users.AddRange(users);
         await ApplicationDbContext.SaveChangesAsync();
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.GetAsync($"{RequestUrl}?pageIndex=1&pageSize={users.Count}");
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -76,13 +71,11 @@ public class GetAllUsersTest : ApiTest
     {
         // Arrange
         var users = CreateTestUsersList();
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUri}?pageIndex={0}");
-
         ApplicationDbContext.Users.AddRange(users);
         await ApplicationDbContext.SaveChangesAsync();
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.GetAsync( $"{RequestUrl}?pageIndex={0}");
         var json = await response.Content.ReadAsStringAsync();
 
         // Assert

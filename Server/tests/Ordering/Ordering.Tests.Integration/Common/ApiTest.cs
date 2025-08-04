@@ -65,8 +65,8 @@ public class ApiTest : BaseIntegrationTest, IClassFixture<IntegrationTestWebAppl
                 (current, error) => current +
                                     "{" +
                                     $"""
-                                     "message":"{error.Message}",
-                                     "description":"{error.Description}"
+                                     "message":"{propertyName}",
+                                     "description":"{error.Message}:{error.Description}"
                                      """ +
                                     "},");
         // Remove last coma

@@ -2,7 +2,7 @@
 using JetBrains.Annotations;
 using Users.Core.Models.ValueObjects;
 
-namespace Users.Tests.Unit.Application.Models.ValueObjects;
+namespace Users.Tests.Unit.Core.Models.ValueObjects;
 
 [TestSubject(typeof(Email))]
 public class EmailTest

@@ -19,10 +19,10 @@ public class UpdateUserTest : ApiTest
     {
     }
 
-    private const string DefaultEmail = "test@test.com";
-    private const string DefaultPhoneNumber = "+380991234567";
+    private const string TestEmail = "test@test.com";
+    private const string TestPhoneNumber = "+380991234567";
 
-    private User CreateTestUser(Guid userId, string email = DefaultEmail, string phoneNumber = DefaultPhoneNumber) =>
+    private User CreateTestUser(Guid userId, string email = TestEmail, string phoneNumber = TestPhoneNumber) =>
         User.Create(
             id: UserId.Create(userId).Value,
             name: UserName.Create("test").Value,
@@ -60,13 +60,10 @@ public class UpdateUserTest : ApiTest
         // Arrange
         var userId = Guid.NewGuid();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userId}");
-        request.Content = GenerateRequestBody();
-
         var expectedContent = MakeSystemErrorApiOutput(new UpdateUserCommandHandler.UserNotFoundError(userId));
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PutAsync($"{RequestUrl}/{userId}", GenerateRequestBody());
         var actualContent = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -81,19 +78,18 @@ public class UpdateUserTest : ApiTest
         var user = CreateTestUser(Guid.NewGuid());
         var userToUpdateNumber = "+380991234577";
         var userToUpdate = CreateTestUser(Guid.NewGuid(), "test2@test.com", userToUpdateNumber);
-        var newEmail = DefaultEmail;
+        var newEmail = TestEmail;
 
         ApplicationDbContext.Users.Add(userToUpdate);
         ApplicationDbContext.Users.Add(user);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userToUpdate.Id.Value}");
-        request.Content = GenerateRequestBody(userToUpdate, email: newEmail);
+        var content = GenerateRequestBody(userToUpdate, email: newEmail);
 
         var expectedContent = MakeSystemErrorApiOutput(new UpdateUserCommandHandler.IncorrectEmailError(newEmail));
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PutAsync($"{RequestUrl}/{userToUpdate.Id.Value}", content);
         var actualContent = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -108,19 +104,17 @@ public class UpdateUserTest : ApiTest
         var user = CreateTestUser(Guid.NewGuid());
         var userToUpdateEmail = "test2@test.com";
         var userToUpdate = CreateTestUser(Guid.NewGuid(), userToUpdateEmail, "+380991234577");
-        var newPhoneNumber = DefaultPhoneNumber;
+        var newPhoneNumber = TestPhoneNumber;
 
-        ApplicationDbContext.Users.Add(userToUpdate);
-        ApplicationDbContext.Users.Add(user);
+        ApplicationDbContext.Users.AddRange(userToUpdate, user);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userToUpdate.Id.Value}");
-        request.Content = GenerateRequestBody(userToUpdate, phoneNumber: newPhoneNumber);
+        var content = GenerateRequestBody(userToUpdate, phoneNumber: newPhoneNumber);
 
         var expectedContent = MakeSystemErrorApiOutput(new UpdateUserCommandHandler.IncorrectPhoneNumberError(newPhoneNumber));
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PutAsync( $"{RequestUrl}/{userToUpdate.Id.Value}", content);
         var actualContent = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -138,11 +132,10 @@ public class UpdateUserTest : ApiTest
         ApplicationDbContext.Users.Add(userToUpdate);
         await ApplicationDbContext.SaveChangesAsync();  
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{userToUpdate.Id.Value}");
-        request.Content = GenerateRequestBody(userToUpdate, email: newEmail);
+        var content = GenerateRequestBody(userToUpdate, email: newEmail);
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PutAsync($"{RequestUrl}/{userToUpdate.Id.Value}", content);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

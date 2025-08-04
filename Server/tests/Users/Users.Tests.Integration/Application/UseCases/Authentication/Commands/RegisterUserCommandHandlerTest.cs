@@ -14,7 +14,7 @@ using Users.Core.Models.Entities;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands.Register;
+namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands;
 
 [TestSubject(typeof(RegisterUserCommandHandler))]
 public class RegisterUserCommandHandlerTest : IntegrationTest
@@ -27,7 +27,7 @@ public class RegisterUserCommandHandlerTest : IntegrationTest
     private readonly string _jwtTokenDefault = "jwtToken";
     private readonly string _refreshTokenStringDefault = "refreshToken";
     
-    private UserWriteDto CreateUserDto() => new (
+    private UserWriteDto CreateUserWriteDto() => new (
         Name: "Name",
         Email: "email@email.com",
         Password: "Password",
@@ -56,7 +56,7 @@ public class RegisterUserCommandHandlerTest : IntegrationTest
         _senderMock = Substitute.For<ISender>();
         _tokenProviderMock = Substitute.For<ITokenProvider>();
         _tokenProviderMock.GenerateRefreshToken(Arg.Any<User>()).Returns(u =>
-            Core.Models.Entities.RefreshToken.Create(
+            RefreshToken.Create(
                 token: _refreshTokenStringDefault,
                 ((User)u[0]).Id,
                 DateTime.UtcNow.AddMinutes(15) 
@@ -74,10 +74,10 @@ public class RegisterUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCreateUserFails_Handler_ReturnsFailureResult()
+    public async Task WhenCreateUserFails_ThenReturnsFailureResult()
     {
         // Arrange
-        var dto = CreateUserDto();
+        var dto = CreateUserWriteDto();
         var cmd = new RegisterUserCommand(dto);
         var handler = CreateRegisterUserCommandHandler();
 
@@ -94,10 +94,10 @@ public class RegisterUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenLinkFactoryFails_DoesNotSendEmailOrSaveTokens_ReturnsFailureResult()
+    public async Task WhenLinkFactoryFails_ThenDoesNotSendEmailOrSaveTokensAndReturnsFailureResult()
     {
         // Arrange
-        var dto = CreateUserDto();
+        var dto = CreateUserWriteDto();
         var userToCreate = CreateUserFromDto(dto);
         var cmd = new RegisterUserCommand(dto);
         var handler = CreateRegisterUserCommandHandler();
@@ -125,10 +125,10 @@ public class RegisterUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenAllServicesWorks_SavesTokens_AndSendsEmail_AndReturnsDtoSuccessResult()
+    public async Task WhenAllServicesWorks_ThenSavesTokensSendsEmailAndReturnsDtoSuccessResult()
     {
         // Arrange
-        var dto = CreateUserDto();
+        var dto = CreateUserWriteDto();
         var userToCreate = CreateUserFromDto(dto);
         var cmd = new RegisterUserCommand(dto);
         var handler = CreateRegisterUserCommandHandler();

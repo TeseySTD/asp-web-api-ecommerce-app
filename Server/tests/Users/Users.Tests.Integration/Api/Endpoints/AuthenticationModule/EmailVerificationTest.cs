@@ -17,7 +17,7 @@ public class EmailVerificationTest : ApiTest
     {
     }
 
-    private User CreateDefaultUser() => User.Create(
+    private User CreateTestUser() => User.Create(
         id: UserId.Create(Guid.NewGuid()).Value,
         name: UserName.Create("test").Value,
         email: Email.Create("test").Value,
@@ -32,12 +32,10 @@ public class EmailVerificationTest : ApiTest
         // Arrange
         var tokenId = Guid.NewGuid();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUrl}?tokenId={tokenId}");
-
         var expectedContent = MakeSystemErrorApiOutput(new EmailVerificationCommandHandler.TokenNotFoundError(tokenId));
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.GetAsync($"{RequestUrl}?tokenId={tokenId}");
         var actualContent = await response.Content.ReadAsStringAsync();
 
         // Arrange
@@ -49,7 +47,7 @@ public class EmailVerificationTest : ApiTest
     public async Task WhenTokenIsExpired_ThenReturnsBadRequest()
     {
         // Arrange
-        var user = CreateDefaultUser();
+        var user = CreateTestUser();
         var token = EmailVerificationToken.Create(user.Id, DateTime.UtcNow.AddSeconds(-1));
         var tokenId = token.Id.Value;
 
@@ -57,12 +55,10 @@ public class EmailVerificationTest : ApiTest
         ApplicationDbContext.EmailVerificationTokens.Add(token);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUrl}?tokenId={tokenId}");
-
         var expectedContent = MakeSystemErrorApiOutput(new EmailVerificationCommandHandler.TokenExpiredError(token.ExpiresOnUtc));
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.GetAsync($"{RequestUrl}?tokenId={tokenId}");
         var actualContent = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -74,7 +70,7 @@ public class EmailVerificationTest : ApiTest
     public async Task WhenTokenIsCorrect_ThenReturnsOk()
     {
         // Arrange
-        var user = CreateDefaultUser();
+        var user = CreateTestUser();
         var token = EmailVerificationToken.Create(user.Id, DateTime.UtcNow.AddSeconds(30));
         var tokenId = token.Id.Value;
 
@@ -82,10 +78,8 @@ public class EmailVerificationTest : ApiTest
         ApplicationDbContext.EmailVerificationTokens.Add(token);
         await ApplicationDbContext.SaveChangesAsync();
         
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{RequestUrl}?tokenId={tokenId}");
-        
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.GetAsync($"{RequestUrl}?tokenId={tokenId}");
         
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

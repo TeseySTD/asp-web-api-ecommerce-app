@@ -47,13 +47,11 @@ public class LogoutTest : ApiTest
         HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(user));
 
-        var request = new HttpRequestMessage(HttpMethod.Delete, RequestUrl);
-
         var expectedContent =
             MakeSystemErrorApiOutput( new LogoutUserCommandHandler.UserNotFoundError(user.Id.Value));
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.DeleteAsync(RequestUrl);
         var actualContent = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -73,10 +71,8 @@ public class LogoutTest : ApiTest
         HttpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(user));
         
-        var request = new HttpRequestMessage(HttpMethod.Delete, RequestUrl);
-        
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.DeleteAsync(RequestUrl);
         
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

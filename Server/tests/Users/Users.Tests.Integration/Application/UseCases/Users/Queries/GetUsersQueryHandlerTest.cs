@@ -1,20 +1,18 @@
 ﻿using FluentAssertions;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using Shared.Core.API;
 using Shared.Core.Auth;
-using Users.Application.Common.Interfaces;
 using Users.Application.UseCases.Users.Queries.GetUsers;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Users.Queries.GetUsers;
+namespace Users.Tests.Integration.Application.UseCases.Users.Queries;
 
 [TestSubject(typeof(GetUsersQueryHandler))]
 public class GetUsersQueryHandlerTest : IntegrationTest
 {
-    private List<User> CreateDefaultUsersList() => new()
+    private List<User> CreateTestUsersList() => new()
     {
         User.Create(
             name: UserName.Create("John Doe").Value,
@@ -44,7 +42,7 @@ public class GetUsersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDbHasNoUsers_QueryHandler_ReturnsFailureResult()
+    public async Task WhenDbHasNoUsers_ThenReturnsFailureResult()
     {
         // Arrange
         var query = new GetUsersQuery(new PaginationRequest());
@@ -59,10 +57,10 @@ public class GetUsersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenQueryIsOutOfRange_QueryHandler_ReturnsFailureResult()
+    public async Task WhenQueryIsOutOfRange_ThenReturnsFailureResult()
     {
         // Arrange
-        var users = CreateDefaultUsersList();
+        var users = CreateTestUsersList();
         var query = new GetUsersQuery(new PaginationRequest(1, users.Count));
         var handler = new GetUsersQueryHandler(ApplicationDbContext);
 
@@ -78,10 +76,10 @@ public class GetUsersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDbHasUsers_QueryHandler_ReturnsSuccessResult()
+    public async Task WhenDbHasUsers_ThenReturnsSuccessResult()
     {
         // Arrange
-        var users = CreateDefaultUsersList();
+        var users = CreateTestUsersList();
         var query = new GetUsersQuery(new PaginationRequest(0, users.Count));
         var handler = new GetUsersQueryHandler(ApplicationDbContext);
 
@@ -108,10 +106,10 @@ public class GetUsersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenQueryAskLimitedCount_QueryHandler_ReturnsSuccessResult()
+    public async Task WhenQueryAskLimitedCount_ThenReturnsSuccessResult()
     {
         // Arrange
-        var users = CreateDefaultUsersList();
+        var users = CreateTestUsersList();
         var query = new GetUsersQuery(new PaginationRequest(0, users.Count - 1));
         var handler = new GetUsersQueryHandler(ApplicationDbContext);
 

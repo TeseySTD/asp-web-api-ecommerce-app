@@ -1,16 +1,14 @@
 ﻿using FluentAssertions;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using Shared.Core.Auth;
 using Shared.Core.Validation.Result;
-using Users.Application.Common.Interfaces;
 using Users.Application.Dto.User;
 using Users.Application.UseCases.Users.Queries.GetUserById;
 using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Users.Queries.GetUserById;
+namespace Users.Tests.Integration.Application.UseCases.Users.Queries;
 
 [TestSubject(typeof(GetUserByIdQueryHandler))]
 public class GetUserByIdQueryHandlerTest : IntegrationTest
@@ -20,7 +18,7 @@ public class GetUserByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenIdIsNotInDb_QueryHandler_ReturnsFailureResult()
+    public async Task WhenIdIsNotInDb_ThenReturnsFailureResult()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -36,7 +34,7 @@ public class GetUserByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenUserIsInDb_QueryHandler_ReturnsSuccessResult()
+    public async Task WhenUserIsInDb_ThenReturnsSuccessResult()
     {
         // Arrange
         var userId = Guid.NewGuid();

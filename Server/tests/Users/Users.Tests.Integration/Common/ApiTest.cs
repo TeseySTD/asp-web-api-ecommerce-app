@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Validation.Result;
 using Users.Application.Common.Interfaces;
+using Users.Infrastructure.Helpers;
 using Users.Persistence;
 
 namespace Users.Tests.Integration.Common;
@@ -12,6 +13,7 @@ public class ApiTest : BaseIntegrationTest, IClassFixture<IntegrationTestWebAppl
     protected HttpClient HttpClient { get; init; }
     protected ApplicationDbContext ApplicationDbContext { get; init; }
     protected ITokenProvider TokenProvider { get; init; }
+    protected IPasswordHelper PasswordHelper { get; init; }
 
     private DatabaseFixture _databaseFixture;
     private IServiceScope _scope;
@@ -24,6 +26,7 @@ public class ApiTest : BaseIntegrationTest, IClassFixture<IntegrationTestWebAppl
         Sender = _scope.ServiceProvider.GetRequiredService<ISender>();
         ApplicationDbContext = _scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         TokenProvider = _scope.ServiceProvider.GetRequiredService<ITokenProvider>();
+        PasswordHelper = _scope.ServiceProvider.GetRequiredService<IPasswordHelper>();
         _databaseFixture = databaseFixture;
     }
 
@@ -68,8 +71,8 @@ public class ApiTest : BaseIntegrationTest, IClassFixture<IntegrationTestWebAppl
                 (current, error) => current +
                                     "{" +
                                     $"""
-                                     "message":"{error.Message}",
-                                     "description":"{error.Description}"
+                                     "message":"{propertyName}",
+                                     "description":"{error.Message}:{error.Description}"
                                      """ +
                                     "},");
         // Remove last coma

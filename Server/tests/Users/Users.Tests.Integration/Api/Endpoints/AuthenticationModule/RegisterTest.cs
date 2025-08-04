@@ -25,17 +25,11 @@ public class RegisterTest : ApiTest
         var incorrectPhoneNumber = "0123456789";
         var incorrectRole = "incorrect.role";
 
-        using StringContent content = new(
-            JsonSerializer.Serialize(new RegisterUserRequest(incorrectUserName, incorrectEmail, incorrectPassword,
-                incorrectPhoneNumber, incorrectRole)),
-            Encoding.UTF8,
-            "application/json"
-        );
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
-        request.Content = content;
+        var json = JsonSerializer.Serialize(new RegisterUserRequest(incorrectUserName, incorrectEmail, incorrectPassword, incorrectPhoneNumber, incorrectRole));
+        using StringContent content = new(json, Encoding.UTF8, "application/json");
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PostAsync(RequestUrl, content);
 
         // Assert 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -51,17 +45,11 @@ public class RegisterTest : ApiTest
         var userPhoneNumber = "+380991444230";
         var userRole = "Default";
 
-        using StringContent content = new(
-            JsonSerializer.Serialize(new RegisterUserRequest(userName, userEmail, userPassword,
-                userPhoneNumber, userRole)),
-            Encoding.UTF8,
-            "application/json"
-        );
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
-        request.Content = content;
+        var json = JsonSerializer.Serialize(new RegisterUserRequest(userName, userEmail, userPassword, userPhoneNumber, userRole));
+        using StringContent content = new(json, Encoding.UTF8, "application/json");
 
         // Act
-        var response = await HttpClient.SendAsync(request);
+        var response = await HttpClient.PostAsync(RequestUrl, content);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

@@ -7,7 +7,7 @@ using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands.Logout;
+namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands;
 
 [TestSubject(typeof(LogoutUserCommandHandler))]
 public class LogoutUserCommandHandlerTest : IntegrationTest
@@ -17,7 +17,7 @@ public class LogoutUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenUserIsNotInDb_Handler_ReturnFailureResult()
+    public async Task WhenUserIsNotInDb_ThenReturnsFailureResult()
     {
         // Arrange 
         var userId = Guid.NewGuid();
@@ -34,7 +34,7 @@ public class LogoutUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_Handler_ReturnSuccessResult()
+    public async Task WhenDataIsCorrect_ThenReturnsSuccessResult()
     {
         // Arrange
         var user = User.Create(

@@ -10,14 +10,14 @@ using Users.Core.Models;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Users.Commands.CreateUser;
+namespace Users.Tests.Integration.Application.UseCases.Users.Commands;
 
 [TestSubject(typeof(CreateUserCommandHandler))]
 public class CreateUserCommandHandlerTest : IntegrationTest
 {
     private readonly IPasswordHelper _passwordHelperMock;
 
-    private UserWriteDto CreateDefaultUserWriteDto() => new (
+    private UserWriteDto CreateTestUserWriteDto() => new (
         Name: "test",
         Email: "test@test.com",
         Password: "test",
@@ -25,7 +25,7 @@ public class CreateUserCommandHandlerTest : IntegrationTest
         Role: "Default"
     );
     
-    private User CreateDefaultUser() => User.Create(
+    private User CreateTestUser() => User.Create(
         name: UserName.Create("test").Value,
         email: Email.Create("test@test.com").Value,
         phoneNumber: PhoneNumber.Create("+3809912345678").Value,
@@ -39,13 +39,13 @@ public class CreateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenEmailIsNotUnique_Handle_Should_ReturnFailureResult()
+    public async Task WhenEmailIsNotUnique_ThenReturnsFailureResult()
     {
         // Arrange
-        var dto = CreateDefaultUserWriteDto();
+        var dto = CreateTestUserWriteDto();
         var cmd = new CreateUserCommand(dto);
 
-        var user = CreateDefaultUser();
+        var user = CreateTestUser();
         ApplicationDbContext.Users.Add(user);
         await ApplicationDbContext.SaveChangesAsync(default);
         
@@ -63,13 +63,13 @@ public class CreateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenPhoneNumberIsNotUnique_Handle_Should_ReturnFailureResult()
+    public async Task WhenPhoneNumberIsNotUnique_ThenReturnsFailureResult()
     {
         // Arrange
-        var dto = CreateDefaultUserWriteDto();
+        var dto = CreateTestUserWriteDto();
         var cmd = new CreateUserCommand(dto);
 
-        var user = CreateDefaultUser();
+        var user = CreateTestUser();
         ApplicationDbContext.Users.Add(user);
         await ApplicationDbContext.SaveChangesAsync(default);
         
@@ -87,10 +87,10 @@ public class CreateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task CreateUser_WithCorrectData_Should_ReturnSuccessResult()
+    public async Task WhenDataIsCorrect_ThenReturnSuccessResult()
     {
         // Arrange
-        var dto = CreateDefaultUserWriteDto();
+        var dto = CreateTestUserWriteDto();
         var cmd = new CreateUserCommand(dto);
         
         _passwordHelperMock.HashPassword(Arg.Any<string>()).Returns(dto.Password);

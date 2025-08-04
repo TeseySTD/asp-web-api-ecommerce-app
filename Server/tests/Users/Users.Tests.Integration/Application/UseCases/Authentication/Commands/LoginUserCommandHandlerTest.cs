@@ -1,15 +1,15 @@
 ﻿using FluentAssertions;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using Shared.Core.Auth;
 using Users.Application.Common.Interfaces;
 using Users.Application.UseCases.Authentication.Commands.Login;
 using Users.Core.Models;
-using Users.Core.Models.Entities;
 using Users.Core.Models.ValueObjects;
 using Users.Tests.Integration.Common;
 
-namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands.Login;
+namespace Users.Tests.Integration.Application.UseCases.Authentication.Commands;
 
 [TestSubject(typeof(LoginUserCommandHandler))]
 public class LoginUserCommandHandlerTest : IntegrationTest
@@ -23,8 +23,16 @@ public class LoginUserCommandHandlerTest : IntegrationTest
         _passwordHelperMock = Substitute.For<IPasswordHelper>();
     }
 
+    private User CreateTestUser(string email, string password) => User.Create(
+        name: UserName.Create("test").Value,
+        email: Email.Create(email).Value,
+        hashedPassword: HashedPassword.Create(password).Value,
+        phoneNumber: PhoneNumber.Create("+380991444743").Value,
+        role: UserRole.Default
+    );
+    
     [Fact]
-    public async Task WhenUserWithEmailIsNotInDb_Handler_ReturnFailureResult()
+    public async Task WhenUserWithEmailIsNotInDb_ThenReturnsFailureResult()
     {
         // Arrange
         var email = "test@test.com";
@@ -40,19 +48,13 @@ public class LoginUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenPasswordIsNotOfUser_Handler_ReturnFailureResult()
+    public async Task WhenPasswordIsNotOfUser_ThenReturnsFailureResult()
     {
         // Arrange
         var email = "test@test.com";
         var password = "password";
         var userPassword = "userPassword";
-        var user = User.Create(
-            name: UserName.Create("test").Value,
-            email: Email.Create(email).Value,
-            hashedPassword: HashedPassword.Create(userPassword).Value,
-            phoneNumber: PhoneNumber.Create("+380991444743").Value,
-            role: UserRole.Default
-        );
+        var user = CreateTestUser(email, password);
 
         _passwordHelperMock.VerifyPassword(userPassword, password).Returns(false);
 
@@ -67,22 +69,17 @@ public class LoginUserCommandHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e => e == new LoginUserCommandHandler.IncorrectPasswordError(email, password));
+        result.Errors.Should()
+            .ContainSingle(e => e == new LoginUserCommandHandler.IncorrectPasswordError(email, password));
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_Handler_ReturnSuccessResult()
+    public async Task WhenDataIsCorrect_ThenReturnsSuccessResult()
     {
         // Arrange
         var email = "test@test.com";
         var password = "password";
-        var user = User.Create(
-            name: UserName.Create("test").Value,
-            email: Email.Create(email).Value,
-            hashedPassword: HashedPassword.Create(password).Value,
-            phoneNumber: PhoneNumber.Create("+380991444743").Value,
-            role: UserRole.Default
-        );
+        var user = CreateTestUser(email, password);
         var refreshToken = Core.Models.Entities.RefreshToken.Create(
             token: "refreshToken",
             userId: user.Id,
@@ -102,7 +99,7 @@ public class LoginUserCommandHandlerTest : IntegrationTest
 
         // Act
         var result = await handler.Handle(cmd, default);
-        var isRefeshTokenInDb = await ApplicationDbContext.RefreshTokens.FindAsync(refreshToken.Id) is not null;
+        var isRefeshTokenInDb = await ApplicationDbContext.RefreshTokens.AnyAsync(r => r.Id == refreshToken.Id);
 
         // Assert
         Assert.True(result.IsSuccess);
