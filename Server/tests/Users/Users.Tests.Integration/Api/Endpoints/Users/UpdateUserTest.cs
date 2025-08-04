@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
 using Shared.Core.Auth;
@@ -55,10 +56,44 @@ public class UpdateUserTest : ApiTest
     private StringContent GenerateRequestBody() => GenerateRequestBody(CreateTestUser(Guid.NewGuid()));
 
     [Fact]
+    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+
+        // Act
+        var response = await HttpClient.PutAsync($"{RequestUrl}/{userId}", GenerateRequestBody());
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WhenIdIsNotBelongToUser_ThenReturnsForbidden()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var testUser = CreateTestUser(Guid.NewGuid()); // User with other id
+
+        HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(testUser));
+
+        // Act
+        var response = await HttpClient.PutAsync($"{RequestUrl}/{userId}", GenerateRequestBody());
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
     public async Task WhenIdIsNotFound_ThenReturnsNotFound()
     {
         // Arrange
         var userId = Guid.NewGuid();
+        var testUser = CreateTestUser(userId);
+
+        HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(testUser));
 
         var expectedContent = MakeSystemErrorApiOutput(new UpdateUserCommandHandler.UserNotFoundError(userId));
 
@@ -83,6 +118,9 @@ public class UpdateUserTest : ApiTest
         ApplicationDbContext.Users.Add(userToUpdate);
         ApplicationDbContext.Users.Add(user);
         await ApplicationDbContext.SaveChangesAsync();
+
+        HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(userToUpdate));
 
         var content = GenerateRequestBody(userToUpdate, email: newEmail);
 
@@ -111,10 +149,14 @@ public class UpdateUserTest : ApiTest
 
         var content = GenerateRequestBody(userToUpdate, phoneNumber: newPhoneNumber);
 
-        var expectedContent = MakeSystemErrorApiOutput(new UpdateUserCommandHandler.IncorrectPhoneNumberError(newPhoneNumber));
+        HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(userToUpdate));
+
+        var expectedContent =
+            MakeSystemErrorApiOutput(new UpdateUserCommandHandler.IncorrectPhoneNumberError(newPhoneNumber));
 
         // Act
-        var response = await HttpClient.PutAsync( $"{RequestUrl}/{userToUpdate.Id.Value}", content);
+        var response = await HttpClient.PutAsync($"{RequestUrl}/{userToUpdate.Id.Value}", content);
         var actualContent = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -128,11 +170,14 @@ public class UpdateUserTest : ApiTest
         // Arrange
         var userToUpdate = CreateTestUser(Guid.NewGuid());
         var newEmail = "test2@test.com";
-        
+
         ApplicationDbContext.Users.Add(userToUpdate);
-        await ApplicationDbContext.SaveChangesAsync();  
+        await ApplicationDbContext.SaveChangesAsync();
 
         var content = GenerateRequestBody(userToUpdate, email: newEmail);
+
+        HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(userToUpdate));
 
         // Act
         var response = await HttpClient.PutAsync($"{RequestUrl}/{userToUpdate.Id.Value}", content);

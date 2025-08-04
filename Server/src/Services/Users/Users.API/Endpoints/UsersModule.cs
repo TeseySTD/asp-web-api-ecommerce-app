@@ -1,6 +1,9 @@
-﻿using Carter;
+﻿using System.Security.Claims;
+using Carter;
 using MediatR;
 using Shared.Core.API;
+using Shared.Core.Auth;
+using Shared.Core.Validation.Result;
 using Users.API.Http.User.Requests;
 using Users.API.Http.User.Responses;
 using Users.Application.Dto.User;
@@ -17,12 +20,12 @@ public class UsersModule : CarterModule
     {
         WithTags("Users");
     }
-    
+
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
         // Get all users
         app.MapGet("/", async (ISender sender,
-            [AsParameters]PaginationRequest paginationRequest) =>
+            [AsParameters] PaginationRequest paginationRequest) =>
         {
             var query = new GetUsersQuery(paginationRequest);
             var result = await sender.Send(query);
@@ -46,8 +49,13 @@ public class UsersModule : CarterModule
         });
 
         // Update user
-        app.MapPut("/{id:guid}", async (ISender sender, Guid id, UpdateUserRequest request) =>
+        app.MapPut("/{id:guid}", async (ISender sender, Guid id, UpdateUserRequest request, ClaimsPrincipal user) =>
         {
+            var userIdClaim = user.FindFirstValue("userId");
+            Guid idInToken = Guid.TryParse(userIdClaim, out Guid parsed) ? parsed : Guid.Empty;
+            if (idInToken != id)
+                return Results.Forbid();
+
             var dto = new UserUpdateDto(
                 Name: request.Name,
                 Email: request.Email,
@@ -67,13 +75,18 @@ public class UsersModule : CarterModule
                     if (enumerable.Any(e => e is UpdateUserCommandHandler.UserNotFoundError))
                         return Results.NotFound(Envelope.Of(enumerable));
                     return Results.BadRequest(Envelope.Of(enumerable));
-                } 
+                }
             );
-        });
+        }).RequireAuthorization(Policies.RequireDefaultPolicy);
 
         // Delete user
-        app.MapDelete("/{id:guid}", async (ISender sender, Guid id) =>
+        app.MapDelete("/{id:guid}", async (ISender sender, Guid id, ClaimsPrincipal user) =>
         {
+            var userIdClaim = user.FindFirstValue("userId");
+            Guid idInToken = Guid.TryParse(userIdClaim, out Guid parsed) ? parsed : Guid.Empty;
+            if (idInToken != id)
+                return Results.Forbid();
+            
             var cmd = new DeleteUserCommand(id);
             var result = await sender.Send(cmd);
 
@@ -81,6 +94,6 @@ public class UsersModule : CarterModule
                 onSuccess: () => Results.Ok(),
                 onFailure: errors => Results.NotFound(Envelope.Of(errors))
             );
-        });
+        }).RequireAuthorization(Policies.RequireDefaultPolicy);
     }
 }

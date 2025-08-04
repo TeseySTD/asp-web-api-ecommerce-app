@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Core.API;
+using Shared.Core.Auth;
 using Users.API.Http.Auth.Requests;
 using Users.API.Http.Auth.Responses;
 using Users.Application.Dto.User;
@@ -99,6 +100,6 @@ public class AuthenticationModule : CarterModule
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
         })
-        .RequireAuthorization();
+        .RequireAuthorization(Policies.RequireDefaultPolicy);
     }
 }
