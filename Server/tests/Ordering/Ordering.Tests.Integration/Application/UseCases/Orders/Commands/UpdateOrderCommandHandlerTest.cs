@@ -106,7 +106,7 @@ public class UpdateOrderCommandHandlerTest : IntegrationTest
             state: "",
             zipCode: "12345"
         );
-        var dto = CreateTestOrderUpdateDto() with { Payment = newPayment, DestinationAddress = newAddress };
+        var dto = new OrderUpdateDto(Payment: newPayment, DestinationAddress: newAddress);
 
         ApplicationDbContext.Orders.Add(order);
         await ApplicationDbContext.SaveChangesAsync(default);

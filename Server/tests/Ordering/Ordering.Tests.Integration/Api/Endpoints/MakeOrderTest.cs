@@ -17,7 +17,7 @@ public class MakeOrderTest : ApiTest
     {
     }
 
-    private MakeOrderRequest CreateTestRequest() => new (
+    private MakeOrderRequest CreateTestRequest() => new(
         Guid.NewGuid(),
         [new(Guid.NewGuid(), 10)],
         CardName: "John Doe",
@@ -30,6 +30,19 @@ public class MakeOrderTest : ApiTest
         State: "CA",
         ZipCode: "12345"
     );
+
+    private HttpRequestMessage GenerateRequest(MakeOrderRequest dto)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = "Default"
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
+        
+        return request;
+    }
 
     [Fact]
     public async Task WhenOrderItemIsNotUnique_ThenShouldReturnBadRequest()
@@ -45,13 +58,7 @@ public class MakeOrderTest : ApiTest
             ]
         };
 
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
+        var request = GenerateRequest(dto);
 
         var expectedContent = MakeSystemErrorApiOutput(new CreateOrderCommandHandler.OrderItemIsNotUniqueError());
 
@@ -69,14 +76,7 @@ public class MakeOrderTest : ApiTest
     {
         var dto = CreateTestRequest();
 
-        var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["sub"] = Guid.NewGuid().ToString(),
-            ["role"] = "Default"
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
+        var request = GenerateRequest(dto);
 
         // Act
         var response = await HttpClient.SendAsync(request);

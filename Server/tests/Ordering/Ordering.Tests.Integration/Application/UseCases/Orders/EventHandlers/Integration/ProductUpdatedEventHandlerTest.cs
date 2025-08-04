@@ -15,7 +15,7 @@ public class ProductUpdatedEventHandlerTest : IntegrationTest
         public ProductUpdatedEventHandlerTest(DatabaseFixture databaseFixture) : base(databaseFixture) { }
 
         [Fact]
-        public async Task WhenHandlerHasBeenCalled_ProductIsUpdated()
+        public async Task WhenHandlerHasBeenCalled_ThenProductIsUpdated()
         {
             // Arrange
             var productIdGuid = Guid.NewGuid();

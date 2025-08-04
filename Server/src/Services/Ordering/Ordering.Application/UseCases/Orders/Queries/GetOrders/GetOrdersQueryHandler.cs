@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
 using Ordering.Application.Dto.Order;
 using Ordering.Core.Models.Orders.ValueObjects;
@@ -48,7 +49,7 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PaginatedResu
             return new OrderReadDto(
                 OrderId: o.Id.Value,
                 CustomerId: o.CustomerId.Value,
-                OrderDate: o.OrderDate.ToString(),
+                OrderDate: o.OrderDate.ToString(CultureInfo.InvariantCulture),
                 Status: o.Status.ToString(),
                 CardName: o.Payment.CardName,
                 ShortCardNumber: o.Payment.CardNumber.Substring(0, 3),

@@ -72,7 +72,7 @@ public class MakeOrderSagaTest : IntegrationTest
         var sagaHarness = _harness.GetSagaStateMachineHarness<MakeOrderSaga, MakeOrderSagaState>();
         var saga = sagaHarness.Sagas.Contains(orderId);
         saga.Should().NotBeNull();
-        saga.CurrentState.Should().Be("CheckingCustomer");
+        saga.CurrentState.Should().Be(nameof(MakeOrderSaga.CheckingCustomer));
         saga.ProductWithQuantityDtos.Should().BeEquivalentTo(products);
     }
 
@@ -109,7 +109,7 @@ public class MakeOrderSagaTest : IntegrationTest
         var sagaHarness = _harness.GetSagaStateMachineHarness<MakeOrderSaga, MakeOrderSagaState>();
         var saga = sagaHarness.Sagas.Contains(orderId);
         saga.Should().NotBeNull();
-        saga.CurrentState.Should().Be("ReservingProducts");
+        saga.CurrentState.Should().Be(nameof(MakeOrderSaga.ReservingProducts));
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class MakeOrderSagaTest : IntegrationTest
         var publishedMessage = _harness.Published.Select<CanceledOrderEvent>().FirstOrDefault();
         publishedMessage.Should().NotBeNull();
         publishedMessage.Context.Message.OrderId.Should().Be(orderId);
-        publishedMessage.Context.Message.Reason.Should().Be("Checking customer failed.");
+        publishedMessage.Context.Message.Reason.Should().Be(MakeOrderSaga.CheckingCustomerFailedReason);
 
         var sagaHarness = _harness.GetSagaStateMachineHarness<MakeOrderSaga, MakeOrderSagaState>();
         var saga = sagaHarness.Sagas.Contains(orderId);
@@ -245,20 +245,20 @@ public class MakeOrderSagaTest : IntegrationTest
 
         var sagaHarness = _harness.GetSagaStateMachineHarness<MakeOrderSaga, MakeOrderSagaState>();
 
-        // Act & Assert - Full workflow
+        // Act & Assert
         // Step 1: OrderMade
         await _harness.Bus.Publish(new OrderMadeEvent(orderId, customerId, products));
         await Task.Delay(DelayTime);
 
         var saga = sagaHarness.Sagas.Contains(orderId);
-        saga.CurrentState.Should().Be("CheckingCustomer");
+        saga.CurrentState.Should().Be(nameof(MakeOrderSaga.CheckingCustomer));
         (await _harness.Published.Any<CheckCustomerMessage>()).Should().BeTrue();
 
         // Step 2: CustomerChecked
         await _harness.Bus.Publish(new CheckedCustomerEvent(orderId));
         await Task.Delay(DelayTime);
 
-        saga.CurrentState.Should().Be("ReservingProducts");
+        saga.CurrentState.Should().Be(nameof(MakeOrderSaga.ReservingProducts));
         (await _harness.Published.Any<ReserveProductsMessage>()).Should().BeTrue();
 
         // Step 3: ProductsReserved

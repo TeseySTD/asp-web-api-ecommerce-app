@@ -56,7 +56,7 @@ public class ApprovedOrderEventHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenHandle_WithExistingProducts_ThenApproveOrderWithOrderItems()
+    public async Task WhenHandleWithExistingProducts_ThenApproveOrderWithOrderItems()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -88,7 +88,7 @@ public class ApprovedOrderEventHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenHandle_WithNonExistingProducts_ThenCreateProductsAndApproveOrder()
+    public async Task WhenHandleWithNonExistingProducts_ThenCreateProductsAndApproveOrder()
     {
         // Arrange
         var orderId = Guid.NewGuid();

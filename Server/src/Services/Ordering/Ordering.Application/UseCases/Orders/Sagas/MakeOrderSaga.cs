@@ -14,6 +14,8 @@ public class MakeOrderSagaState : SagaStateMachineInstance
 
 public class MakeOrderSaga : MassTransitStateMachine<MakeOrderSagaState>
 {
+    public const string CheckingCustomerFailedReason = "Checking customer failed.";
+
     public MakeOrderSaga()
     {
         InstanceState(x => x.CurrentState);
@@ -49,7 +51,7 @@ public class MakeOrderSaga : MassTransitStateMachine<MakeOrderSagaState>
                 .Publish(context => new
                     CanceledOrderEvent(
                         OrderId: context.Message.OrderId,
-                        Reason: "Checking customer failed."
+                        Reason: CheckingCustomerFailedReason 
                     )
                 )
                 .Finalize()

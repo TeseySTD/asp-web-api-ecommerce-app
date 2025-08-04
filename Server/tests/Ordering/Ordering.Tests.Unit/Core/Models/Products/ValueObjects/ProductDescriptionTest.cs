@@ -19,8 +19,11 @@ public class ProductDescriptionTest
     [Fact]
     public void WhenDescriptionIsOutOfLength_ThenReturnFailure()
     {
+        // Arrange
+        var str = new string('a', ProductDescription.MaxDescriptionLength + 1);
+        
         // Act
-        var result = ProductDescription.Create("abc");
+        var result = ProductDescription.Create(str);
         
         // Assert
         result.IsFailure.Should().BeTrue();

@@ -42,21 +42,29 @@ public class UpdateOrderTest : ApiTest
         ZipCode: "12345"
     );
 
+    private HttpRequestMessage GenerateRequest(Guid orderId, UpdateOrderRequest dto, Guid? userId = null)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{orderId}");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = "Default",
+            ["userId"] = userId?.ToString() ?? Guid.NewGuid().ToString(),
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8,
+            "application/json");
+
+
+        return request;
+    }
+
     [Fact]
     public async Task WhenOrderIsNotInDb_ThenReturnsNotFound()
     {
         // Arrange
         var orderId = Guid.NewGuid();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{orderId}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default",
-            ["userId"] = Guid.NewGuid().ToString(),
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(CreateTestRequest()), Encoding.UTF8,
-            "application/json");
+        var request = GenerateRequest(orderId, CreateTestRequest());
 
         var expectedContent = MakeSystemErrorApiOutput(new UpdateOrderCommandHandler.OrderNotFoundError(orderId));
 
@@ -79,15 +87,7 @@ public class UpdateOrderTest : ApiTest
         ApplicationDbContext.Orders.Add(order);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{order.Id.Value}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default",
-            ["userId"] = customerId.ToString(),
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(CreateTestRequest()), Encoding.UTF8,
-            "application/json");
+        var request = GenerateRequest(order.Id.Value, CreateTestRequest(), customerId);
 
         var expectedContent = MakeSystemErrorApiOutput(new UpdateOrderCommandHandler.CustomerMismatchError(customerId));
 
@@ -112,15 +112,7 @@ public class UpdateOrderTest : ApiTest
         ApplicationDbContext.Orders.Add(order);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{order.Id.Value}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default",
-            ["userId"] = customerId.ToString(),
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(CreateTestRequest()), Encoding.UTF8,
-            "application/json");
+        var request = GenerateRequest(order.Id.Value, CreateTestRequest(), customerId);
 
         var expectedContent = MakeSystemErrorApiOutput(new UpdateOrderCommandHandler.IncorrectOrderStateError());
 
@@ -139,21 +131,11 @@ public class UpdateOrderTest : ApiTest
         // Arrange
         var order = CreateTestOrder();
         var customerId = order.CustomerId.Value;
-        var dto = CreateTestRequest();
 
         ApplicationDbContext.Orders.Add(order);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{order.Id.Value}");
-        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
-        {
-            ["role"] = "Default",
-            ["userId"] = customerId.ToString(),
-        });
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8,
-            "application/json");
-
+        var request = GenerateRequest(order.Id.Value, CreateTestRequest(), customerId);
         // Act
         var response = await HttpClient.SendAsync(request);
 

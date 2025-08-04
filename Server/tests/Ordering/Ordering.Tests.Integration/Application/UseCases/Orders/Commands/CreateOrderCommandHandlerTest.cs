@@ -38,7 +38,7 @@ public class CreateOrderCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenOrderItemIsNotUnique_ThenShouldReturnFailureResult()
+    public async Task WhenOrderItemIsNotUnique_ThenReturnsFailureResult()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -63,7 +63,7 @@ public class CreateOrderCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenShouldReturnSuccessResultCreateOrderAndPublishEndpoint()
+    public async Task WhenDataIsCorrect_ThenReturnsSuccessResultCreateOrderAndPublishEndpoint()
     {
         // Arrange
         var orderDto = CreateTestOrderWriteDto();

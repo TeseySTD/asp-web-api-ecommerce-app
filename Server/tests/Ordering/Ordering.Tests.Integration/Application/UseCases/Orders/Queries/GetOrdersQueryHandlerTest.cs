@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Globalization;
+using FluentAssertions;
 using Ordering.Application.Dto.Order;
 using Ordering.Application.UseCases.Orders.Queries.GetOrders;
 using Ordering.Core.Models.Orders;
@@ -95,7 +96,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
             orders.Should().Contain(o =>
                 dto.OrderId == o.Id.Value &&
                 dto.CustomerId == o.CustomerId.Value &&
-                dto.OrderDate == o.OrderDate.ToString() &&
+                dto.OrderDate == o.OrderDate.ToString(CultureInfo.InvariantCulture) &&
                 dto.Status == o.Status.ToString() &&
                 dto.CardName == o.Payment.CardName &&
                 dto.ShortCardNumber == o.Payment.CardNumber.Substring(0, 3) &&
