@@ -12,10 +12,13 @@ public record RefreshTokenId
         Value = value;
     }
 
-    public static Result<RefreshTokenId> Create(Guid Id)
+    public static Result<RefreshTokenId> Create(Guid id)
     {
-        if (Id != Guid.Empty)
-            return new RefreshTokenId(Id);
-        return new Error(nameof(RefreshTokenId), "Refresh token id can't be empty");
+        return Result<RefreshTokenId>.Try(new RefreshTokenId(id))
+            .Check(id == Guid.Empty, new IdRequiredError())
+            .Build();
     }
+
+    public sealed record IdRequiredError()
+        : Error("Refresh token id cannot be empty", "RefreshTokenId value object failure");
 };

@@ -11,10 +11,13 @@ public record EmailVerificationTokenId
         Value = value;
     }
 
-    public static Result<EmailVerificationTokenId> Create(Guid Id)
+    public static Result<EmailVerificationTokenId> Create(Guid id)
     {
-        if (Id != Guid.Empty)
-            return new EmailVerificationTokenId(Id);
-        return new Error(nameof(EmailVerificationTokenId), "Email verification token id can't be empty");
+        return Result<EmailVerificationTokenId>.Try(new EmailVerificationTokenId(id))
+            .Check(id == Guid.Empty, new IdRequiredError())
+            .Build();
     }
+
+    public sealed record IdRequiredError()
+        : Error("Refresh token id cannot be empty", "RefreshTokenId value object failure");
 }
