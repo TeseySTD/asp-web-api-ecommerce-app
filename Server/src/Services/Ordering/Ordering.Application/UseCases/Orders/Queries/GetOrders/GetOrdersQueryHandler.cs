@@ -27,6 +27,7 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PaginatedResu
 
         var orders = await _context.Orders
             .AsNoTracking()
+            .Where(o => o.CustomerId == request.CustomerId)
             .Skip(pageSize * pageIndex)
             .Take(pageSize)
             .Include(o => o.OrderItems)

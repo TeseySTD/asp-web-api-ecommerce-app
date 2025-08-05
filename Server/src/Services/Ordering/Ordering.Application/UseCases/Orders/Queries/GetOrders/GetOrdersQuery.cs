@@ -5,4 +5,4 @@ using Shared.Core.CQRS;
 
 namespace Ordering.Application.UseCases.Orders.Queries.GetOrders;
 
-public record GetOrdersQuery(PaginationRequest PaginationRequest) : IQuery<PaginatedResult<OrderReadDto>>;
+public record GetOrdersQuery(PaginationRequest PaginationRequest, CustomerId CustomerId) : IQuery<PaginatedResult<OrderReadDto>>;

@@ -19,35 +19,35 @@ public class GetOrdersTest : ApiTest
     {
     }
 
-    private List<Order> GetTestListOrders() =>
+    private List<Order> GetTestListOrders(Guid customerId) =>
     [
         Order.Create(
-            CustomerId.Create(Guid.NewGuid()).Value,
+            CustomerId.Create(customerId).Value,
             Payment.Create("John Doe", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
             [],
             OrderId.Create(Guid.NewGuid()).Value
         ),
         Order.Create(
-            CustomerId.Create(Guid.NewGuid()).Value,
+            CustomerId.Create(customerId).Value,
             Payment.Create("Jane Doe", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
             OrderId.Create(Guid.NewGuid()).Value
         ),
         Order.Create(
-            CustomerId.Create(Guid.NewGuid()).Value,
+            CustomerId.Create(customerId).Value,
             Payment.Create("Somebody One", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
             OrderId.Create(Guid.NewGuid()).Value
         )
     ];
 
-    private HttpRequestMessage GenerateHttpRequest(string url, Guid? userId = null)
+    private HttpRequestMessage GenerateHttpRequest(string url, Guid? userId = null, string role = "Default")
     {
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
-            ["role"] = "Default",
+            ["role"] = role,
             ["userId"] = userId?.ToString() ?? Guid.NewGuid().ToString(),
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -60,16 +60,31 @@ public class GetOrdersTest : ApiTest
     {
         // Act
         var response = await HttpClient.GetAsync(RequestUrl + "/");
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WhenCustomerRequestsOtherCustomersData_ThenReturnsForbidden()
+    {
+        // Arrange
+        var customerId = Guid.NewGuid();
+        var request = GenerateHttpRequest(RequestUrl + $"/?customerId={customerId}", Guid.NewGuid());
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
     public async Task WhenNoOrdersExist_ThenReturnsNotFound()
     {
         // Arrange
-        var request = GenerateHttpRequest(RequestUrl + "/");
+        var customerId = Guid.NewGuid();
+        var request = GenerateHttpRequest(RequestUrl + $"/?customerId={customerId}", customerId);
 
         var expectedContent = MakeSystemErrorApiOutput(new GetOrdersQueryHandler.OrdersNotFoundError());
 
@@ -86,12 +101,14 @@ public class GetOrdersTest : ApiTest
     public async Task WhenRequestIsOutOfRange_ThenReturnsNotFound()
     {
         // Arrange
-        var orders = GetTestListOrders();
+        var customerId = Guid.NewGuid();
+        var orders = GetTestListOrders(customerId);
 
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateHttpRequest(RequestUrl + $"/?pageIndex=1&pageSize={GetTestListOrders().Count}");
+        var request = GenerateHttpRequest(RequestUrl + $"/?customerId={customerId}&pageIndex=1&pageSize={orders.Count}",
+            customerId);
         var expectedContent = MakeSystemErrorApiOutput(new GetOrdersQueryHandler.OrdersNotFoundError());
 
         // Act
@@ -107,12 +124,38 @@ public class GetOrdersTest : ApiTest
     public async Task WhenRequestIsValid_ThenReturnsOk()
     {
         // Arrange
-        var orders = GetTestListOrders();
+        var customerId = Guid.NewGuid();
+        var orders = GetTestListOrders(customerId);
 
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateHttpRequest(RequestUrl + $"/?pageIndex=0");
+        var request = GenerateHttpRequest(RequestUrl + $"/?customerId={customerId}&pageIndex=0", customerId);
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+        var json = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        foreach (var o in orders)
+        {
+            json.Should()
+                .Contain(o.CustomerId.Value.ToString());
+        }
+    }
+
+    [Fact]
+    public async Task WhenRequestIsValidAndCustomerIsAdmin_ThenReturnsOk()
+    {
+        // Arrange
+        var customerId = Guid.NewGuid();
+        var orders = GetTestListOrders(customerId);
+
+        ApplicationDbContext.Orders.AddRange(orders);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        var request = GenerateHttpRequest(RequestUrl + $"/?customerId={customerId}&pageIndex=0", Guid.NewGuid(), "Admin");
 
         // Act
         var response = await HttpClient.SendAsync(request);

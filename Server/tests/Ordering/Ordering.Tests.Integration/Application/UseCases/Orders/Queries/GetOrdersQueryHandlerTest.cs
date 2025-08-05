@@ -15,23 +15,23 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     {
     }
 
-    private List<Order> GetTestListOrders() =>
+    private List<Order> GetTestListOrders(Guid customerId) =>
     [
         Order.Create(
-            CustomerId.Create(Guid.NewGuid()).Value,
+            CustomerId.Create(customerId).Value,
             Payment.Create("John Doe", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
             [],
             OrderId.Create(Guid.NewGuid()).Value
         ),
         Order.Create(
-            CustomerId.Create(Guid.NewGuid()).Value,
+            CustomerId.Create(customerId).Value,
             Payment.Create("Jane Doe", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
             OrderId.Create(Guid.NewGuid()).Value
         ),
         Order.Create(
-            CustomerId.Create(Guid.NewGuid()).Value,
+            CustomerId.Create(customerId).Value,
             Payment.Create("Somebody One", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
             OrderId.Create(Guid.NewGuid()).Value
@@ -42,7 +42,8 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     public async Task WhenNoOrdersExist_ThenReturnsFailure()
     {
         // Arrange
-        var query = new GetOrdersQuery(new PaginationRequest());
+        var customerId = CustomerId.Create(Guid.NewGuid()).Value;
+        var query = new GetOrdersQuery(new PaginationRequest(), customerId);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
 
         // Act
@@ -57,12 +58,13 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     public async Task WhenRequestIsOutOfRange_ThenReturnsFailure()
     {
         // Arrange
-        var orders = GetTestListOrders();
+        var customerId = CustomerId.Create(Guid.NewGuid()).Value;
+        var orders = GetTestListOrders(customerId.Value);
 
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 1, PageSize: orders.Count));
+        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 1, PageSize: orders.Count), customerId);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
 
         // Act
@@ -77,12 +79,13 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     public async Task WhenRequestIsValid_ThenReturnsSuccess()
     {
         // Arrange
-        var orders = GetTestListOrders();
+        var customerId = CustomerId.Create(Guid.NewGuid()).Value;
+        var orders = GetTestListOrders(customerId.Value);
 
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: orders.Count - 1));
+        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: orders.Count - 1), customerId);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
 
         // Act
@@ -102,8 +105,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
                 dto.ShortCardNumber == o.Payment.CardNumber.Substring(0, 3) &&
                 dto.Address == o.DestinationAddress.AddressLine &&
                 dto.TotalPrice == o.TotalPrice &&
-                
-                 o.OrderItems.Select(oi =>
+                o.OrderItems.Select(oi =>
                     new OrderReadItemDto(
                         oi.Product.Id.Value,
                         oi.Product.Title.Value,
@@ -112,5 +114,33 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
                 ).SequenceEqual(dto.Products)
             );
         });
+    }
+
+    [Fact]
+    public async Task WhenRequestIsValid_ThenReturnsSuccessAndCustomersOrders()
+    {
+        // Arrange
+        var customerId = CustomerId.Create(Guid.NewGuid()).Value;
+        var orders = GetTestListOrders(customerId.Value);
+        var notCustomersOrder = Order.Create(
+            CustomerId.Create(Guid.NewGuid()).Value,
+            Payment.Create("Somebody One", "4111111111111111", "12/25", "123", "Visa").Value,
+            Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
+            OrderId.Create(Guid.NewGuid()).Value
+        );
+        orders.Add(notCustomersOrder);
+
+        ApplicationDbContext.Orders.AddRange(orders);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: orders.Count), customerId);
+        var handler = new GetOrdersQueryHandler(ApplicationDbContext);
+
+        // Act
+        var result = await handler.Handle(query, default);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        result.Value.Data.Should().HaveCount(orders.Count - 1); // Because one order is not customer`s.
     }
 }
