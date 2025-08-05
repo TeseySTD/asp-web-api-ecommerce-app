@@ -24,6 +24,57 @@ public class AddCategoryImagesTest : ApiTest
         CategoryDescription.Create("Test Description").Value
     );
 
+    private HttpRequestMessage GenereateHttpRequest(Guid categoryId, MultipartFormDataContent form,
+        string role = "Admin")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{RequestUrl}/{categoryId}/images");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        request.Content = form;
+        return request;
+    }
+
+    [Fact]
+    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+
+        using var form = new MultipartFormDataContent();
+        var imageContent1 = new ByteArrayContent(new byte[] { 1, 2, 3, 4 });
+        imageContent1.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        form.Add(imageContent1, "images", "test1.jpg");
+        
+        // Act
+        var response = await HttpClient.PostAsync($"{RequestUrl}/{categoryId}/images", form);
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WhenCustomerIsNotAdmin_ThenReturnsForbidden()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+
+        using var form = new MultipartFormDataContent();
+        var imageContent1 = new ByteArrayContent(new byte[] { 1, 2, 3, 4 });
+        imageContent1.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        form.Add(imageContent1, "images", "test1.jpg");
+        
+        var request = GenereateHttpRequest(categoryId, form, "Seller");
+        
+        // Act
+        var response = await HttpClient.SendAsync(request);
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+    
 
     [Fact]
     public async Task WhenValidImages_ThenReturnsOk()
@@ -45,8 +96,10 @@ public class AddCategoryImagesTest : ApiTest
         imageContent2.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png");
         form.Add(imageContent2, "images", "test2.png");
 
+        var request = GenereateHttpRequest(categoryId, form);
+
         // Act
-        var response = await HttpClient.PostAsync($"{RequestUrl}/{categoryId}/images", form);
+        var response = await HttpClient.SendAsync(request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -71,8 +124,11 @@ public class AddCategoryImagesTest : ApiTest
 
         using var form = new MultipartFormDataContent();
 
+        var request = GenereateHttpRequest(categoryId, form);
+
         // Act
-        var response = await HttpClient.PostAsync($"{RequestUrl}/{categoryId}/images", form);
+        var response = await HttpClient.SendAsync(request);
+
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -99,9 +155,10 @@ public class AddCategoryImagesTest : ApiTest
         }
 
         var expectedJson = MakeSystemErrorApiOutput(new CategoryModule.ImageCountOutOfRangeError());
+        var request = GenereateHttpRequest(categoryId, form);
 
         // Act
-        var response = await HttpClient.PostAsync($"{RequestUrl}/{categoryId}/images", form);
+        var response = await HttpClient.SendAsync(request);
         var actualJson = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -126,8 +183,11 @@ public class AddCategoryImagesTest : ApiTest
 
         var expectedJson = MakeSystemErrorApiOutput(new CategoryModule.InvalidImagesTypeError());
 
+        var request = GenereateHttpRequest(categoryId, form);
+
         // Act
-        var response = await HttpClient.PostAsync($"{RequestUrl}/{categoryId}/images", form);
+        var response = await HttpClient.SendAsync(request);
+
         var actualJson = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -147,8 +207,11 @@ public class AddCategoryImagesTest : ApiTest
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         form.Add(imageContent, "images", "test1.jpg");
 
+        var request = GenereateHttpRequest(categoryId, form);
+
         // Act
-        var response = await HttpClient.PostAsync($"{RequestUrl}/{categoryId}/images", form);
+        var response = await HttpClient.SendAsync(request);
+
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

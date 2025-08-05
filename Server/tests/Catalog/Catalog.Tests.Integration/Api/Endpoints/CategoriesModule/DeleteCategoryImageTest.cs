@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using Catalog.Application.UseCases.Categories.Commands.DeleteCategoryImage;
 using Catalog.Core.Models.Categories;
 using Catalog.Core.Models.Categories.ValueObjects;
@@ -25,6 +26,42 @@ public class DeleteCategoryImageTest : ApiTest
         CategoryDescription.Create("Test Description").Value
     );
 
+    private HttpRequestMessage GenereateHttpRequest(Guid categoryId, Guid imageId, string role = "Admin")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{categoryId}/images/{imageId}");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return request;
+    }
+
+    [Fact]
+    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    {
+        // Act
+        var response = await HttpClient.DeleteAsync($"{RequestUrl}/{Guid.NewGuid()}/images/{Guid.NewGuid()}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WhenCustomerIsNotAdmin_ThenReturnsForbidden()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+        var imageId = Guid.NewGuid();
+        var request = GenereateHttpRequest(categoryId, imageId, "Seller");
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
     {
@@ -45,8 +82,10 @@ public class DeleteCategoryImageTest : ApiTest
         category.AddImage(image);
         await ApplicationDbContext.SaveChangesAsync();
 
+        var request = GenereateHttpRequest(categoryId, image.Id.Value);
+
         // Act
-        var response = await HttpClient.DeleteAsync($"{RequestUrl}/{categoryId}/images/{image.Id.Value}");
+        var response = await HttpClient.SendAsync(request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -65,7 +104,7 @@ public class DeleteCategoryImageTest : ApiTest
         // Arrange
         var categoryId = Guid.NewGuid();
         var category = CreateTestCategory(categoryId);
-        
+
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();
 
@@ -74,8 +113,12 @@ public class DeleteCategoryImageTest : ApiTest
         var expectedJson =
             MakeSystemErrorApiOutput(
                 new DeleteCategoryImageCommandHandler.ImageNotFoundError(nonExistentImageId, categoryId));
+
+        var request = GenereateHttpRequest(categoryId, nonExistentImageId);
+
         // Act
-        var response = await HttpClient.DeleteAsync($"{RequestUrl}/{categoryId}/images/{nonExistentImageId}");
+        var response = await HttpClient.SendAsync(request);
+
         var actualJson = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -94,8 +137,11 @@ public class DeleteCategoryImageTest : ApiTest
         var expectedJson =
             MakeSystemErrorApiOutput(new DeleteCategoryImageCommandHandler.CategoryNotFoundError(categoryId));
 
+        var request = GenereateHttpRequest(categoryId, imageId);
+
         // Act
-        var response = await HttpClient.DeleteAsync($"{RequestUrl}/{categoryId}/images/{imageId}");
+        var response = await HttpClient.SendAsync(request);
+
         var actualJson = await response.Content.ReadAsStringAsync();
 
         // Assert

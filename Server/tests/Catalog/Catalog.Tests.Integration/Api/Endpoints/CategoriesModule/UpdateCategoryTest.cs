@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using Catalog.API.Http.Category.Requests;
 using Catalog.Core.Models.Categories;
@@ -20,6 +21,44 @@ public class UpdateCategoryTest : ApiTest
 
     private const string RequestUrl = "/api/categories";
 
+    private HttpRequestMessage GenereateHttpRequest(UpdateCategoryRequest dto, Guid categoryId, string role = "Admin")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{categoryId}");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var json = JsonConvert.SerializeObject(dto);
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+        return request;
+    }
+
+    [Fact]
+    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    {
+        // Act
+        var response = await HttpClient.PutAsync( $"{RequestUrl}/{Guid.NewGuid()}", new StringContent("", Encoding.UTF8, "application/json"));
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WhenCustomerIsNotAdmin_ThenReturnsForbidden()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+        var dto = new UpdateCategoryRequest("New Category", "New Description");
+        var request = GenereateHttpRequest(dto, categoryId, "Seller");
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
     {
@@ -34,12 +73,11 @@ public class UpdateCategoryTest : ApiTest
         ApplicationDbContext.Categories.Add(category);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new UpdateCategoryRequest("Updated Name", "Updated Description");
-        var json = JsonConvert.SerializeObject(request);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var dto = new UpdateCategoryRequest("Updated Name", "Updated Description");
+        var request = GenereateHttpRequest(dto, categoryId);
 
         // Act
-        var response = await HttpClient.PutAsync($"{RequestUrl}/{categoryId}", content);
+        var response = await HttpClient.SendAsync(request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -56,14 +94,15 @@ public class UpdateCategoryTest : ApiTest
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
-        var request = new UpdateCategoryRequest("Updated Name", "Updated Description");
-        var json = JsonConvert.SerializeObject(request);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var dto = new UpdateCategoryRequest("Updated Name", "Updated Description");
 
         var expectedJson = MakeSystemErrorApiOutput(Error.NotFound);
-        
+
+        var request = GenereateHttpRequest(dto, nonExistentId);
+
         // Act
-        var response = await HttpClient.PutAsync($"{RequestUrl}/{nonExistentId}", content);
+        var response = await HttpClient.SendAsync(request);
+
         var actualJson = await response.Content.ReadAsStringAsync();
 
         // Assert

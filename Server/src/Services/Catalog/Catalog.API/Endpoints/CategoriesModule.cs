@@ -19,6 +19,7 @@ using Catalog.Core.Models.Products;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Core.API;
+using Shared.Core.Auth;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.API.Endpoints;
@@ -67,7 +68,7 @@ public class CategoryModule : CarterModule
                 onSuccess: value => Results.Ok(value.Value),
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
-        });
+        }).RequireAuthorization(Policies.RequireAdminPolicy);
 
         app.MapPost("/{id:guid}/images", async (ISender sender,
                 Guid id,
@@ -77,7 +78,8 @@ public class CategoryModule : CarterModule
                 var validationResult = Result.Try()
                     .Check(images == null, new RequiredImageError())
                     .DropIfFail()
-                    .Check(images!.Count() == 0 || images!.Count() > Category.MaxImagesCount, new ImageCountOutOfRangeError())
+                    .Check(images!.Count() == 0 || images!.Count() > Category.MaxImagesCount,
+                        new ImageCountOutOfRangeError())
                     .Check(() =>
                     {
                         foreach (var image in images!)
@@ -115,9 +117,10 @@ public class CategoryModule : CarterModule
                         if (enumerable.Any(e => e is AddCategoryImagesCommandHandler.CategoryNotFoundError))
                             return Results.NotFound(Envelope.Of(enumerable));
                         return Results.BadRequest(Envelope.Of(enumerable));
-                    } 
+                    }
                 );
             })
+            .RequireAuthorization(Policies.RequireAdminPolicy)
             .DisableAntiforgery();
 
         app.MapDelete("/{id:guid}/images/{imageId:guid}",
@@ -130,7 +133,7 @@ public class CategoryModule : CarterModule
                     onSuccess: () => Results.Ok(),
                     onFailure: errors => Results.NotFound(Envelope.Of(errors))
                 );
-            });
+            }).RequireAuthorization(Policies.RequireAdminPolicy);
 
         app.MapPut("/{id:guid}",
             async (ISender sender, Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken) =>
@@ -149,12 +152,12 @@ public class CategoryModule : CarterModule
                     onFailure: errors =>
                     {
                         var enumerable = errors as Error[] ?? errors.ToArray();
-                        if(enumerable.Any(e => e == Error.NotFound))
+                        if (enumerable.Any(e => e == Error.NotFound))
                             return Results.NotFound(Envelope.Of(enumerable));
                         return Results.BadRequest(Envelope.Of(enumerable));
                     }
                 );
-            });
+            }).RequireAuthorization(Policies.RequireAdminPolicy);
 
         app.MapDelete("/{id:guid}", async (ISender sender, Guid id, CancellationToken cancellationToken) =>
         {
@@ -165,7 +168,7 @@ public class CategoryModule : CarterModule
                 onSuccess: () => Results.Ok(),
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
-        });
+        }).RequireAuthorization(Policies.RequireAdminPolicy);
     }
 
     public sealed record RequiredImageError() : Error("Images are required", "Image files are required");
