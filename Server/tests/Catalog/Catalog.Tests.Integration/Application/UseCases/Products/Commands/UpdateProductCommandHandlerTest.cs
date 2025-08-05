@@ -55,8 +55,8 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         // Arrange
         var nonExistentId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
-        var dto = GenerateProductUpdateDto(nonExistentId,sellerId);
-        var cmd = new UpdateProductCommand(dto);
+        var dto = GenerateProductUpdateDto(nonExistentId, sellerId: sellerId);
+        var cmd = new UpdateProductCommand(sellerId, dto);
         var handler = new UpdateProductCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -73,7 +73,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         // Arrange
         var productId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
-        var product = CreateTestProduct(productId);
+        var product = CreateTestProduct(productId, sellerId: sellerId);
         product.StockQuantity = StockQuantity.Create(1).Value;
 
         ApplicationDbContext.Products.Add(product);
@@ -81,7 +81,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
 
         var invalidCategoryId = Guid.NewGuid();
         var dto = GenerateProductUpdateDto(productId, sellerId, invalidCategoryId);
-        var cmd = new UpdateProductCommand(dto);
+        var cmd = new UpdateProductCommand(sellerId, dto);
         var handler = new UpdateProductCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -92,8 +92,9 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         result.Errors.Should().ContainSingle(e => e is UpdateProductCommandHandler.CategoryNotFoundError);
     }
 
+
     [Fact]
-    public async Task WhenValidData_ThenUpdatesProductSavesContextAndCachesDto()
+    public async Task WhenProductSellerIsNotCustomer_ThenReturnsFailureResult()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -101,7 +102,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         var category = CreateTestCategory(categoryId);
 
         var prodId = Guid.NewGuid();
-        var product = CreateTestProduct(prodId, category.Id);
+        var product = CreateTestProduct(prodId, category.Id, sellerId);
         product.StockQuantity = StockQuantity.Create(10).Value;
 
         var newCategoryId = Guid.NewGuid();
@@ -115,7 +116,41 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         var dto = GenerateProductUpdateDto(prodId, newSellerId, newCategoryId);
 
         ConfigureMapster();
-        var cmd = new UpdateProductCommand(dto);
+        var cmd = new UpdateProductCommand(newSellerId, dto);
+        var handler = new UpdateProductCommandHandler(ApplicationDbContext, _cache);
+
+        // Act
+        var result = await handler.Handle(cmd, default);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e => e is UpdateProductCommandHandler.CustomerMismatchError);
+    }
+
+    [Fact]
+    public async Task WhenValidData_ThenUpdatesProductSavesContextAndCachesDto()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
+        var category = CreateTestCategory(categoryId);
+
+        var prodId = Guid.NewGuid();
+        var product = CreateTestProduct(prodId, category.Id, sellerId);
+        product.StockQuantity = StockQuantity.Create(10).Value;
+
+        var newCategoryId = Guid.NewGuid();
+        var newCategory = CreateTestCategory(newCategoryId);
+        var newSellerId = Guid.NewGuid();
+
+        ApplicationDbContext.Categories.AddRange(category, newCategory);
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var dto = GenerateProductUpdateDto(prodId, newSellerId, newCategoryId);
+
+        ConfigureMapster();
+        var cmd = new UpdateProductCommand(sellerId, dto);
         var handler = new UpdateProductCommandHandler(ApplicationDbContext, _cache);
 
         // Act

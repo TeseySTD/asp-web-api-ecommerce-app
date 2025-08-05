@@ -24,12 +24,21 @@ public class DecreaseQuantityTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantity}");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
-            ["sellerId"] = sellerId?.ToString() ?? Guid.Empty.ToString(),
+            ["userId"] = sellerId?.ToString() ?? Guid.NewGuid().ToString(),
             ["role"] = role
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return request;
     }
+
+    private Product CreateTestProduct(Guid productId, Guid sellerId) => Product.Create(
+        id: ProductId.Create(productId).Value,
+        title: ProductTitle.Create("Test Product").Value,
+        description: ProductDescription.Create("Test Product").Value,
+        price: ProductPrice.Create(10).Value,
+        sellerId: SellerId.Create(sellerId).Value,
+        null
+    );
 
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
@@ -38,21 +47,14 @@ public class DecreaseQuantityTest : ApiTest
         var productId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
         var initialQuantity = 100;
-        var product = Product.Create(
-            id: ProductId.Create(productId).Value,
-            title: ProductTitle.Create("Test Product").Value,
-            description: ProductDescription.Create("Test Product").Value,
-            price: ProductPrice.Create(10).Value,
-            sellerId: SellerId.Create(sellerId).Value,
-            null
-        );
+        var product = CreateTestProduct(productId, sellerId);
         product.StockQuantity = StockQuantity.Create(initialQuantity).Value;
         var quantityMinus = 10;
 
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateRequest(productId, quantityMinus);
+        var request = GenerateRequest(productId, quantityMinus, sellerId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -83,6 +85,29 @@ public class DecreaseQuantityTest : ApiTest
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal(expectedJson, actualJson, ignoreAllWhiteSpace: true);
+    }
+
+    [Fact]
+    public async Task WhenCustomerIsNotProductSeller_ThenReturnsForbidden()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
+        var initialQuantity = 100;
+        var product = CreateTestProduct(productId, sellerId);
+        product.StockQuantity = StockQuantity.Create(initialQuantity).Value;
+        var quantityMinus = 10;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        var request = GenerateRequest(productId, quantityMinus);
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]

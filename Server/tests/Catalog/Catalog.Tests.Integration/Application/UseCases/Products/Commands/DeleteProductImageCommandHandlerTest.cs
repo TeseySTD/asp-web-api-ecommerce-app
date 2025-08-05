@@ -40,7 +40,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
         // Arrange
         var nonExistentProductId = Guid.NewGuid();
         var imageId = Guid.NewGuid();
-        var cmd = new DeleteProductImageCommand(nonExistentProductId, imageId);
+        var cmd = new DeleteProductImageCommand(nonExistentProductId, Guid.NewGuid(), imageId);
         var handler = new DeleteProductImageCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -51,6 +51,29 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
         result.Errors.Should().ContainSingle(e => e is DeleteProductImageCommandHandler.ProductNotFoundError);
     }
 
+    [Fact]
+    public async Task WhenCustomerIsNotProductSeller_ThenReturnsFailureResult()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        var fakeProductSellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId);
+        product.StockQuantity = StockQuantity.Create(1).Value;
+        
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync(default);
+        
+        var cmd = new DeleteProductImageCommand(productId, fakeProductSellerId, productId);
+        var handler = new DeleteProductImageCommandHandler(ApplicationDbContext, _cache);
+        
+        // Act
+        var result = await handler.Handle(cmd, default);
+        
+        // Assert
+        Assert.True(result.IsFailure);
+        result.Errors.Should().ContainSingle(e => e is DeleteProductImageCommandHandler.CustomerMismatchError);
+    }
+    
     [Fact]
     public async Task WhenImageNotFound_ThenReturnsFailureResult()
     {
@@ -63,7 +86,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var nonExistentImageId = Guid.NewGuid();
-        var cmd = new DeleteProductImageCommand(productId, nonExistentImageId);
+        var cmd = new DeleteProductImageCommand(productId, product.SellerId.Value, nonExistentImageId);
         var handler = new DeleteProductImageCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -92,7 +115,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
         ApplicationDbContext.Images.Add(orphanImage);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var cmd = new DeleteProductImageCommand(productId, orphanImage.Id.Value);
+        var cmd = new DeleteProductImageCommand(productId, product.SellerId.Value, orphanImage.Id.Value);
         var handler = new DeleteProductImageCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -102,7 +125,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e is DeleteProductImageCommandHandler.ImageNotFoundError);
     }
-
+    
     [Fact]
     public async Task WhenValidData_ThenRemovesImage_SavesContext_AndCachesDto()
     {
@@ -132,7 +155,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
         await ApplicationDbContext.SaveChangesAsync(default);
 
         ConfigureMapster();
-        var cmd = new DeleteProductImageCommand(productId, image1.Id.Value);
+        var cmd = new DeleteProductImageCommand(productId, product.SellerId.Value, image1.Id.Value);
         var handler = new DeleteProductImageCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -143,7 +166,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
 
         var updatedProduct = await ApplicationDbContext.Products
             .Include(p => p.Category)
-                .ThenInclude(c => c.Images)
+            .ThenInclude(c => c.Images)
             .Include(p => p.Images)
             .FirstAsync(p => p.Id == product.Id);
 

@@ -53,6 +53,7 @@ public class UpdateProductTest : ApiTest
             "Updated Description",
             12,
             333,
+            Guid.NewGuid(),
             categoryId
         );
 
@@ -135,6 +136,30 @@ public class UpdateProductTest : ApiTest
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         Assert.Equal(expectedJson, actualJson, ignoreAllWhiteSpace: true);
+    }
+
+    [Fact]
+    public async Task WhenCustomerIsNotProductSeller_ThenReturnsForbidden()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
+        var fakeSellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
+        product.StockQuantity = StockQuantity.Create(1).Value;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        var dto = GenerateUpdateProductRequest();
+
+        var request = GenerateHttpRequest(productId, dto, fakeSellerId);
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode); 
     }
 
     [Fact]

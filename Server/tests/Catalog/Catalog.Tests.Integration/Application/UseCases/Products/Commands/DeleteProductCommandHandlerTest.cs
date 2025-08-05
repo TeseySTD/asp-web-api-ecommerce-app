@@ -8,6 +8,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using NSubstitute;
+using Shared.Core.Auth;
 
 namespace Catalog.Tests.Integration.Application.UseCases.Products.Commands;
 
@@ -34,7 +35,9 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var nonExistentId = ProductId.Create(Guid.NewGuid()).Value;
-        var cmd = new DeleteProductCommand(nonExistentId);
+        var sellerId = SellerId.Create(Guid.NewGuid()).Value;
+        var role = UserRole.Default;
+        var cmd = new DeleteProductCommand(nonExistentId, sellerId, role);
         var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -44,6 +47,30 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e is DeleteProductCommandHandler.ProductNotFoundError);
     }
+
+    [Fact]
+    public async Task WhenCustomerIsNotProductSeller_ThenReturnsFailureResult()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var fakeSellerId = SellerId.Create(Guid.NewGuid()).Value;
+        var product = CreateTestProduct(id);
+        product.StockQuantity = StockQuantity.Create(100).Value;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var cmd = new DeleteProductCommand(product.Id, fakeSellerId, UserRole.Default);
+        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
+
+        // Act
+        var result = await handler.Handle(cmd, default);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        result.Errors.Should().ContainSingle(e => e is DeleteProductCommandHandler.CustomerMismatchError);
+    }
+
 
     [Fact]
     public async Task WhenProductExists_ThenDeletesProduct_AndRemovesFromCache()
@@ -56,7 +83,37 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var cmd = new DeleteProductCommand(product.Id);
+        var cmd = new DeleteProductCommand(product.Id, product.SellerId, UserRole.Default);
+        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
+
+        // Act
+        var result = await handler.Handle(cmd, default);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+
+        // Verify product deleted from DB
+        var deletedProduct = await ApplicationDbContext.Products
+            .FirstOrDefaultAsync(p => p.Id == product.Id);
+        deletedProduct.Should().BeNull();
+
+        // Verify cache removal
+        await _cache.Received(1).RemoveAsync($"product-{id}");
+    }
+
+    [Fact]
+    public async Task WhenValidDataCustomerIsAdminAndNotProductSeller_ThenReturnsSuccessResult()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var fakeSellerId = SellerId.Create(Guid.NewGuid()).Value;
+        var product = CreateTestProduct(id);
+        product.StockQuantity = StockQuantity.Create(100).Value;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var cmd = new DeleteProductCommand(product.Id, fakeSellerId, UserRole.Admin);
         var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -85,7 +142,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var cmd = new DeleteProductCommand(product.Id);
+        var cmd = new DeleteProductCommand(product.Id, product.SellerId, UserRole.Default);
         var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -119,7 +176,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         ApplicationDbContext.Products.AddRange(product1, product2);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var cmd = new DeleteProductCommand(product1.Id);
+        var cmd = new DeleteProductCommand(product1.Id, product1.SellerId, UserRole.Default);
         var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
 
         // Act

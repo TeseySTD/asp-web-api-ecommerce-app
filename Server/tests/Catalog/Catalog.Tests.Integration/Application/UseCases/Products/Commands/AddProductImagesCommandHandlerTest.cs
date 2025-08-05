@@ -35,7 +35,8 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
     public async Task WhenProductNotFound_ThenReturnsFailureResult()
     {
         // Arrange
-        var cmd = new AddProductImagesCommand(Guid.NewGuid(), new[] { new ImageDto("f.jpg", "Png", [1]) });
+        var cmd = new AddProductImagesCommand(Guid.NewGuid(), Guid.NewGuid(),
+            new[] { new ImageDto("f.jpg", "Png", [1]) });
         var handler = new AddProductImagesCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -44,6 +45,35 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e is AddProductImagesCommandHandler.ProductNotFoundError);
+    }
+
+    [Fact]
+    public async Task WhenProductSellerIsNotCustomer_ThenReturnsFailureResult()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var fakeSellerId = Guid.NewGuid();
+        var product = CreateTestProduct(id);
+        product.StockQuantity = StockQuantity.Create(100).Value;
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var images = new[]
+        {
+            new ImageDto("a.jpg", "Png", new byte[] { 1 }),
+            new ImageDto("b.jpg", "Jpeg", new byte[] { 2 })
+        };
+
+        ConfigureMapster();
+        var cmd = new AddProductImagesCommand(id, fakeSellerId, images);
+        var handler = new AddProductImagesCommandHandler(ApplicationDbContext, _cache);
+
+        // Act
+        var result = await handler.Handle(cmd, default);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        result.Errors.Should().ContainSingle(e => e is AddProductImagesCommandHandler.CustomerMismatchError);
     }
 
     [Fact]
@@ -59,7 +89,7 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
         var images = Enumerable.Range(1, Product.MaxImagesCount + 1).Select(i => new ImageDto(i.ToString(), "Png", [1]))
             .ToList();
 
-        var cmd = new AddProductImagesCommand(id, images);
+        var cmd = new AddProductImagesCommand(id, product.SellerId.Value, images);
         var handler = new AddProductImagesCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -87,7 +117,7 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
         };
 
         ConfigureMapster();
-        var cmd = new AddProductImagesCommand(id, images);
+        var cmd = new AddProductImagesCommand(id, product.SellerId.Value, images);
         var handler = new AddProductImagesCommandHandler(ApplicationDbContext, _cache);
 
         // Act

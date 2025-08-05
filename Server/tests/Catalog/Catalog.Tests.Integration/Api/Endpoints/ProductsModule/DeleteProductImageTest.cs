@@ -26,7 +26,7 @@ public class DeleteProductImageTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}/images/{imageId}");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
-            ["userId"] = sellerId?.ToString() ?? Guid.Empty.ToString(),
+            ["userId"] = sellerId?.ToString() ?? Guid.NewGuid().ToString(),
             ["role"] = role
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -63,7 +63,7 @@ public class DeleteProductImageTest : ApiTest
         product.AddImage(image);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateRequest(productId, image.Id.Value);
+        var request = GenerateRequest(productId, image.Id.Value, sellerId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -96,7 +96,7 @@ public class DeleteProductImageTest : ApiTest
             MakeSystemErrorApiOutput(
                 new DeleteProductImageCommandHandler.ImageNotFoundError(nonExistentImageId, productId));
 
-        var request = GenerateRequest(productId, nonExistentImageId);
+        var request = GenerateRequest(productId, nonExistentImageId, sellerId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -130,6 +130,28 @@ public class DeleteProductImageTest : ApiTest
     }
 
     [Fact]
+    public async Task WhenCustomerIsNotProductSeller_ThenReturnsForbidden()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
+        var fakeSellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
+        product.StockQuantity = StockQuantity.Create(1).Value;
+        
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync();
+        
+        var request = GenerateRequest(productId, Guid.NewGuid(), fakeSellerId);
+        
+        // Act
+        var response = await HttpClient.SendAsync(request);
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
     public async Task WhenUnauthorized_ThenReturnsUnauthorized()
     {
         // Arrange
@@ -147,7 +169,7 @@ public class DeleteProductImageTest : ApiTest
     public async Task WhenNotSeller_ThenReturnsUnauthorized()
     {
         // Arrange
-        var request = GenerateRequest(Guid.NewGuid(), Guid.NewGuid(), role:"Default");
+        var request = GenerateRequest(Guid.NewGuid(), Guid.NewGuid(), role: "Default");
 
         // Act
         var response = await HttpClient.SendAsync(request);

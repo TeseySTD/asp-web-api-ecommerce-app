@@ -2,4 +2,4 @@
 
 namespace Catalog.Application.UseCases.Products.Commands.IncreaseQuantity;
 
-public record IncreaseQuantityCommand(Guid Id, int Quantity) : ICommand;
+public record IncreaseQuantityCommand(Guid Id, Guid SellerId, int Quantity) : ICommand;

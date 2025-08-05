@@ -28,10 +28,14 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
     public async Task<Result> Handle(AddProductImagesCommand request, CancellationToken cancellationToken)
     {
         var productId = ProductId.Create(request.ProductId).Value;
+        var sellerId = SellerId.Create(request.SellerId).Value;
         Product? product = null;
         var result = await Result.Try()
             .Check(!await _context.Products.AnyAsync(p => p.Id == productId),
                 new ProductNotFoundError(request.ProductId))
+            .DropIfFail()
+            .CheckAsync(async () => !await _context.Products.AnyAsync(p => p.Id == productId && p.SellerId == sellerId),
+                new CustomerMismatchError(request.SellerId))
             .DropIfFail()
             .CheckAsync(async () =>
                 {
@@ -77,4 +81,7 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
 
     public sealed record MaxImagesError(Guid ProductId) : Error("Max images in product.",
         $"Product with id: {ProductId} has maximum ({Product.MaxImagesCount}) images.");
+
+    public sealed record CustomerMismatchError(Guid SellerId) : Error("You can`t add images to this product!",
+        $"Your id {SellerId} doesn’t match with seller’s id in product.");
 }

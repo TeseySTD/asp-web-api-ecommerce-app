@@ -29,7 +29,7 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
         ProductDescription.Create("Test Description").Value,
         ProductPrice.Create(10).Value,
         SellerId.Create(Guid.NewGuid()).Value,
-        null 
+        null
     );
 
     [Fact]
@@ -37,7 +37,7 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
-        var cmd = new DecreaseQuantityCommand(nonExistentId, 5);
+        var cmd = new DecreaseQuantityCommand(nonExistentId, Guid.NewGuid(), 5);
         var handler = new DecreaseQuantityCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -46,6 +46,30 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e is DecreaseQuantityCommandHandler.ProductNotFoundError);
+    }
+
+
+    [Fact]
+    public async Task WhenProductSellerIsNotCustomer_ThenReturnsFailureResult()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var fakeSellrId = Guid.NewGuid();
+        var product = CreateTestProduct(id);
+        product.StockQuantity = StockQuantity.Create(5).Value;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var cmd = new DecreaseQuantityCommand(id, fakeSellrId, 1);
+        var handler = new DecreaseQuantityCommandHandler(ApplicationDbContext, _cache);
+        
+        // Act
+        var result = await handler.Handle(cmd, default);
+        
+        // Assert
+        Assert.True(result.IsFailure);
+        result.Errors.Should().ContainSingle(e => e is DecreaseQuantityCommandHandler.CustomerMismatchError);
     }
 
     [Fact]
@@ -59,7 +83,7 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var cmd = new DecreaseQuantityCommand(id, 10); // Trying to decrease by 10
+        var cmd = new DecreaseQuantityCommand(id, product.SellerId.Value, 10); // Trying to decrease by 10
         var handler = new DecreaseQuantityCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -84,7 +108,7 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
 
         ConfigureMapster();
         uint minusQuantity = 30;
-        var cmd = new DecreaseQuantityCommand(id, (int)minusQuantity);
+        var cmd = new DecreaseQuantityCommand(id, product.SellerId.Value, (int)minusQuantity);
         var handler = new DecreaseQuantityCommandHandler(ApplicationDbContext, _cache);
 
         // Act

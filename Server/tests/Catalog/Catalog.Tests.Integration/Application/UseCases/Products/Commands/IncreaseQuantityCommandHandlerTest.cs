@@ -24,12 +24,21 @@ public class IncreaseQuantityCommandHandlerTest : IntegrationTest
         _cache = Substitute.For<IDistributedCache>();
     }
 
+    private Product CreateTestProduct(Guid productId) => Product.Create(
+        ProductId.Create(productId).Value,
+        ProductTitle.Create("Title").Value,
+        ProductDescription.Create("Descripction").Value,
+        ProductPrice.Create(10m).Value,
+        SellerId.Create(Guid.NewGuid()).Value,
+        null
+    );
+
     [Fact]
     public async Task WhenProductNotFound_ThenReturnsFailureResult()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
-        var cmd = new IncreaseQuantityCommand(nonExistentId, 5);
+        var cmd = new IncreaseQuantityCommand(nonExistentId, Guid.NewGuid(), 5);
         var handler = new IncreaseQuantityCommandHandler(ApplicationDbContext, _cache);
 
         // Act
@@ -41,25 +50,43 @@ public class IncreaseQuantityCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidData_ThenIncreasesQuantity_SavesContext_AndCachesDto()
+    public async Task WhenProductSellerIsNotCustomer_ThenReturnsFailureResult()
     {
         // Arrange
-        var prodId = Guid.NewGuid();
-        var product = Product.Create(
-            ProductId.Create(prodId).Value,
-            ProductTitle.Create("Title").Value,
-            ProductDescription.Create("Descripction").Value,
-            ProductPrice.Create(10m).Value,
-            SellerId.Create(Guid.NewGuid()).Value,
-            null
-        );
+        var productId = Guid.NewGuid();
+        var fakeSellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId);
         product.StockQuantity = StockQuantity.Create(10).Value;
 
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var increaseBy = 7u;
-        var cmd = new IncreaseQuantityCommand(prodId, (int)increaseBy);
+        var cmd = new IncreaseQuantityCommand(productId, fakeSellerId, (int)increaseBy);
+        ConfigureMapster();
+        var handler = new IncreaseQuantityCommandHandler(ApplicationDbContext, _cache);
+
+        // Act
+        var result = await handler.Handle(cmd, default);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        result.Errors.Should().ContainSingle(e => e is IncreaseQuantityCommandHandler.CustomerMismatchError);
+    }
+
+    [Fact]
+    public async Task WhenValidData_ThenIncreasesQuantity_SavesContext_AndCachesDto()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        var product = CreateTestProduct(productId);
+        product.StockQuantity = StockQuantity.Create(10).Value;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var increaseBy = 7u;
+        var cmd = new IncreaseQuantityCommand(productId, product.SellerId.Value, (int)increaseBy);
         ConfigureMapster();
         var handler = new IncreaseQuantityCommandHandler(ApplicationDbContext, _cache);
 
@@ -71,7 +98,7 @@ public class IncreaseQuantityCommandHandlerTest : IntegrationTest
 
         // Verify DB update
         var updated = await ApplicationDbContext.Products
-            .FirstOrDefaultAsync(p => p.Id == ProductId.Create(prodId).Value);
+            .FirstOrDefaultAsync(p => p.Id == ProductId.Create(productId).Value);
         updated.Should().NotBeNull();
         updated.StockQuantity.Value.Should().Be(10 + increaseBy);
 

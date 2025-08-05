@@ -24,14 +24,20 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
+        var productId = ProductId.Create(request.Value.Id).Value;
+        var sellerId = SellerId.Create(request.CurrentSellerId).Value;
+        
         var result = await Result.Try()
-            .Check(!await _context.Products.AnyAsync(p => p.Id == ProductId.Create(request.Value.Id).Value),
+            .Check(!await _context.Products.AnyAsync(p => p.Id == productId), 
                 new ProductNotFoundError(request.Value.Id))
             .CheckIfAsync(
                 request.Value.CategoryId != null,
                 async () => !await _context.Categories.AnyAsync(p =>
                     p.Id == CategoryId.Create(request.Value.CategoryId ?? Guid.Empty).Value),
                 new CategoryNotFoundError(request.Value.CategoryId ?? Guid.Empty))
+            .DropIfFail()
+            .CheckAsync(async () => !await _context.Products.AnyAsync(p => p.Id == productId && p.SellerId == sellerId),
+                new CustomerMismatchError(sellerId.Value))
             .BuildAsync();
 
         if (result.IsSuccess)
@@ -81,4 +87,6 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 
     public sealed record CategoryNotFoundError(Guid CategoryId) : Error("Category not found",
         $"Category not found, incorrect id:{CategoryId}");
+    public sealed record CustomerMismatchError(Guid SellerId) : Error("You can`t update this product!",
+        $"Your id {SellerId} doesn’t match with seller’s id in product.");
 }

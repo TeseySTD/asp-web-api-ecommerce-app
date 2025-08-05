@@ -21,12 +21,21 @@ public class DeleteProductTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
-            ["userId"] = sellerId?.ToString() ?? Guid.Empty.ToString(),
+            ["userId"] = sellerId?.ToString() ?? Guid.NewGuid().ToString(),
             ["role"] = role
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return request;
     }
+
+    private Product CreateTestProduct(Guid productId, Guid sellerId) => Product.Create(
+        id: ProductId.Create(productId).Value,
+        title: ProductTitle.Create("Test Product").Value,
+        description: ProductDescription.Create("Test Product").Value,
+        price: ProductPrice.Create(10).Value,
+        sellerId: SellerId.Create(sellerId).Value,
+        null
+    );
 
     [Fact]
     public async Task WhenValidData_ThenReturnsOk()
@@ -34,20 +43,13 @@ public class DeleteProductTest : ApiTest
         // Arrange
         var productId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
-        var product = Product.Create(
-            id: ProductId.Create(productId).Value,
-            title: ProductTitle.Create("Test Product").Value,
-            description: ProductDescription.Create("Test Product").Value,
-            price: ProductPrice.Create(10).Value,
-            sellerId: SellerId.Create(sellerId).Value,
-            null
-        );
+        var product = CreateTestProduct(productId, sellerId);
         product.StockQuantity = StockQuantity.Create(10).Value;
 
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateRequest(productId);
+        var request = GenerateRequest(productId, sellerId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -62,7 +64,7 @@ public class DeleteProductTest : ApiTest
         // Arrange
         var productId = Guid.NewGuid();
 
-        var request = GenerateRequest(productId);
+        var request = GenerateRequest(productId, Guid.NewGuid());
 
         var expectedJson = MakeSystemErrorApiOutput(new DeleteProductCommandHandler.ProductNotFoundError(productId));
 
@@ -90,11 +92,55 @@ public class DeleteProductTest : ApiTest
     }
 
     [Fact]
+    public async Task WhenCustomerIsNotProductSeller_ThenReturnsForbidden()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
+        var fakeSellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
+        product.StockQuantity = StockQuantity.Create(10).Value;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        var request = GenerateRequest(productId, fakeSellerId);
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WhenCustomerIsNotProductSellerButIsAdminAndValidData_ThenReturnsOk()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
+        var fakeSellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
+        product.StockQuantity = StockQuantity.Create(10).Value;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        var request = GenerateRequest(productId, fakeSellerId, role: "Admin");
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public async Task WhenNotSeller_ThenReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var request = GenerateRequest(productId, role:"Default");
+        var request = GenerateRequest(productId, role: "Default");
 
         // Act
         var response = await HttpClient.SendAsync(request);

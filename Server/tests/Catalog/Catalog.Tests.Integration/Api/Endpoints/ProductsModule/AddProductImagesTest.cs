@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using Catalog.API.Endpoints;
+using Catalog.Application.UseCases.Products.Commands.AddProductImages;
 using Catalog.Core.Models.Products;
 using Catalog.Core.Models.Products.ValueObjects;
 using Catalog.Tests.Integration.Common;
@@ -184,6 +185,33 @@ public class AddProductImagesTest : ApiTest
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task WhenProductSellerIsNotCustomer_ThenReturnsForbidden()
+    {
+        // Arrange
+        var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
+        var fakeSellerid = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
+        product.StockQuantity = StockQuantity.Create(1).Value;
+
+        ApplicationDbContext.Products.Add(product);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        using var form = new MultipartFormDataContent();
+        var imageContent = new ByteArrayContent(new byte[] { 1, 2, 3, 4 });
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        form.Add(imageContent, "images", "test1.jpg");
+
+        var request = GenereateRequest(productId, fakeSellerid, form);
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]

@@ -87,8 +87,13 @@ public class ProductModule : CarterModule
         // Add images to product
         app.MapPost("/{id:guid}/images", async (ISender sender,
                 Guid id,
-                [FromForm] IFormFileCollection images, CancellationToken cancellationToken) =>
+                [FromForm] IFormFileCollection images, ClaimsPrincipal userClaims,
+                CancellationToken cancellationToken) =>
             {
+                if (ExtractUserDataFromClaims(userClaims).IsFailure)
+                    return Results.Unauthorized();
+                var userId = ExtractUserDataFromClaims(userClaims).Value.userId;
+
                 var imageDtos = new List<ImageDto>();
                 var validationResult = Result.Try()
                     .Check(images == null, new RequiredImageError())
@@ -120,7 +125,7 @@ public class ProductModule : CarterModule
                     ));
                 }
 
-                var cmd = new AddProductImagesCommand(id, imageDtos);
+                var cmd = new AddProductImagesCommand(id, userId, imageDtos);
                 var result = await sender.Send(cmd, cancellationToken);
 
                 return result.Map(
@@ -130,6 +135,8 @@ public class ProductModule : CarterModule
                         var enumerable = errors as Error[] ?? errors.ToArray();
                         if (enumerable.Any(e => e is AddProductImagesCommandHandler.ProductNotFoundError))
                             return Results.NotFound(Envelope.Of(enumerable));
+                        else if (enumerable.Any(e => e is AddProductImagesCommandHandler.CustomerMismatchError))
+                            return Results.Forbid();
                         return Results.BadRequest(Envelope.Of(enumerable));
                     }
                 );
@@ -138,14 +145,29 @@ public class ProductModule : CarterModule
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapDelete("/{id:guid}/images/{imageId:guid}", async (ISender sender,
-                Guid id, Guid imageId, CancellationToken cancellationToken) =>
+                Guid id, Guid imageId, ClaimsPrincipal userClaims, CancellationToken cancellationToken) =>
             {
-                var cmd = new DeleteProductImageCommand(id, imageId);
+                if (ExtractUserDataFromClaims(userClaims).IsFailure)
+                    return Results.Unauthorized();
+                var userId = ExtractUserDataFromClaims(userClaims).Value.userId;
+
+                var cmd = new DeleteProductImageCommand(id, userId, imageId);
                 var result = await sender.Send(cmd, cancellationToken);
 
                 return result.Map(
                     onSuccess: () => Results.Ok(),
-                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                    onFailure: errors =>
+                    {
+                        var enumerable = errors as Error[] ?? errors.ToArray();
+
+                        if (enumerable.Any(e =>
+                                e is DeleteProductImageCommandHandler.ProductNotFoundError ||
+                                e is DeleteProductImageCommandHandler.ImageNotFoundError))
+                            return Results.NotFound(Envelope.Of(enumerable));
+                        else if (enumerable.Any(e => e is DeleteProductImageCommandHandler.CustomerMismatchError))
+                            return Results.Forbid();
+                        return Results.BadRequest(Envelope.Of(enumerable));
+                    }
                 );
             })
             .RequireAuthorization(Policies.RequireSellerPolicy);
@@ -164,54 +186,98 @@ public class ProductModule : CarterModule
                         Description: request.Description,
                         Price: request.Price,
                         Quantity: request.Quantity,
-                        SellerId: userId,
+                        SellerId: request.SellerId,
                         CategoryId: request.CategoryId
                     );
 
-                    var cmd = new UpdateProductCommand(updateDto);
+                    var cmd = new UpdateProductCommand(userId, updateDto);
                     var result = await sender.Send(cmd, cancellationToken);
 
                     return result.Map(
                         onSuccess: () => Results.Ok(),
-                        onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                        onFailure: errors =>
+                        {
+                            var enumerable = errors as Error[] ?? errors.ToArray();
+                            if(enumerable.Any(e => e is UpdateProductCommandHandler.CustomerMismatchError))
+                                return Results.Forbid();
+                            return Results.NotFound(Envelope.Of(enumerable));
+                        }
                     );
                 })
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/increase-quantity/{id:guid}/{quantity:int}",
-                async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
+                async (ISender sender, Guid id, int quantity, ClaimsPrincipal userClaims,
+                    CancellationToken cancellationToken) =>
                 {
-                    var cmd = new IncreaseQuantityCommand(id, quantity);
+                    if (ExtractUserDataFromClaims(userClaims).IsFailure)
+                        return Results.Unauthorized();
+                    var userId = ExtractUserDataFromClaims(userClaims).Value.userId;
+
+                    var cmd = new IncreaseQuantityCommand(id, userId, quantity);
                     var result = await sender.Send(cmd, cancellationToken);
 
                     return result.Map(
                         onSuccess: () => Results.Ok(),
-                        onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                        onFailure: errors =>
+                        {
+                            var enumerable = errors as Error[] ?? errors.ToArray();
+                            if(enumerable.Any(e => e is IncreaseQuantityCommandHandler.ProductNotFoundError))
+                                return Results.NotFound(Envelope.Of(enumerable));
+                            else if (enumerable.Any(e => e is IncreaseQuantityCommandHandler.CustomerMismatchError))
+                                return Results.Forbid();
+                            return Results.BadRequest(Envelope.Of(enumerable));
+                        }
                     );
                 })
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/decrease-quantity/{id:guid}/{quantity:int}",
-                async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
+                async (ISender sender, Guid id, int quantity, ClaimsPrincipal userClaims,
+                    CancellationToken cancellationToken) =>
                 {
-                    var cmd = new DecreaseQuantityCommand(id, quantity);
+                    if (ExtractUserDataFromClaims(userClaims).IsFailure)
+                        return Results.Unauthorized();
+                    var userId = ExtractUserDataFromClaims(userClaims).Value.userId;
+
+                    var cmd = new DecreaseQuantityCommand(id, userId, quantity);
                     var result = await sender.Send(cmd, cancellationToken);
 
                     return result.Map(
                         onSuccess: () => Results.Ok(),
-                        onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                        onFailure: errors =>
+                        {
+                            var enumerable = errors as Error[] ?? errors.ToArray();
+                            if (enumerable.Any(e => e is DecreaseQuantityCommandHandler.ProductNotFoundError))
+                                return Results.NotFound(Envelope.Of(enumerable));
+                            else if (enumerable.Any(e => e is DecreaseQuantityCommandHandler.CustomerMismatchError))
+                                return Results.Forbid();
+                            return Results.BadRequest(Envelope.Of(enumerable));
+                        }
                     );
                 })
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
-        app.MapDelete("/{id:guid}", async (ISender sender, Guid id) =>
+        app.MapDelete("/{id:guid}", async (ISender sender, Guid id, ClaimsPrincipal userClaims) =>
             {
-                var cmd = new DeleteProductCommand(ProductId.Create(id).Value);
+                if (ExtractUserDataFromClaims(userClaims).IsFailure)
+                    return Results.Unauthorized();
+                var (userId, role) = ExtractUserDataFromClaims(userClaims).Value;
+
+                var cmd = new DeleteProductCommand(ProductId.Create(id).Value, SellerId.Create(userId).Value, role);
                 var result = await sender.Send(cmd);
 
                 return result.Map(
                     onSuccess: () => Results.Ok(),
-                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                    onFailure: errors =>
+                    {
+                        var enumerable = errors as Error[] ?? errors.ToArray();
+                        if (enumerable.Any(e => e is DeleteProductCommandHandler.ProductNotFoundError))
+                            return Results.NotFound(Envelope.Of(enumerable));
+                        else if (enumerable.Any(e => e is DeleteProductCommandHandler.CustomerMismatchError))
+                            return Results.Forbid();
+                        return Results.BadRequest(Envelope.Of(enumerable));
+                    }
                 );
             })
             .RequireAuthorization(Policies.RequireSellerPolicy);
