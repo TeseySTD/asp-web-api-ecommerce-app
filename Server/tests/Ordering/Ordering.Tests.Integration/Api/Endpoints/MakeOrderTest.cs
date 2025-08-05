@@ -18,7 +18,6 @@ public class MakeOrderTest : ApiTest
     }
 
     private MakeOrderRequest CreateTestRequest() => new(
-        Guid.NewGuid(),
         [new(Guid.NewGuid(), 10)],
         CardName: "John Doe",
         CardNumber: "4111111111111111",
@@ -31,17 +30,33 @@ public class MakeOrderTest : ApiTest
         ZipCode: "12345"
     );
 
-    private HttpRequestMessage GenerateRequest(MakeOrderRequest dto)
+    private HttpRequestMessage GenerateHttpRequest(MakeOrderRequest dto, Guid userId)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
-            ["role"] = "Default"
+            ["role"] = "Default",
+            ["userId"] = userId.ToString()
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8, "application/json");
-        
+
         return request;
+    }
+
+    [Fact]
+    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    {
+        // Arrange
+        var dto = CreateTestRequest();
+        var json = JsonConvert.SerializeObject(dto);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        
+        // Act
+        var response = await HttpClient.PostAsync(RequestUrl, content);
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
@@ -58,7 +73,7 @@ public class MakeOrderTest : ApiTest
             ]
         };
 
-        var request = GenerateRequest(dto);
+        var request = GenerateHttpRequest(dto, Guid.NewGuid());
 
         var expectedContent = MakeSystemErrorApiOutput(new CreateOrderCommandHandler.OrderItemIsNotUniqueError());
 
@@ -76,7 +91,7 @@ public class MakeOrderTest : ApiTest
     {
         var dto = CreateTestRequest();
 
-        var request = GenerateRequest(dto);
+        var request = GenerateHttpRequest(dto, Guid.NewGuid());
 
         // Act
         var response = await HttpClient.SendAsync(request);

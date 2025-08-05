@@ -1,5 +1,8 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
 using FluentAssertions;
+using Newtonsoft.Json;
 using Ordering.Application.UseCases.Orders.Queries.GetOrders;
 using Ordering.Core.Models.Orders;
 using Ordering.Core.Models.Orders.ValueObjects;
@@ -39,11 +42,34 @@ public class GetOrdersTest : ApiTest
         )
     ];
 
+    private HttpRequestMessage GenerateHttpRequest(string url, Guid? userId = null)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = "Default",
+            ["userId"] = userId?.ToString() ?? Guid.NewGuid().ToString(),
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return request;
+    }
+
+    [Fact]
+    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    {
+        // Act
+        var response = await HttpClient.GetAsync(RequestUrl + "/");
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
     [Fact]
     public async Task WhenNoOrdersExist_ThenReturnsNotFound()
     {
         // Arrange
-        var request = new HttpRequestMessage(HttpMethod.Get, RequestUrl + "/");
+        var request = GenerateHttpRequest(RequestUrl + "/");
 
         var expectedContent = MakeSystemErrorApiOutput(new GetOrdersQueryHandler.OrdersNotFoundError());
 
@@ -65,13 +91,13 @@ public class GetOrdersTest : ApiTest
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, RequestUrl + $"/?pageIndex=1&pageSize={GetTestListOrders().Count}");
+        var request = GenerateHttpRequest(RequestUrl + $"/?pageIndex=1&pageSize={GetTestListOrders().Count}");
         var expectedContent = MakeSystemErrorApiOutput(new GetOrdersQueryHandler.OrdersNotFoundError());
-        
+
         // Act
         var response = await HttpClient.SendAsync(request);
         var actualContent = await response.Content.ReadAsStringAsync();
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal(expectedContent, actualContent, ignoreAllWhiteSpace: true);
@@ -82,16 +108,16 @@ public class GetOrdersTest : ApiTest
     {
         // Arrange
         var orders = GetTestListOrders();
-        
+
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync();
-        
-        var request = new HttpRequestMessage(HttpMethod.Get, RequestUrl + $"/?pageIndex=0");
-        
+
+        var request = GenerateHttpRequest(RequestUrl + $"/?pageIndex=0");
+
         // Act
         var response = await HttpClient.SendAsync(request);
         var json = await response.Content.ReadAsStringAsync();
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         foreach (var o in orders)

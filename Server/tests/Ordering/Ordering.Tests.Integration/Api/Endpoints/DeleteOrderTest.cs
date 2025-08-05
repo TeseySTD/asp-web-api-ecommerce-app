@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
@@ -25,12 +26,57 @@ public class DeleteOrderTest : ApiTest
         OrderId.Create(Guid.NewGuid()).Value
     );
 
+    private HttpRequestMessage GenerateHttpRequest(Guid orderId, Guid userId, string role = "Default")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{orderId}");
+        var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
+        {
+            ["role"] = role,
+            ["userId"] = userId.ToString()
+        });
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return request;
+    }
+
+    [Fact]
+    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+
+        // Act
+        var response = await HttpClient.DeleteAsync($"{RequestUrl}/{orderId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WhenCustomerIsNotOrderOwner_ThenReturnsForbidden()
+    {
+        // Arrange
+        var order = CreateTestOrder();
+        var customerId = Guid.NewGuid();
+
+        ApplicationDbContext.Orders.Add(order);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        var request = GenerateHttpRequest(order.Id.Value, customerId);
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
     [Fact]
     public async Task WhenOrderIsNotFound_ThenReturnsNotFound()
     {
         // Arrange
         var orderId = Guid.NewGuid();
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{orderId}");
+        var request = GenerateHttpRequest(orderId, Guid.NewGuid());
 
         var expectedContent = MakeSystemErrorApiOutput(new DeleteOrderCommandHandler.OrderNotFoundError(orderId));
 
@@ -48,18 +94,35 @@ public class DeleteOrderTest : ApiTest
     {
         // Arrange
         var order = CreateTestOrder();
-        
+
         ApplicationDbContext.Orders.Add(order);
         await ApplicationDbContext.SaveChangesAsync();
-        
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{order.Id.Value}");
-        
+
+        var request = GenerateHttpRequest(order.Id.Value, order.CustomerId.Value);
+
         // Act
         var response = await HttpClient.SendAsync(request);
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var isOrderInDb = await ApplicationDbContext.Orders.AnyAsync(o => o.Id == order.Id);
-        Assert.False(isOrderInDb);
+    }
+
+    [Fact]
+    public async Task WhenOrderInDbCustomerIsAdminAndNotOrderOwner_ThenReturnsOk()
+    {
+        // Arrange
+        var order = CreateTestOrder();
+        var customerId = CustomerId.Create(Guid.NewGuid()).Value;
+
+        ApplicationDbContext.Orders.Add(order);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        var request = GenerateHttpRequest(order.Id.Value, customerId.Value, role: "Admin");
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 }

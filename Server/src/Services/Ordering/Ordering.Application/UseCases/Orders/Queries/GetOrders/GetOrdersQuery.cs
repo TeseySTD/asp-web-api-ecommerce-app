@@ -1,4 +1,5 @@
 ﻿using Ordering.Application.Dto.Order;
+using Ordering.Core.Models.Orders.ValueObjects;
 using Shared.Core.API;
 using Shared.Core.CQRS;
 

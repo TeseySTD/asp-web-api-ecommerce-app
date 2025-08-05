@@ -13,8 +13,12 @@ public class UpdateOrderEndpoint : OrdersEndpoint
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPut($"/{{id:guid}}", async (ISender sender, Guid id, ClaimsPrincipal user, UpdateOrderRequest request) =>
+        app.MapPut($"/{{id:guid}}", async (ISender sender, Guid id, ClaimsPrincipal userClaims, UpdateOrderRequest request) =>
         {
+            if(ExtractUserDataFromClaims(userClaims).IsFailure)
+                return Results.Unauthorized();
+            var customerId = ExtractUserDataFromClaims(userClaims).Value.customerId;
+            
             var payment = (
                 request.CardName,
                 request.CardNumber,
@@ -35,9 +39,6 @@ public class UpdateOrderEndpoint : OrdersEndpoint
                 DestinationAddress: address
             );
 
-            var customerIdString = user.FindFirstValue("userId");
-            Guid customerId = Guid.TryParse(customerIdString, out Guid parsed) ? parsed : Guid.Empty;
-
             var cmd = new UpdateOrderCommand(customerId, id, dto);
             var result = await sender.Send(cmd);
 
@@ -46,10 +47,13 @@ public class UpdateOrderEndpoint : OrdersEndpoint
                 onFailure: errors =>
                 {
                     var enumerable = errors as Error[] ?? errors.ToArray();
-                    return enumerable.Any(e => e is UpdateOrderCommandHandler.OrderNotFoundError)
-                        ? Results.NotFound(Envelope.Of(enumerable))
-                        : Results.BadRequest(Envelope.Of(enumerable));
+                    
+                    if(enumerable.Any(e => e is UpdateOrderCommandHandler.OrderNotFoundError))
+                        return Results.NotFound(Envelope.Of(enumerable));
+                    else if (enumerable.Any(e => e is UpdateOrderCommandHandler.CustomerMismatchError))
+                        return Results.Forbid();
+                    return Results.BadRequest(Envelope.Of(enumerable));
                 });
-        }).RequireAuthorization();
+        });
     }
 }

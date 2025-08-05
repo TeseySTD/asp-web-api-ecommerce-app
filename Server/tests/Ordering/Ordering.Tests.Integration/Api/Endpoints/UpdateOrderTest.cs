@@ -42,7 +42,7 @@ public class UpdateOrderTest : ApiTest
         ZipCode: "12345"
     );
 
-    private HttpRequestMessage GenerateRequest(Guid orderId, UpdateOrderRequest dto, Guid? userId = null)
+    private HttpRequestMessage GenerateHttpRequest(Guid orderId, UpdateOrderRequest dto, Guid? userId = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{orderId}");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
@@ -54,8 +54,22 @@ public class UpdateOrderTest : ApiTest
         request.Content = new StringContent(JsonConvert.SerializeObject(dto), Encoding.UTF8,
             "application/json");
 
-
         return request;
+    }
+
+    [Fact]
+    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var json = JsonConvert.SerializeObject(CreateTestRequest());
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        
+        // Act
+        var response = await HttpClient.PutAsync($"{RequestUrl}/{orderId}", content);
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
@@ -64,7 +78,7 @@ public class UpdateOrderTest : ApiTest
         // Arrange
         var orderId = Guid.NewGuid();
 
-        var request = GenerateRequest(orderId, CreateTestRequest());
+        var request = GenerateHttpRequest(orderId, CreateTestRequest());
 
         var expectedContent = MakeSystemErrorApiOutput(new UpdateOrderCommandHandler.OrderNotFoundError(orderId));
 
@@ -78,7 +92,7 @@ public class UpdateOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotOrderOwner_ThenReturnsBadRequest()
+    public async Task WhenCustomerIsNotOrderOwner_ThenReturnsForbidden()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -87,17 +101,14 @@ public class UpdateOrderTest : ApiTest
         ApplicationDbContext.Orders.Add(order);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateRequest(order.Id.Value, CreateTestRequest(), customerId);
+        var request = GenerateHttpRequest(order.Id.Value, CreateTestRequest(), customerId);
 
-        var expectedContent = MakeSystemErrorApiOutput(new UpdateOrderCommandHandler.CustomerMismatchError(customerId));
 
         // Act
         var response = await HttpClient.SendAsync(request);
-        var actualContent = await response.Content.ReadAsStringAsync();
 
         // Assert
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal(expectedContent, actualContent, ignoreAllWhiteSpace: true);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Theory]
@@ -112,7 +123,7 @@ public class UpdateOrderTest : ApiTest
         ApplicationDbContext.Orders.Add(order);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateRequest(order.Id.Value, CreateTestRequest(), customerId);
+        var request = GenerateHttpRequest(order.Id.Value, CreateTestRequest(), customerId);
 
         var expectedContent = MakeSystemErrorApiOutput(new UpdateOrderCommandHandler.IncorrectOrderStateError());
 
@@ -135,7 +146,7 @@ public class UpdateOrderTest : ApiTest
         ApplicationDbContext.Orders.Add(order);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateRequest(order.Id.Value, CreateTestRequest(), customerId);
+        var request = GenerateHttpRequest(order.Id.Value, CreateTestRequest(), customerId);
         // Act
         var response = await HttpClient.SendAsync(request);
 
