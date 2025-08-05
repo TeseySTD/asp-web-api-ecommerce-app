@@ -34,6 +34,7 @@ public class ReserveProductsMessageHandlerTest : IntegrationTest
         ProductTitle.Create("Title").Value,
         ProductDescription.Create("Description").Value,
         ProductPrice.Create(5m).Value,
+        SellerId.Create(Guid.NewGuid()).Value,
         null
     );
 

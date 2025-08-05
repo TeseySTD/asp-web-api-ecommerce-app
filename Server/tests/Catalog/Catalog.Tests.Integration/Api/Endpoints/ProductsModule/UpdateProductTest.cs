@@ -22,13 +22,15 @@ public class UpdateProductTest : ApiTest
 
     private const string RequestUrl = "/api/products";
 
-    private HttpRequestMessage GenerateRequest(Guid productId, UpdateProductRequest dto, string role = "Seller")
+    private HttpRequestMessage GenerateHttpRequest(Guid productId, UpdateProductRequest dto, Guid? sellerId = null,
+        string role = "Seller")
     {
         var json = JsonConvert.SerializeObject(dto);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
+            ["userId"] = sellerId?.ToString() ?? Guid.NewGuid().ToString(),
             ["role"] = role
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -36,7 +38,16 @@ public class UpdateProductTest : ApiTest
         return request;
     }
 
-    private UpdateProductRequest GenerateUpdateProductRequest(Guid productId, Guid? categoryId = null) =>
+    private Product CreateTestProduct(Guid productId, Guid sellerId) => Product.Create(
+        id: ProductId.Create(productId).Value,
+        title: ProductTitle.Create("Test Product").Value,
+        description: ProductDescription.Create("Test Product").Value,
+        price: ProductPrice.Create(10).Value,
+        sellerId: SellerId.Create(sellerId).Value,
+        null
+    );
+
+    private UpdateProductRequest GenerateUpdateProductRequest(Guid? categoryId = null) =>
         new(
             "Updated Name",
             "Updated Description",
@@ -51,21 +62,16 @@ public class UpdateProductTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = Product.Create(
-            id: ProductId.Create(productId).Value,
-            title: ProductTitle.Create("Test Product").Value,
-            description: ProductDescription.Create("Test Product").Value,
-            price: ProductPrice.Create(10).Value,
-            null
-        );
+        var sellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
         product.StockQuantity = StockQuantity.Create(1).Value;
 
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var dto = GenerateUpdateProductRequest(productId);
+        var dto = GenerateUpdateProductRequest();
 
-        var request = GenerateRequest(productId, dto);
+        var request = GenerateHttpRequest(productId, dto, sellerId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -87,9 +93,9 @@ public class UpdateProductTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var dto = GenerateUpdateProductRequest(productId);
+        var dto = GenerateUpdateProductRequest();
 
-        var request = GenerateRequest(productId, dto);
+        var request = GenerateHttpRequest(productId, dto);
 
         var expectedJson = MakeSystemErrorApiOutput(new UpdateProductCommandHandler.ProductNotFoundError(productId));
 
@@ -107,22 +113,17 @@ public class UpdateProductTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
         var nonExistingCategoryId = Guid.NewGuid();
-        var product = Product.Create(
-            id: ProductId.Create(productId).Value,
-            title: ProductTitle.Create("Test Product").Value,
-            description: ProductDescription.Create("Test Product").Value,
-            price: ProductPrice.Create(10).Value,
-            null
-        );
+        var product = CreateTestProduct(productId, sellerId);
         product.StockQuantity = StockQuantity.Create(1).Value;
 
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var dto = GenerateUpdateProductRequest(productId, nonExistingCategoryId);
+        var dto = GenerateUpdateProductRequest(nonExistingCategoryId);
 
-        var request = GenerateRequest(productId, dto);
+        var request = GenerateHttpRequest(productId, dto, sellerId);
 
         var expectedJson =
             MakeSystemErrorApiOutput(new UpdateProductCommandHandler.CategoryNotFoundError(nonExistingCategoryId));
@@ -141,7 +142,7 @@ public class UpdateProductTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var dto = GenerateUpdateProductRequest(productId, Guid.NewGuid());
+        var dto = GenerateUpdateProductRequest(Guid.NewGuid());
 
         var json = JsonConvert.SerializeObject(dto);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -159,7 +160,7 @@ public class UpdateProductTest : ApiTest
         // Arrange
         var dto = GenerateUpdateProductRequest(Guid.NewGuid());
 
-        var request = GenerateRequest(Guid.NewGuid(), dto, "Default");
+        var request = GenerateHttpRequest(Guid.NewGuid(), dto, role: "Default");
 
         // Act
         var response = await HttpClient.SendAsync(request);

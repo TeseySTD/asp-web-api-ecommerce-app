@@ -50,6 +50,7 @@ public class IncreaseQuantityCommandHandlerTest : IntegrationTest
             ProductTitle.Create("Title").Value,
             ProductDescription.Create("Descripction").Value,
             ProductPrice.Create(10m).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             null
         );
         product.StockQuantity = StockQuantity.Create(10).Value;

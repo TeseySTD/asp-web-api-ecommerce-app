@@ -19,6 +19,7 @@ public class ProductTest
             ProductTitle.Create("OldTitle").Value,
             ProductDescription.Create("OldDesc").Value,
             ProductPrice.Create(100).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             categoryId: CategoryId.Create(Guid.NewGuid()).Value
         );
         original.StockQuantity = StockQuantity.Create(5).Value;
@@ -27,19 +28,21 @@ public class ProductTest
         var newDesc = ProductDescription.Create("NewDesc").Value;
         var newPrice = ProductPrice.Create(150).Value;
         var newQty = StockQuantity.Create(10).Value;
+        var newSeller = SellerId.Create(Guid.NewGuid()).Value;
         var newCategory = Category.Create(
             CategoryName.Create("Test Category").Value,
             CategoryDescription.Create("Test Description").Value
         );
 
         // Act 
-        original.Update(newTitle, newDesc, newPrice, newQty, newCategory);
+        original.Update(newTitle, newDesc, newPrice, newQty, newSeller, newCategory);
 
         // Assert 
         original.Title.Should().Be(newTitle);
         original.Description.Should().Be(newDesc);
         original.Price.Should().Be(newPrice);
         original.StockQuantity.Should().Be(newQty);
+        original.SellerId.Should().Be(newSeller);
         original.Category.Should().Be(newCategory);
 
         original.DomainEvents.Should().ContainSingle(e => e is ProductUpdatedDomainEvent)
@@ -54,6 +57,7 @@ public class ProductTest
             ProductTitle.Create("Title").Value,
             ProductDescription.Create("Desc").Value,
             ProductPrice.Create(50).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             categoryId: null
         );
         var img = Image.Create(
@@ -79,6 +83,7 @@ public class ProductTest
             ProductTitle.Create("Title").Value,
             ProductDescription.Create("Desc").Value,
             ProductPrice.Create(50).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             categoryId: null
         );
         var imageId = ImageId.Create(Guid.NewGuid()).Value;
@@ -106,6 +111,7 @@ public class ProductTest
             ProductTitle.Create("T").Value,
             ProductDescription.Create("D").Value,
             ProductPrice.Create(20).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             categoryId: null
         );
         product.StockQuantity = StockQuantity.Create(5).Value;
@@ -125,6 +131,7 @@ public class ProductTest
             ProductTitle.Create("T").Value,
             ProductDescription.Create("D").Value,
             ProductPrice.Create(20).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             categoryId: null
         );
         product.StockQuantity = StockQuantity.Create(2).Value;

@@ -8,4 +8,5 @@ public record ProductWriteDto(
     string Description,
     decimal Price,
     uint Quantity,
+    Guid SellerId,
     Guid CategoryId);

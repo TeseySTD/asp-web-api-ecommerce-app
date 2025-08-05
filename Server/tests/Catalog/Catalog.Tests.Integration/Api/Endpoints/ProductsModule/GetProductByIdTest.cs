@@ -27,6 +27,7 @@ public class GetProductByIdTest : ApiTest
             title: ProductTitle.Create("Test Product1").Value,
             description: ProductDescription.Create("Test Product1").Value,
             price: ProductPrice.Create(10).Value,
+            sellerId: SellerId.Create(Guid.NewGuid()).Value,
             null
         );
         product.StockQuantity = StockQuantity.Create(1).Value;

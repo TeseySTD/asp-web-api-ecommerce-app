@@ -27,6 +27,7 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
         ProductTitle.Create("Test Title").Value,
         ProductDescription.Create("Test Description").Value,
         ProductPrice.Create(10).Value,
+        SellerId.Create(Guid.NewGuid()).Value,
         categoryId: null
     );
 

@@ -31,6 +31,7 @@ public class GetProductByIdQueryHandlerTest : IntegrationTest
             ProductTitle.Create("Title").Value,
             ProductDescription.Create("Description").Value,
             ProductPrice.Create(9.9m).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             null
         );
         product.StockQuantity = StockQuantity.Create(3).Value;
@@ -51,6 +52,7 @@ public class GetProductByIdQueryHandlerTest : IntegrationTest
             "Description",
             1m,
             10,
+            Guid.NewGuid(), 
             Array.Empty<string>(),
             null
         );

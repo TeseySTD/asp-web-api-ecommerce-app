@@ -17,11 +17,13 @@ public class IncreaseQuantityTest : ApiTest
 
     private const string RequestUrl = "/api/products/increase-quantity";
 
-    private HttpRequestMessage GenerateRequest(Guid productId, int quantityPlus, string role = "Seller")
+    private HttpRequestMessage GenerateRequest(Guid productId, int quantityPlus, Guid? sellerId = null,
+        string role = "Seller")
     {
         var request = new HttpRequestMessage(HttpMethod.Put, $"{RequestUrl}/{productId}/{quantityPlus}");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
+            ["sellerId"] = sellerId?.ToString() ?? Guid.Empty.ToString(),
             ["role"] = role
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -39,6 +41,7 @@ public class IncreaseQuantityTest : ApiTest
             title: ProductTitle.Create("Test Product").Value,
             description: ProductDescription.Create("Test Product").Value,
             price: ProductPrice.Create(10).Value,
+            sellerId: SellerId.Create(Guid.NewGuid()).Value,
             null
         );
         product.StockQuantity = StockQuantity.Create(initialQuantity).Value;
@@ -101,7 +104,7 @@ public class IncreaseQuantityTest : ApiTest
         var productId = Guid.NewGuid();
         var quantityPlus = 10;
 
-        var request = GenerateRequest(productId, quantityPlus, "Default");
+        var request = GenerateRequest(productId, quantityPlus, role: "Default");
 
         // Act
         var response = await HttpClient.SendAsync(request);

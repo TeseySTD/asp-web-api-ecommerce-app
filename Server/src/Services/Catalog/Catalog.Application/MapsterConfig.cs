@@ -57,6 +57,8 @@ public static class MapsterConfig
             .MapWith(src => src.Value);
         TypeAdapterConfig<StockQuantity, uint>.NewConfig()
             .MapWith(src => src.Value);
+        TypeAdapterConfig<SellerId, Guid>.NewConfig()
+            .MapWith(src => src.Value);
         TypeAdapterConfig<ProductImage, string>.NewConfig()
             .MapWith(src => imageUrlGenerator.GenerateUrl(src.Id));
 
@@ -70,6 +72,7 @@ public static class MapsterConfig
                     src.Description.Value,
                     src.Price.Value,
                     src.StockQuantity.Value,
+                    src.SellerId.Value,
                     src.Images.Adapt<string[]>(),
                     src.Category.Adapt<CategoryReadDto>()
                 )

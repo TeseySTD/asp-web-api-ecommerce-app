@@ -57,6 +57,7 @@ public class GetProductsQueryHandlerTest : IntegrationTest
                 ProductTitle.Create($"Title #{i}").Value,
                 ProductDescription.Create($"Description #{i}").Value,
                 ProductPrice.Create(i * 10m).Value,
+                SellerId.Create(Guid.NewGuid()).Value,
                 category.Id
             );
             prod.StockQuantity = StockQuantity.Create(i * 2).Value;

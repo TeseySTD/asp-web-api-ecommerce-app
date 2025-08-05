@@ -26,6 +26,7 @@ public class GetProductsTest : ApiTest
             title: ProductTitle.Create("Test Product1").Value,
             description: ProductDescription.Create("Test Product1").Value,
             price: ProductPrice.Create(10).Value,
+            sellerId: SellerId.Create(Guid.NewGuid()).Value,
             null
         );
         product1.StockQuantity = StockQuantity.Create(1).Value;
@@ -33,11 +34,12 @@ public class GetProductsTest : ApiTest
             title: ProductTitle.Create("Test Product2").Value,
             description: ProductDescription.Create("Test Product2").Value,
             price: ProductPrice.Create(10).Value,
+            sellerId: SellerId.Create(Guid.NewGuid()).Value,
             null
         );
         product2.StockQuantity = StockQuantity.Create(1).Value;
         Product[] products = [product1, product2];
-        
+
         ApplicationDbContext.Products.AddRange(products);
         await ApplicationDbContext.SaveChangesAsync();
 
@@ -74,10 +76,9 @@ public class GetProductsTest : ApiTest
         // Act
         var response = await HttpClient.GetAsync($"{RequestUrl}?page={page}&pageSize={pageSize}");
         var actualJson = await response.Content.ReadAsStringAsync();
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal(expectedJson, actualJson, ignoreAllWhiteSpace: true);
-        
     }
 }

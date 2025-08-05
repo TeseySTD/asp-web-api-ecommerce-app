@@ -38,6 +38,7 @@ public class DeleteCategoryCommandHandlerTest : IntegrationTest
                 ProductTitle.Create($"Title {i}").Value,
                 ProductDescription.Create("Desccription").Value,
                 ProductPrice.Create(1m).Value,
+                SellerId.Create(Guid.NewGuid()).Value,
                 categoryId
             );
             product.StockQuantity = StockQuantity.Create(1).Value;

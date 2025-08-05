@@ -48,6 +48,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 p => p.Value,
                 value => StockQuantity.Create(value).Value);
         
+        builder.Property(p => p.SellerId)
+            .HasConversion(
+                c => c.Value,
+                value => SellerId.Create(value).Value);
+        
         builder.Property(p => p.CategoryId)
             .HasConversion(
                 c => c.Value,

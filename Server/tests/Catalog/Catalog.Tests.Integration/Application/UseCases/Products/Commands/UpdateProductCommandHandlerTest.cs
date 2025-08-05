@@ -30,19 +30,21 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         CategoryDescription.Create("Test Description").Value
     );
 
-    private Product CreateTestProduct(Guid id, CategoryId? categoryId = null) => Product.Create(
+    private Product CreateTestProduct(Guid id, CategoryId? categoryId = null, Guid? sellerId = null) => Product.Create(
         ProductId.Create(id).Value,
         ProductTitle.Create("Test Product").Value,
         ProductDescription.Create("Test Description").Value,
         ProductPrice.Create(10).Value,
+        SellerId.Create(sellerId ?? Guid.NewGuid()).Value,
         categoryId
     );
 
-    private ProductUpdateDto GenerateProductUpdateDto(Guid productId, Guid? categoryId = null) => new(
+    private ProductUpdateDto GenerateProductUpdateDto(Guid productId, Guid sellerId, Guid? categoryId = null) => new(
         Id: productId,
         Title: "Updated",
         Description: "Updated description",
         Price: 2m,
+        SellerId: sellerId,
         CategoryId: categoryId,
         Quantity: 2
     );
@@ -52,7 +54,8 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
-        var dto = GenerateProductUpdateDto(nonExistentId);
+        var sellerId = Guid.NewGuid();
+        var dto = GenerateProductUpdateDto(nonExistentId,sellerId);
         var cmd = new UpdateProductCommand(dto);
         var handler = new UpdateProductCommandHandler(ApplicationDbContext, _cache);
 
@@ -69,6 +72,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
         var product = CreateTestProduct(productId);
         product.StockQuantity = StockQuantity.Create(1).Value;
 
@@ -76,7 +80,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var invalidCategoryId = Guid.NewGuid();
-        var dto = GenerateProductUpdateDto(productId, invalidCategoryId);
+        var dto = GenerateProductUpdateDto(productId, sellerId, invalidCategoryId);
         var cmd = new UpdateProductCommand(dto);
         var handler = new UpdateProductCommandHandler(ApplicationDbContext, _cache);
 
@@ -93,6 +97,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
         var category = CreateTestCategory(categoryId);
 
         var prodId = Guid.NewGuid();
@@ -101,12 +106,13 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
 
         var newCategoryId = Guid.NewGuid();
         var newCategory = CreateTestCategory(newCategoryId);
+        var newSellerId = Guid.NewGuid();
 
         ApplicationDbContext.Categories.AddRange(category, newCategory);
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var dto = GenerateProductUpdateDto(prodId, newCategoryId);
+        var dto = GenerateProductUpdateDto(prodId, newSellerId, newCategoryId);
 
         ConfigureMapster();
         var cmd = new UpdateProductCommand(dto);
@@ -126,6 +132,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
         updated.Title.Value.Should().Be(dto.Title);
         updated.Description.Value.Should().Be(dto.Description);
         updated.Price.Value.Should().Be(dto.Price);
+        updated.SellerId.Value.Should().Be(dto.SellerId);
         updated.CategoryId!.Value.Should().Be((Guid)dto.CategoryId!);
         updated.StockQuantity.Value.Should().Be(dto.Quantity);
 

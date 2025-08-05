@@ -18,19 +18,21 @@ public class AddProductImagesTest : ApiTest
 
     private const string RequestUrl = "/api/products";
 
-    private Product CreateTestProduct(Guid productId) => Product.Create(
+    private Product CreateTestProduct(Guid productId, Guid sellerId) => Product.Create(
         id: ProductId.Create(productId).Value,
         title: ProductTitle.Create("Test Product").Value,
         description: ProductDescription.Create("Test Product").Value,
         price: ProductPrice.Create(10).Value,
+        sellerId: SellerId.Create(sellerId).Value,
         null
     );
 
-    private HttpRequestMessage GenereateRequest(Guid productId, MultipartFormDataContent form)
+    private HttpRequestMessage GenereateRequest(Guid productId, Guid sellerId, MultipartFormDataContent form)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"{RequestUrl}/{productId}/images");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
+            ["userId"] = sellerId.ToString(),
             ["role"] = "Seller"
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -43,7 +45,8 @@ public class AddProductImagesTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = CreateTestProduct(productId);
+        var sellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
         product.StockQuantity = StockQuantity.Create(1).Value;
 
         ApplicationDbContext.Products.Add(product);
@@ -58,7 +61,7 @@ public class AddProductImagesTest : ApiTest
         imageContent2.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png");
         form.Add(imageContent2, "images", "test2.png");
 
-        var request = GenereateRequest(productId, form);
+        var request = GenereateRequest(productId, sellerId, form);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -79,14 +82,15 @@ public class AddProductImagesTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = CreateTestProduct(productId);
+        var sellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
 
         product.StockQuantity = StockQuantity.Create(1).Value;
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
 
         using var form = new MultipartFormDataContent();
-        var request = GenereateRequest(productId, form);
+        var request = GenereateRequest(productId, sellerId, form);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -101,7 +105,8 @@ public class AddProductImagesTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = CreateTestProduct(productId);
+        var sellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
 
         product.StockQuantity = StockQuantity.Create(1).Value;
         ApplicationDbContext.Products.Add(product);
@@ -117,7 +122,7 @@ public class AddProductImagesTest : ApiTest
 
         var expectedJson = MakeSystemErrorApiOutput(new ProductModule.ImageCountOutOfRangeError());
 
-        var request = GenereateRequest(productId, form);
+        var request = GenereateRequest(productId, sellerId, form);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -134,7 +139,8 @@ public class AddProductImagesTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = CreateTestProduct(productId);
+        var sellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
         product.StockQuantity = StockQuantity.Create(1).Value;
 
         ApplicationDbContext.Products.Add(product);
@@ -147,7 +153,7 @@ public class AddProductImagesTest : ApiTest
 
         var expectedJson = MakeSystemErrorApiOutput(new ProductModule.InvalidImagesTypeError());
 
-        var request = GenereateRequest(productId, form);
+        var request = GenereateRequest(productId, sellerId, form);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -164,13 +170,14 @@ public class AddProductImagesTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
 
         using var form = new MultipartFormDataContent();
         var imageContent = new ByteArrayContent(new byte[] { 1, 2, 3, 4 });
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         form.Add(imageContent, "images", "test1.jpg");
 
-        var request = GenereateRequest(productId, form);
+        var request = GenereateRequest(productId, sellerId, form);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -198,6 +205,7 @@ public class AddProductImagesTest : ApiTest
     public async Task WhenNotSeller_ThenReturnsForbidden()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var productId = Guid.NewGuid();
 
         using var form = new MultipartFormDataContent();
@@ -205,6 +213,7 @@ public class AddProductImagesTest : ApiTest
         var request = new HttpRequestMessage(HttpMethod.Post, $"{RequestUrl}/{productId}/images");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
+            ["userId"] = userId,
             ["role"] = "Default"
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);

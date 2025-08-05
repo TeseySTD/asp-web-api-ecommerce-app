@@ -55,6 +55,7 @@ public class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
                 description: ProductDescription.Create(request.Value.Description).Value,
                 price: ProductPrice.Create(request.Value.Price).Value,
                 quantity: StockQuantity.Create(request.Value.Quantity).Value,
+                sellerId: SellerId.Create(request.Value.SellerId).Value,
                 category: category
             );
 

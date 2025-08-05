@@ -30,6 +30,7 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
             title: ProductTitle.Create(request.Value.Title).Value,
             description: ProductDescription.Create(request.Value.Description).Value,
             price: ProductPrice.Create(request.Value.Price).Value,
+            sellerId: SellerId.Create(request.Value.SellerId).Value,
             categoryId: CategoryId.Create(request.Value.CategoryId).Value
         );
 

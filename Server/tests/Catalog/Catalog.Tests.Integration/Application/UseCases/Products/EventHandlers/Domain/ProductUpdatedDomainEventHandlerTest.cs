@@ -46,11 +46,12 @@ public class ProductUpdatedDomainEventHandlerTest : IntegrationTest
             ProductTitle.Create("Title").Value,
             ProductDescription.Create("Description").Value,
             ProductPrice.Create(10m).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             category.Id
         );
-        
+
         // Update to set nav proprerty 'Category' and quantity
-        product.Update(product.Title, product.Description, product.Price, StockQuantity.Create(5).Value, category);
+        product.Update(product.Title, product.Description, product.Price, StockQuantity.Create(5).Value, product.SellerId, category);
         var imageId = Guid.NewGuid();
         var image = Image.Create(
             ImageId.Create(imageId).Value,

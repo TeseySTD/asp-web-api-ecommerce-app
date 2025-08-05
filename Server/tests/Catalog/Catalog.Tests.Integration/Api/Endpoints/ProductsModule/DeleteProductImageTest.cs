@@ -20,22 +20,25 @@ public class DeleteProductImageTest : ApiTest
 
     private const string RequestUrl = "/api/products";
 
-    private HttpRequestMessage GenerateRequest(Guid productId, Guid imageId, string role = "Seller")
+    private HttpRequestMessage GenerateRequest(Guid productId, Guid imageId, Guid? sellerId = null,
+        string role = "Seller")
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}/images/{imageId}");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
+            ["userId"] = sellerId?.ToString() ?? Guid.Empty.ToString(),
             ["role"] = role
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return request;
     }
 
-    private Product CreateTestProduct(Guid productId) => Product.Create(
+    private Product CreateTestProduct(Guid productId, Guid sellerId) => Product.Create(
         id: ProductId.Create(productId).Value,
         title: ProductTitle.Create("Test Product").Value,
         description: ProductDescription.Create("Test Product").Value,
         price: ProductPrice.Create(10).Value,
+        sellerId: SellerId.Create(sellerId).Value,
         null
     );
 
@@ -44,7 +47,8 @@ public class DeleteProductImageTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = CreateTestProduct(productId);
+        var sellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
         product.StockQuantity = StockQuantity.Create(1).Value;
         var image = Image.Create(
             FileName.Create("test.jpg").Value,
@@ -80,7 +84,8 @@ public class DeleteProductImageTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = CreateTestProduct(productId);
+        var sellerId = Guid.NewGuid();
+        var product = CreateTestProduct(productId, sellerId);
         product.StockQuantity = StockQuantity.Create(1).Value;
         ApplicationDbContext.Products.Add(product);
         await ApplicationDbContext.SaveChangesAsync();
@@ -142,7 +147,7 @@ public class DeleteProductImageTest : ApiTest
     public async Task WhenNotSeller_ThenReturnsUnauthorized()
     {
         // Arrange
-        var request = GenerateRequest(Guid.NewGuid(), Guid.NewGuid(), "Default");
+        var request = GenerateRequest(Guid.NewGuid(), Guid.NewGuid(), role:"Default");
 
         // Act
         var response = await HttpClient.SendAsync(request);

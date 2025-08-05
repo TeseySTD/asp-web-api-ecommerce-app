@@ -22,11 +22,12 @@ public class CreateProductTest : ApiTest
 
     private const string RequestUrl = "/api/products";
 
-    private HttpRequestMessage GenerateRequest(AddProductRequest dto, string role = "Seller")
+    private HttpRequestMessage GenerateHttpRequest(AddProductRequest dto, Guid sellerId, string role = "Seller")
     {
         var request = new HttpRequestMessage(HttpMethod.Post, RequestUrl);
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
+            ["userId"] = sellerId.ToString(),
             ["role"] = role
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -69,7 +70,7 @@ public class CreateProductTest : ApiTest
     {
         // Arrange
         var dto = GenerateAddProductRequest();
-        var request = GenerateRequest(dto, "Default");
+        var request = GenerateHttpRequest(dto, Guid.NewGuid(), "Default");
         // Act
         var response = await HttpClient.SendAsync(request);
 
@@ -82,6 +83,7 @@ public class CreateProductTest : ApiTest
     public async Task WhenRequsetIsValid_ThenReturnsOk()
     {
         // Arrange
+        var sellerId = Guid.NewGuid();
         var categoryId = Guid.NewGuid();
         var category = CreateTestCategory(categoryId);
         
@@ -90,7 +92,7 @@ public class CreateProductTest : ApiTest
 
         var dto = GenerateAddProductRequest() with { CategoryId = categoryId };
 
-        var request = GenerateRequest(dto);
+        var request = GenerateHttpRequest(dto, sellerId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -107,6 +109,7 @@ public class CreateProductTest : ApiTest
     public async Task WhenInvalidData_ThenReturnsBadRequest()
     {
         // Arrange
+        var sellerId = Guid.NewGuid();
         var categoryId = Guid.NewGuid();
         var category = CreateTestCategory(categoryId);
         
@@ -115,7 +118,7 @@ public class CreateProductTest : ApiTest
 
         var dto = GenerateAddProductRequest() with { Title = "", CategoryId = categoryId }; // Empty title
 
-        var request = GenerateRequest(dto);
+        var request = GenerateHttpRequest(dto, sellerId);
 
         var expectedJson = MakePropertyErrorApiOutput("Title",
             [new ProductTitle.TitleRequiredError(), new ProductTitle.OutOfLengthError()]);
@@ -133,11 +136,12 @@ public class CreateProductTest : ApiTest
     public async Task WhenCategoryNotFound_ThenReturnsBadRequest()
     {
         // Arrange
+        var sellerId = Guid.NewGuid();
         var categoryId = Guid.NewGuid();
 
         var dto = GenerateAddProductRequest() with { CategoryId = categoryId };
 
-        var request = GenerateRequest(dto);
+        var request = GenerateHttpRequest(dto, sellerId);
 
         var expectedJson = MakeSystemErrorApiOutput(new CreateProductCommandHandler.CategoryNotFoundError(categoryId));
 

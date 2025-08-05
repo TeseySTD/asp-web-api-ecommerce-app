@@ -29,12 +29,13 @@ public class CreateProductCommandHandlerTest : IntegrationTest
         CategoryDescription.Create("Sample description").Value
     );
 
-    private ProductWriteDto CreateTestProductWriteDto(Guid id, Guid categoryId) => new ProductWriteDto(
+    private ProductWriteDto CreateTestProductWriteDto(Guid id, Guid categoryId, Guid? sellerId = null) => new ProductWriteDto(
         Id: id,
         Title: "New Product",
         Description: "New Description",
         Price: 20,
         CategoryId: categoryId,
+        SellerId: sellerId ?? Guid.NewGuid(),
         Quantity: 100
     );
 
@@ -51,6 +52,7 @@ public class CreateProductCommandHandlerTest : IntegrationTest
             ProductTitle.Create("Existing Product").Value,
             ProductDescription.Create("Existing Description").Value,
             ProductPrice.Create(10).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
             CategoryId.Create(categoryId).Value
         );
         existingProduct.StockQuantity = StockQuantity.Create(100).Value;

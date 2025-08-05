@@ -25,6 +25,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         ProductTitle.Create("Test Product").Value,
         ProductDescription.Create("Test Description").Value,
         ProductPrice.Create(10).Value,
+        SellerId.Create(Guid.NewGuid()).Value,
         null
     );
 

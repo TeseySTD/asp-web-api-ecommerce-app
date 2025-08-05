@@ -1,4 +1,5 @@
-﻿using Carter;
+﻿using System.Security.Claims;
+using Carter;
 using Catalog.API.Http.Product.Requests;
 using Catalog.API.Http.Product.Responses;
 using Catalog.Application.Dto.Image;
@@ -57,15 +58,20 @@ public class ProductModule : CarterModule
         });
 
         // Create product
-        app.MapPost("/", async (ISender sender, AddProductRequest request,
+        app.MapPost("/", async (ISender sender, AddProductRequest request, ClaimsPrincipal userClaims,
             CancellationToken cancellationToken) =>
         {
+            if (ExtractUserDataFromClaims(userClaims).IsFailure)
+                return Results.Unauthorized();
+            var userId = ExtractUserDataFromClaims(userClaims).Value.userId;
+
             var writeDto = new ProductWriteDto(
                 Id: Guid.NewGuid(),
                 Title: request.Title,
                 Description: request.Description,
                 Price: request.Price,
                 Quantity: request.Quantity,
+                SellerId: userId,
                 CategoryId: request.CategoryId
             );
 
@@ -125,7 +131,7 @@ public class ProductModule : CarterModule
                         if (enumerable.Any(e => e is AddProductImagesCommandHandler.ProductNotFoundError))
                             return Results.NotFound(Envelope.Of(enumerable));
                         return Results.BadRequest(Envelope.Of(enumerable));
-                    } 
+                    }
                 );
             })
             .DisableAntiforgery()
@@ -145,45 +151,63 @@ public class ProductModule : CarterModule
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/{id:guid}",
-            async (ISender sender, Guid id, UpdateProductRequest request, CancellationToken cancellationToken) =>
-            {
-                var updateDto = new ProductUpdateDto(
-                    Id: id,
-                    Title: request.Title,
-                    Description: request.Description,
-                    Price: request.Price,
-                    Quantity: request.Quantity,
-                    CategoryId: request.CategoryId
-                );
+                async (ISender sender, Guid id, UpdateProductRequest request, ClaimsPrincipal userClaims,
+                    CancellationToken cancellationToken) =>
+                {
+                    if (ExtractUserDataFromClaims(userClaims).IsFailure)
+                        return Results.Unauthorized();
+                    var userId = ExtractUserDataFromClaims(userClaims).Value.userId;
 
-                var cmd = new UpdateProductCommand(updateDto);
-                var result = await sender.Send(cmd, cancellationToken);
+                    var updateDto = new ProductUpdateDto(
+                        Id: id,
+                        Title: request.Title,
+                        Description: request.Description,
+                        Price: request.Price,
+                        Quantity: request.Quantity,
+                        SellerId: userId,
+                        CategoryId: request.CategoryId
+                    );
 
-                return result.Map(
-                    onSuccess: () => Results.Ok(),
-                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
-                );
-            })
+                    var cmd = new UpdateProductCommand(updateDto);
+                    var result = await sender.Send(cmd, cancellationToken);
+
+                    return result.Map(
+                        onSuccess: () => Results.Ok(),
+                        onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                    );
+                })
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/increase-quantity/{id:guid}/{quantity:int}",
-            async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
-            {
-                var cmd = new IncreaseQuantityCommand(id, quantity);
-                var result = await sender.Send(cmd, cancellationToken);
+                async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
+                {
+                    var cmd = new IncreaseQuantityCommand(id, quantity);
+                    var result = await sender.Send(cmd, cancellationToken);
 
-                return result.Map(
-                    onSuccess: () => Results.Ok(),
-                    onFailure: errors => Results.NotFound(Envelope.Of(errors))
-                );
-            })
+                    return result.Map(
+                        onSuccess: () => Results.Ok(),
+                        onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                    );
+                })
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/decrease-quantity/{id:guid}/{quantity:int}",
-            async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
+                async (ISender sender, Guid id, int quantity, CancellationToken cancellationToken) =>
+                {
+                    var cmd = new DecreaseQuantityCommand(id, quantity);
+                    var result = await sender.Send(cmd, cancellationToken);
+
+                    return result.Map(
+                        onSuccess: () => Results.Ok(),
+                        onFailure: errors => Results.NotFound(Envelope.Of(errors))
+                    );
+                })
+            .RequireAuthorization(Policies.RequireSellerPolicy);
+
+        app.MapDelete("/{id:guid}", async (ISender sender, Guid id) =>
             {
-                var cmd = new DecreaseQuantityCommand(id, quantity);
-                var result = await sender.Send(cmd, cancellationToken);
+                var cmd = new DeleteProductCommand(ProductId.Create(id).Value);
+                var result = await sender.Send(cmd);
 
                 return result.Map(
                     onSuccess: () => Results.Ok(),
@@ -191,25 +215,38 @@ public class ProductModule : CarterModule
                 );
             })
             .RequireAuthorization(Policies.RequireSellerPolicy);
-
-        app.MapDelete("/{id:guid}", async (ISender sender, Guid id) =>
-        {
-            var cmd = new DeleteProductCommand(ProductId.Create(id).Value);
-            var result = await sender.Send(cmd);
-
-            return result.Map(
-                onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.NotFound(Envelope.Of(errors))
-            );
-        })
-        .RequireAuthorization(Policies.RequireSellerPolicy);
     }
 
     public sealed record RequiredImageError() : Error("Images are required", "Image files are required");
 
     public sealed record ImageCountOutOfRangeError() : Error("Images count is out of range",
         $"Images count must be between 1 and {Product.MaxImagesCount}");
-    
+
     public sealed record InvalidImagesTypeError() : Error("All files must be images",
         $"All files must be images with content type:{string.Join(" ,", Enum.GetNames<ImageContentType>())}");
+
+
+    protected Result<(Guid userId, UserRole userRole)> ExtractUserDataFromClaims(ClaimsPrincipal userClaims)
+    {
+        var userIdString = userClaims.FindFirstValue("userId");
+        var customerRoleString = userClaims.FindFirstValue(ClaimTypes.Role);
+
+        if (string.IsNullOrEmpty(userIdString) || string.IsNullOrEmpty(customerRoleString))
+        {
+            return Result<(Guid, UserRole)>.Failure(new Error("Invalid claims", "Missing required user claims"));
+        }
+
+        if (!Guid.TryParse(userIdString, out Guid userId) || userId == Guid.Empty)
+        {
+            return Result<(Guid, UserRole)>.Failure(new Error("Invalid user ID",
+                "User ID claim is not a valid GUID"));
+        }
+
+        if (!Enum.TryParse(customerRoleString, out UserRole userRole))
+        {
+            return Result<(Guid, UserRole)>.Failure(new Error("Invalid role", "User role claim is not valid"));
+        }
+
+        return Result<(Guid, UserRole)>.Success((userId, userRole));
+    }
 }

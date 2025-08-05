@@ -16,11 +16,12 @@ public class DeleteProductTest : ApiTest
 
     private const string RequestUrl = "/api/products";
 
-    private HttpRequestMessage GenerateRequest(Guid productId, string role = "Seller")
+    private HttpRequestMessage GenerateRequest(Guid productId, Guid? sellerId = null, string role = "Seller")
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, $"{RequestUrl}/{productId}");
         var token = TestJwtTokens.GenerateToken(new Dictionary<string, object>
         {
+            ["userId"] = sellerId?.ToString() ?? Guid.Empty.ToString(),
             ["role"] = role
         });
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -32,11 +33,13 @@ public class DeleteProductTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
         var product = Product.Create(
             id: ProductId.Create(productId).Value,
             title: ProductTitle.Create("Test Product").Value,
             description: ProductDescription.Create("Test Product").Value,
             price: ProductPrice.Create(10).Value,
+            sellerId: SellerId.Create(sellerId).Value,
             null
         );
         product.StockQuantity = StockQuantity.Create(10).Value;
@@ -91,7 +94,7 @@ public class DeleteProductTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var request = GenerateRequest(productId, "Default");
+        var request = GenerateRequest(productId, role:"Default");
 
         // Act
         var response = await HttpClient.SendAsync(request);
