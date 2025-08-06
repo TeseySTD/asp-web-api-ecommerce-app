@@ -49,8 +49,6 @@ public class TokenProvider(
 
     public EmailVerificationToken GenerateEmailVerificationToken(User user)
     {
-        string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-
         var emailVerificationToken = EmailVerificationToken.Create(
             user.Id,
             DateTime.UtcNow.AddMinutes(emailVerificationTokenSettings.Value.ExpirationInMinutes)

@@ -14,7 +14,7 @@ public class EmailVerificationCommandHandler(IApplicationDbContext context) : IC
     public async Task<Result> Handle(EmailVerificationCommand request, CancellationToken cancellationToken)
     {
         var tokenId = EmailVerificationTokenId.Create(request.Id).Value;
-        EmailVerificationToken? token = new();
+        EmailVerificationToken? token = null;
         User? user = null;
 
         var result = await Result.Try()
@@ -23,26 +23,28 @@ public class EmailVerificationCommandHandler(IApplicationDbContext context) : IC
             .DropIfFail()
             .CheckAsync(async () =>
             {
-                token = await context.EmailVerificationTokens.FirstOrDefaultAsync(t => t.Id == tokenId,
-                    cancellationToken);
-                return Result.Try()
-                    .Check(token!.ExpiresOnUtc < DateTime.UtcNow,
-                        new TokenExpiredError(token.ExpiresOnUtc))
-                    .Build();
+                token = await context.EmailVerificationTokens
+                        .Include(t => t.User)
+                    .FirstOrDefaultAsync(t => t.Id == tokenId, cancellationToken);
+
+                if (token!.ExpiresOnUtc < DateTime.UtcNow)
+                    return new TokenExpiredError(token.ExpiresOnUtc);
+                return Result.Success();
             })
-            .CheckAsync(async () =>
+            .Check( () =>
             {
-                user = await context.Users.FirstOrDefaultAsync(u => u.Id == token.UserId);
-                return user is null
-                    ? new TokenUserNotFoundError(token.UserId.Value)
-                    : Result.Success();
+                user = token!.User;
+                
+                if (user is null)
+                    return new TokenUserNotFoundError(token!.UserId.Value); 
+                return Result.Success();
             })
             .BuildAsync();
 
         if (result.IsSuccess)
         {
             user!.VerifyEmail();
-            context.EmailVerificationTokens.Remove(token);
+            context.EmailVerificationTokens.Remove(token!);
 
             await context.SaveChangesAsync(cancellationToken);
         }
@@ -56,6 +58,6 @@ public class EmailVerificationCommandHandler(IApplicationDbContext context) : IC
     public sealed record TokenExpiredError(DateTime Expires) : Error("Email verification token has expired",
         $"Email verification token expiration was in {Expires}");
 
-    public sealed record TokenUserNotFoundError(Guid TokenId)
-        : Error("User not found", $"User with id {TokenId} not found");
+    public sealed record TokenUserNotFoundError(Guid UserId)
+        : Error("User not found", $"User with id {UserId} not found");
 }

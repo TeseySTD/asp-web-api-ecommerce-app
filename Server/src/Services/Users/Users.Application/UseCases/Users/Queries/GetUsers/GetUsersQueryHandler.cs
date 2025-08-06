@@ -23,22 +23,21 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PaginatedResult
         var pageIndex = request.PaginationRequest.PageIndex;
         var pageSize = request.PaginationRequest.PageSize;
         
-
-
         var userDtos = await _context.Users
             .AsNoTracking()
             .Skip(pageSize * pageIndex)
             .Take(pageSize)
             .Select(u =>
-            new UserReadDto(
-                u.Id.Value,
-                u.Name.Value,
-                u.Email.Value,
-                u.HashedPassword.Value,
-                u.PhoneNumber.Value,
-                u.Role.ToString()
+                new UserReadDto(
+                    u.Id.Value,
+                    u.Name.Value,
+                    u.Email.Value,
+                    u.HashedPassword.Value,
+                    u.PhoneNumber.Value,
+                    u.Role.ToString()
+                )
             )
-        ).ToListAsync();
+            .ToListAsync();
 
         if (!userDtos.Any())
             return new UserNotFoundError();

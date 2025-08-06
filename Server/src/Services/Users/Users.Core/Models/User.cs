@@ -31,7 +31,7 @@ public class User : AggregateRoot<UserId>
     public PhoneNumber PhoneNumber { get; private set; }
     public UserRole Role { get; private set; }
 
-    public bool IsEmailVerified { get; private set; } = false;
+    public bool IsEmailVerified { get; private set; }
 
     public static User Create(UserName name, Email email, HashedPassword hashedPassword, PhoneNumber phoneNumber,
         UserRole role,

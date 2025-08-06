@@ -15,6 +15,9 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, T
     private readonly IApplicationDbContext _context;
     private readonly IEmailHelper _emailHelper;
     private readonly IEmailVerificationLinkFactory _emailVerificationLinkFactory;
+    
+    public const string EmailSubject = "Email verification for asp ecommerce web api";
+    public static string GenerateEmailMessage(string link) => $"To verify your email please click on the link: <a href='{link}'>Verify email</a>";
 
     public RegisterUserCommandHandler(ISender sender, ITokenProvider tokenProvider, IApplicationDbContext context,
         IEmailHelper emailHelper, IEmailVerificationLinkFactory emailVerificationLinkFactory)
@@ -52,8 +55,8 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, T
         
         await _emailHelper.SendEmailAsync(
             user.Email.Value,
-            "Email verification for asp ecommerce web api",
-            $"To verify your email please click on the link: <a href='{emailVerificationLink.Value}'>Verify email</a>"
+            EmailSubject,
+            GenerateEmailMessage(emailVerificationLink.Value)
         );
 
         return new TokensDto(jwtToken, refreshToken.Token);

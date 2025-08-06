@@ -29,7 +29,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, TokensD
         User user = default!;
 
         var result = await Result<TokensDto>.Try()
-            .Check(!await _context.Users.AnyAsync(u => u.Email == email),new EmailNotFoundError(email.Value))
+            .Check(!await _context.Users.AnyAsync(u => u.Email == email), new EmailNotFoundError(email.Value))
             .DropIfFail()
             .CheckAsync(async () =>
                 {

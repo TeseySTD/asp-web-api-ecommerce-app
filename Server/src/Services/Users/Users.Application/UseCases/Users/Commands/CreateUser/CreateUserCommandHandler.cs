@@ -23,15 +23,14 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, User>
 
     public async Task<Result<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        var email = Email.Create(request.Value.Email).Value;
+        var number = PhoneNumber.Create(request.Value.PhoneNumber).Value;
         var result = await Result<User>.Try()
-            .CheckAsync(
-                async () => await _context.Users.AnyAsync(u => u.Email == Email.Create(request.Value.Email).Value,
-                    cancellationToken),
+            .Check(
+                await _context.Users.AnyAsync(u => u.Email == email, cancellationToken),
                 new EmailIsTakenError(request.Value.Email))
             .CheckAsync(
-                async () => await _context.Users.AnyAsync(
-                    u => u.PhoneNumber == PhoneNumber.Create(request.Value.PhoneNumber).Value,
-                    cancellationToken),
+                async () => await _context.Users.AnyAsync(u => u.PhoneNumber == number, cancellationToken),
                 new PhoneIsTakenError(request.Value.PhoneNumber))
             .BuildAsync();
 

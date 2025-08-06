@@ -25,20 +25,20 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
+        var id = UserId.Create(request.Id).Value;
+        var email = Email.Create(request.Value.Email).Value;
+        var number = PhoneNumber.Create(request.Value.PhoneNumber).Value;
         var result = await Result.Try()
-            .CheckAsync(
-                async () => !await _context.Users.AnyAsync(u => u.Id == UserId.Create(request.Id).Value,
-                    cancellationToken), new UserNotFoundError(request.Id))
+            .Check(
+                !await _context.Users.AnyAsync(u => u.Id == id, cancellationToken),
+                new UserNotFoundError(request.Id))
             .DropIfFail()
             .CheckAsync(
-                async () => await _context.Users.AnyAsync(
-                    u => u.Email == Email.Create(request.Value.Email).Value && u.Id != UserId.Create(request.Id).Value,
-                    cancellationToken), new IncorrectEmailError(request.Value.Email)
+                async () => await _context.Users.AnyAsync(u => u.Email == email && u.Id != id, cancellationToken),
+                new IncorrectEmailError(request.Value.Email)
             )
             .CheckAsync(
-                async () => await _context.Users.AnyAsync(
-                    u => u.PhoneNumber == PhoneNumber.Create(request.Value.PhoneNumber).Value &&
-                         u.Id != UserId.Create(request.Id).Value, cancellationToken),
+                async () => await _context.Users.AnyAsync(u => u.PhoneNumber == number && u.Id != id, cancellationToken),
                 new IncorrectPhoneNumberError(request.Value.PhoneNumber)
             )
             .BuildAsync();
@@ -48,7 +48,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
 
         var hashedPassword = _passwordHelper.HashPassword(request.Value.Password);
 
-        var userToUpdate = await _context.Users.FindAsync([UserId.Create(request.Id).Value], cancellationToken);
+        var userToUpdate = await _context.Users.FindAsync([id], cancellationToken);
         userToUpdate!.Update(
             name: UserName.Create(request.Value.Name).Value,
             email: Email.Create(request.Value.Email).Value,
