@@ -26,8 +26,8 @@ public record Address
                 new AddressLineRequiredError())
             .CheckIf(
                 checkCondition: !string.IsNullOrWhiteSpace(zipCode), 
-                errorCondition:!Regex.IsMatch(zipCode, RegexZipCode),
-                error: new ZipCodeFormatError(zipCode))
+                () => !Regex.IsMatch(zipCode!, RegexZipCode),
+                error: new ZipCodeFormatError(zipCode ?? ""))
             .Build();
     }
 

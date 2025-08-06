@@ -1,4 +1,3 @@
-using Ordering.Core.Models.Orders.ValueObjects;
 using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.Domain.Classes;
 

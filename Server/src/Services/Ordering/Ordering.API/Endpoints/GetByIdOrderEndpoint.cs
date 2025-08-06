@@ -26,6 +26,7 @@ public class GetByIdOrderEndpoint : OrdersEndpoint
                 onFailure: errors =>
                 {
                     var enumerable = errors as Error[] ?? errors.ToArray();
+                    
                     if (enumerable.Any(e => e is GetOrderByIdQueryHandler.CustomerMismatchError))
                         return Results.Forbid();
                     return Results.NotFound(Envelope.Of(enumerable));

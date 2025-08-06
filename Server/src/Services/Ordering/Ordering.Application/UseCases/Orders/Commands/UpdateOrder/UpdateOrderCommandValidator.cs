@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Ordering.Core.Models.Orders.ValueObjects;
-using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.Validation.FluentValidation;
 
 namespace Ordering.Application.UseCases.Orders.Commands.UpdateOrder;

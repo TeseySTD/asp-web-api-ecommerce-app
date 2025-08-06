@@ -58,8 +58,8 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
                 new OrderNotFoundError(orderId.Value))
             .DropIfFail()
             .CheckAsync(
-                async () => !await _context.Orders.AnyAsync(o => o.Id == orderId && o.CustomerId == customerId,
-                    cancellationToken),
+                async () => !await _context.Orders
+                    .AnyAsync(o => o.Id == orderId && o.CustomerId == customerId, cancellationToken),
                 new CustomerMismatchError(request.CustomerId))
             .DropIfFail()
             .CheckAsync(async () =>
@@ -75,7 +75,7 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand>
             .BuildAsync();
 
         return result.Map(
-            onSuccess: () => orderToUpdate,
+            onSuccess: () => orderToUpdate!,
             onFailure: errors => Result<Order>.Failure(errors)
         );
     }

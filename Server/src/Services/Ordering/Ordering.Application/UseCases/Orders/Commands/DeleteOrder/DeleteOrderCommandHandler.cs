@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
-using Ordering.Core.Models.Orders;
 using Shared.Core.Auth;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Ordering.Application.UseCases.Orders.Commands.DeleteOrder;
@@ -24,8 +22,8 @@ public class DeleteOrderCommandHandler : ICommandHandler<DeleteOrderCommand>
                 new OrderNotFoundError(request.OrderId.Value))
             .DropIfFail()
             .CheckAsync(
-                async () => !await _context.Orders.AnyAsync(
-                    o => o.Id == request.OrderId && o.CustomerId == request.CustomerId, cancellationToken)
+                async () => !await _context.Orders
+                    .AnyAsync(o => o.Id == request.OrderId && o.CustomerId == request.CustomerId, cancellationToken)
                     && request.CustomerRole != UserRole.Admin,
                 new CustomerMismatchError(request.CustomerId.Value))
             .BuildAsync();

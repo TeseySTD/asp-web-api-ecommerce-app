@@ -65,8 +65,8 @@ public class Order : AggregateRoot<OrderId>
 
     public void Update(Payment payment, Address destinationAddress)
     {
-        Payment = payment!;
-        DestinationAddress = destinationAddress!;
+        Payment = payment;
+        DestinationAddress = destinationAddress;
 
         AddDomainEvent(new OrderUpdatedDomainEvent(this));
     }

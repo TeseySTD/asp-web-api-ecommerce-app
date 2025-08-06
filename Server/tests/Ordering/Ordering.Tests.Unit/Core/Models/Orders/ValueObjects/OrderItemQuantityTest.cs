@@ -13,7 +13,7 @@ public class OrderItemQuantityTest
         
         // Assert
         Assert.True(result.IsFailure);
-        result.Errors.Should().ContainSingle(e => e == new OrderItemQuantity.QuantityLessThenZeroError());
+        result.Errors.Should().ContainSingle(e => e == new OrderItemQuantity.QuantityLessThenOneError());
     }
 
     [Fact]

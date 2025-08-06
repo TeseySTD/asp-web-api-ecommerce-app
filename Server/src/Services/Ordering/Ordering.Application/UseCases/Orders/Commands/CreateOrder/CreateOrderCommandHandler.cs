@@ -1,5 +1,4 @@
 ﻿using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
 using Ordering.Core.Models.Orders;
 using Ordering.Core.Models.Orders.ValueObjects;

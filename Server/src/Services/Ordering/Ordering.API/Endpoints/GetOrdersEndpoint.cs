@@ -16,6 +16,7 @@ public class GetOrdersEndpoint : OrdersEndpoint
         {
             if(ExtractUserDataFromClaims(userClaims).IsFailure)
                 return Results.Unauthorized();
+            
             var (currentCustomerId, userRole) = ExtractUserDataFromClaims(userClaims).Value;
             if(currentCustomerId != customerId && userRole != UserRole.Admin)
                 return Results.Forbid();

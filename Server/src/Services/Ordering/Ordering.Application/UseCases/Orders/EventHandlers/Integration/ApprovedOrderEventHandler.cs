@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Ordering.Application.Common.Interfaces;
-using Ordering.Application.UseCases.Orders.Commands.CreateOrder;
 using Ordering.Core.Models.Orders.Entities;
 using Ordering.Core.Models.Orders.ValueObjects;
 using Ordering.Core.Models.Products;

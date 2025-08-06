@@ -2,10 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
 using Ordering.Application.Dto.Order;
-using Ordering.Core.Models.Orders.ValueObjects;
 using Shared.Core.API;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Ordering.Application.UseCases.Orders.Queries.GetOrders;
@@ -30,8 +28,8 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PaginatedResu
             .Where(o => o.CustomerId == request.CustomerId)
             .Skip(pageSize * pageIndex)
             .Take(pageSize)
-            .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
             .ToListAsync(cancellationToken);
 
         if (!orders.Any())

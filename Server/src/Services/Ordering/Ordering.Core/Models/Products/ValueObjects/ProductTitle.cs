@@ -1,4 +1,3 @@
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Ordering.Core.Models.Products.ValueObjects;

@@ -4,7 +4,6 @@ using Ordering.Application.Common.Interfaces;
 using Ordering.Application.Dto.Order;
 using Shared.Core.Auth;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Ordering.Application.UseCases.Orders.Queries.GetOrderById;
@@ -25,9 +24,8 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, OrderRe
                 new OrderNotFoundError(request.OrderId.Value))
             .DropIfFail()
             .CheckAsync(async () =>
-                    !await _context.Orders.AnyAsync(
-                        o => o.Id == request.OrderId && o.CustomerId == request.CustomerId, cancellationToken
-                    )
+                    !await _context.Orders
+                        .AnyAsync(o => o.Id == request.OrderId && o.CustomerId == request.CustomerId, cancellationToken)
                     && request.CustomerRole != UserRole.Admin,
                 new CustomerMismatchError(request.CustomerId.Value))
             .BuildAsync();
@@ -37,8 +35,8 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, OrderRe
 
         var order = await _context.Orders
             .AsNoTracking()
-            .Include(o => o.OrderItems)
-            .ThenInclude(oi => oi.Product)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         var products = order!.OrderItems.Select(oi =>

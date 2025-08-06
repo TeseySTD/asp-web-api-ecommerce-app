@@ -1,9 +1,7 @@
 using System.Text.Json;
-using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Ordering.Core.Models.Orders.Events;
-using Shared.Messaging.Events.Order;
 
 namespace Ordering.Application.UseCases.Orders.EventHandlers.Domain;
 

@@ -1,10 +1,8 @@
 ﻿using System.Reflection;
 using FluentValidation;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Behaviours;
-using Shared.Messaging.Broker;
 
 namespace Ordering.Application;
 
