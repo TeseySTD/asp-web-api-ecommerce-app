@@ -18,6 +18,9 @@ public record ProductPrice
             .Check(price < MinPrice || price > MaxPrice, new OutOfRangeError())
             .Build();
     }
+    
+    // For EF Core queries
+    public static explicit operator decimal(ProductPrice price) => price.Value;
 
     public sealed record OutOfRangeError()
         : Error("Price is out of range", $"Price must be between {MinPrice} and {MaxPrice}");

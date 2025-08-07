@@ -16,6 +16,7 @@ using Catalog.Application.UseCases.Products.Queries.GetProducts;
 using Catalog.Core.Models.Images;
 using Catalog.Core.Models.Products;
 using Catalog.Core.Models.Products.ValueObjects;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Core.API;
@@ -35,9 +36,10 @@ public class ProductModule : CarterModule
     {
         app.MapGet("/", async (ISender sender,
             [AsParameters] PaginationRequest paginationRequest,
+            [AsParameters] GetProductsRequest filter,
             CancellationToken cancellationToken) =>
         {
-            var query = new GetProductsQuery(paginationRequest);
+            var query = new GetProductsQuery(paginationRequest, filter.Adapt<ProductFilterRequest>());
             var result = await sender.Send(query, cancellationToken);
 
             return result.Map(

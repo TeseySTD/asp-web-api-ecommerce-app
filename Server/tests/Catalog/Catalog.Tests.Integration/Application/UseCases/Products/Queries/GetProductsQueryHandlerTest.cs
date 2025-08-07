@@ -23,11 +23,32 @@ public class GetProductsQueryHandlerTest : IntegrationTest
         ConfigureMapster();
     }
 
+    private Product CreateTestProduct(string title, decimal price, Guid? categoryId = null)
+    {
+        var testProduct = Product.Create(
+            ProductId.Create(Guid.NewGuid()).Value,
+            ProductTitle.Create(title).Value,
+            ProductDescription.Create("Desc").Value,
+            ProductPrice.Create(price).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
+            categoryId != null ? CategoryId.Create(categoryId.Value).Value : null
+        );
+        testProduct.StockQuantity = StockQuantity.Create(5).Value;
+
+        return testProduct;
+    }
+
+    private Category CreateTestCategory(Guid id) => Category.Create(
+        CategoryId.Create(id).Value,
+        CategoryName.Create("Category").Value,
+        CategoryDescription.Create("Description").Value
+    );
+
     [Fact]
     public async Task WhenNoProducts_ThenReturnsNotFoundError()
     {
         // Arrange
-        var query = new GetProductsQuery(new PaginationRequest());
+        var query = new GetProductsQuery(new PaginationRequest(), new ProductFilterRequest());
 
         // Act
         var result = await _handler.Handle(query, default);
@@ -42,24 +63,14 @@ public class GetProductsQueryHandlerTest : IntegrationTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var category = Category.Create(
-            CategoryId.Create(categoryId).Value,
-            CategoryName.Create("Category").Value,
-            CategoryDescription.Create("Description").Value
-        );
+        var category = CreateTestCategory(categoryId);
         ApplicationDbContext.Categories.Add(category);
 
         List<Product> products = [];
         for (int i = 1; i <= 5; i++)
         {
-            var prod = Product.Create(
-                ProductId.Create(Guid.NewGuid()).Value,
-                ProductTitle.Create($"Title #{i}").Value,
-                ProductDescription.Create($"Description #{i}").Value,
-                ProductPrice.Create(i * 10m).Value,
-                SellerId.Create(Guid.NewGuid()).Value,
-                category.Id
-            );
+            var prod = CreateTestProduct($"Title #{i}", i, category.Id.Value);
+
             prod.StockQuantity = StockQuantity.Create(i * 2).Value;
             products.Add(prod);
             ApplicationDbContext.Products.Add(prod);
@@ -67,18 +78,64 @@ public class GetProductsQueryHandlerTest : IntegrationTest
 
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var query = new GetProductsQuery(new PaginationRequest());
-        
+        var query = new GetProductsQuery(new PaginationRequest(), new ProductFilterRequest());
+
         // Act
         var result = await _handler.Handle(query, default);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        
+
         var page = result.Value;
         page.Data.Count().Should();
         var dtos = products
-            .Adapt<List<ProductReadDto>>(); 
+            .Adapt<List<ProductReadDto>>();
         page.Data.Should().BeEquivalentTo(dtos);
+    }
+
+    [Fact]
+    public async Task WhenFilterByTitle_ThenReturnsOnlyMatchingProducts()
+    {
+        // Arrange
+        var categoryId = Guid.NewGuid();
+        var category = CreateTestCategory(categoryId);
+        ApplicationDbContext.Categories.Add(category);
+
+        List<Product> products = [];
+        for (int i = 1; i <= 5; i++)
+        {
+            var prod = CreateTestProduct($"Title #{i}", i, i % 2 == 0 ? null : category.Id.Value);
+            products.Add(prod);
+            ApplicationDbContext.Products.Add(prod);
+        }
+
+        ApplicationDbContext.Products.AddRange(products);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var filterTitle = new ProductFilterRequest(Title: "Title #1");
+        var filterCategory = new ProductFilterRequest(CategoryId: categoryId);
+        var filterPrice = new ProductFilterRequest(MinPrice: 2, MaxPrice: 4);
+
+        var queryTitle = new GetProductsQuery(new PaginationRequest(), filterTitle);
+        var queryCategory = new GetProductsQuery(new PaginationRequest(), filterCategory);
+        var queryPrice = new GetProductsQuery(new PaginationRequest(), filterPrice);
+
+        // Act
+        var resultTitle = await _handler.Handle(queryTitle, default);
+        var resultCategory = await _handler.Handle(queryCategory, default);
+        var resultPrice = await _handler.Handle(queryPrice, default);
+
+        // Assert
+        resultTitle.IsSuccess.Should().BeTrue();
+        resultCategory.IsSuccess.Should().BeTrue();
+        resultPrice.IsSuccess.Should().BeTrue();
+
+        resultTitle.Value.Data.Should().ContainSingle(p => p.Title == "Title #1");
+        resultCategory.Value.Data.Should().AllSatisfy(p =>
+        {
+            p.Category.Should().NotBeNull();
+            p.Category!.Id.Should().Be(categoryId);
+        });
+        resultPrice.Value.Data.Should().HaveCount(3);
     }
 }

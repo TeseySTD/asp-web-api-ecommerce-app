@@ -24,6 +24,9 @@ public record ProductTitle
             .Build();
     }
 
+    // For EF Core queries
+    public static explicit operator string(ProductTitle productTitle) => productTitle.Value;
+    
     public sealed record TitleRequiredError() : Error("Title is required", "Title must be not empty");
     public sealed record OutOfLengthError() : Error("Title is out of range.", $"Product title must be between {MinTitleLength} and {MaxTitleLength} characters.");
 }

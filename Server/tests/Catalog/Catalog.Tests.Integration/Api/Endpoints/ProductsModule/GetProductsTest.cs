@@ -47,7 +47,7 @@ public class GetProductsTest : ApiTest
         var pageSize = 10;
 
         // Act
-        var response = await HttpClient.GetAsync($"{RequestUrl}?page={page}&pageSize={pageSize}");
+        var response = await HttpClient.GetAsync($"{RequestUrl}?page={page}&pageSize={pageSize}&minPrice={product1.Price.Value}&maxPrice={product2.Price.Value}");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
