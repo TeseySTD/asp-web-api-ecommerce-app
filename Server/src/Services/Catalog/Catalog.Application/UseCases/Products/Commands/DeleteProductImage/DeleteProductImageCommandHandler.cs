@@ -26,7 +26,30 @@ public class DeleteProductImageCommandHandler : ICommandHandler<DeleteProductIma
 
     public async Task<Result> Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
     {
-        var (productId, imageId, sellerId) = (ProductId.Create(request.ProductId).Value, ImageId.Create(request.ImageId).Value, SellerId.Create(request.SellerId).Value);
+        var result = await ValidateDataAsync(request, cancellationToken);
+
+        if (result.IsFailure)
+            return result;
+
+        var (product, imageId) = result.Value;
+        product.RemoveImage(imageId);
+        
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await _cache.SetStringAsync($"product-{product.Id.Value}",
+            JsonSerializer.Serialize(product.Adapt<ProductReadDto>()),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+        return Result.Success();
+    }
+
+    private async Task<Result<( Product, ImageId )>> ValidateDataAsync(DeleteProductImageCommand request, CancellationToken cancellationToken)
+    {
+        var (productId, imageId, sellerId) = 
+            (ProductId.Create(request.ProductId).Value, ImageId.Create(request.ImageId).Value, SellerId.Create(request.SellerId).Value);
 
         Product? product = null;
 
@@ -55,20 +78,9 @@ public class DeleteProductImageCommandHandler : ICommandHandler<DeleteProductIma
             })
             .BuildAsync();
         
-        if (result.IsFailure)
-            return result;
-
-        product!.RemoveImage(imageId);
-        await _context.SaveChangesAsync(cancellationToken);
-
-        await _cache.SetStringAsync($"product-{product.Id.Value}",
-            JsonSerializer.Serialize(product.Adapt<ProductReadDto>()),
-            new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            });
-
-        return Result.Success();
+        return result.Map(
+            onSuccess: () => (product!, imageId),
+            onFailure: e => Result<(Product, ImageId)>.Failure(e));
     }
 
     public sealed record ProductNotFoundError(Guid ProductId) : Error("Product not found, incorrect id",

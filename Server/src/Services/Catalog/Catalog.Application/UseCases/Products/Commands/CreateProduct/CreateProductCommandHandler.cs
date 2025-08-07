@@ -51,14 +51,14 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
 
     private async Task<Result<ProductReadDto>> Add(Product product, CancellationToken cancellationToken = default)
     {
-        var result = Result<ProductReadDto>.Try()
+        var validationResult = Result<ProductReadDto>.Try()
             .Check(await _context.Products.AnyAsync(p => p.Id == product.Id),
                 new ProductExistsError(product.Id.Value))
             .Check(!await _context.Categories.AnyAsync(p => p.Id == product.CategoryId),
-                new CategoryNotFoundError(product.CategoryId.Value))
+                new CategoryNotFoundError(product.CategoryId!.Value))
             .Build();
 
-        if (result.IsSuccess)
+        if (validationResult.IsSuccess)
         {
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync(cancellationToken);
@@ -74,7 +74,7 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
             return productReadDto!;
         }
 
-        return result;
+        return validationResult;
     }
 
     public sealed record ProductExistsError(Guid ProductId) : Error("Product already exists",

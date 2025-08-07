@@ -4,7 +4,6 @@ using Catalog.Core.Models.Products.Events;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Shared.Core.Domain.Interfaces;
 using Shared.Messaging.Events.Product;
 
 namespace Catalog.Application.UseCases.Products.EventHandlers.Domain;

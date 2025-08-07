@@ -7,7 +7,6 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Categories.Commands.UpdateCategory;
@@ -34,13 +33,15 @@ public class UpdateCategoryCommandHandler : ICommandHandler<UpdateCategoryComman
 
         var result = await Update(updatedCategory, cancellationToken);
 
-        if (result.IsSuccess)
-            await _cache.SetStringAsync($"category-{updatedCategoryId.Value}",
-                JsonSerializer.Serialize(updatedCategory.Adapt<CategoryReadDto>()),
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-                }, cancellationToken);
+        if (result.IsFailure)
+            return result;
+        
+        await _cache.SetStringAsync($"category-{updatedCategoryId.Value}",
+            JsonSerializer.Serialize(updatedCategory.Adapt<CategoryReadDto>()),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            }, cancellationToken);
 
         return result;
     }

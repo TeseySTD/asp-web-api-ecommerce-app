@@ -4,7 +4,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Shared.Messaging.Events;
 using Shared.Messaging.Events.Order;
 using Shared.Messaging.Messages;
 using Shared.Messaging.Messages.Order;

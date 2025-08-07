@@ -18,8 +18,7 @@ public record FileName
         return Result<FileName>.Try(new FileName(value))
             .Check(string.IsNullOrWhiteSpace(value), new FileNameRequiredError())
             .DropIfFail()
-            .Check(value.Length > MaxLength,
-                new OutOfLengthError())
+            .Check(value.Length > MaxLength, new OutOfLengthError())
             .Build();
     }
 

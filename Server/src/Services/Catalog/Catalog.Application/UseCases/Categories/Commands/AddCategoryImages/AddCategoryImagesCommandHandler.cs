@@ -1,12 +1,10 @@
 ﻿using System.Text.Json;
 using Catalog.Application.Common.Interfaces;
 using Catalog.Application.Dto.Category;
-using Catalog.Application.Dto.Product;
 using Catalog.Core.Models.Categories;
 using Catalog.Core.Models.Categories.ValueObjects;
 using Catalog.Core.Models.Images;
 using Catalog.Core.Models.Images.ValueObjects;
-using Catalog.Core.Models.Products;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -29,26 +27,12 @@ public class AddCategoryImagesCommandHandler : ICommandHandler<AddCategoryImages
 
     public async Task<Result> Handle(AddCategoryImagesCommand request, CancellationToken cancellationToken)
     {
-        var categoryId = CategoryId.Create(request.CategoryId).Value;
-        Category? category = null;
-        var result = await Result.Try()
-            .Check(!await _context.Categories.AnyAsync(p => p.Id == categoryId),
-                new CategoryNotFoundError(categoryId.Value))
-            .DropIfFail()
-            .CheckAsync(async () =>
-                {
-                    category = await _context.Categories
-                        .Include(p => p.Images)
-                        .FirstOrDefaultAsync(p => p.Id == categoryId, cancellationToken);
-
-                    return category!.Images.Count + request.Images.Count() > Category.MaxImagesCount;
-                },
-                new ImagesOutOfRangeError(categoryId.Value))
-            .BuildAsync();
+       var result = await ValidateDataAsync(request, cancellationToken); 
 
         if (result.IsFailure)
             return result;
 
+        var category = result.Value;
 
         foreach (var imageDto in request.Images)
         {
@@ -58,12 +42,12 @@ public class AddCategoryImagesCommandHandler : ICommandHandler<AddCategoryImages
 
             var image = Image.Create(fileName, data, contentType);
             await _context.Images.AddAsync(image);
-            category!.AddImage(image);
+            category.AddImage(image);
         }
 
         await _context.SaveChangesAsync(default);
 
-        await _cache.SetStringAsync($"category-{category!.Id.Value}",
+        await _cache.SetStringAsync($"category-{category.Id.Value}",
             JsonSerializer.Serialize(category.Adapt<CategoryReadDto>()),
             new DistributedCacheEntryOptions
             {
@@ -71,6 +55,29 @@ public class AddCategoryImagesCommandHandler : ICommandHandler<AddCategoryImages
             });
 
         return Result.Success();
+    }
+
+    private async Task<Result<Category>> ValidateDataAsync(AddCategoryImagesCommand request, CancellationToken cancellationToken)
+    {
+        var categoryId = CategoryId.Create(request.CategoryId).Value;
+        Category? category = null;
+        var result = await Result.Try()
+            .Check(!await _context.Categories.AnyAsync(p => p.Id == categoryId), new CategoryNotFoundError(categoryId.Value))
+            .DropIfFail()
+            .CheckAsync(async () =>
+                {
+                    category = await _context.Categories
+                            .Include(p => p.Images)
+                        .FirstOrDefaultAsync(p => p.Id == categoryId, cancellationToken);
+
+                    return category!.Images.Count + request.Images.Count() > Category.MaxImagesCount;
+                },
+                new ImagesOutOfRangeError(categoryId.Value))
+            .BuildAsync();
+
+        return result.Map(
+            onSuccess: () => category!,
+            onFailure: e => Result<Category>.Failure(e));
     }
 
     public sealed record CategoryNotFoundError(Guid CategoryId) : Error("Сategory not found!",

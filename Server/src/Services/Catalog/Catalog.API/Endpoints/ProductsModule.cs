@@ -160,9 +160,8 @@ public class ProductModule : CarterModule
                     {
                         var enumerable = errors as Error[] ?? errors.ToArray();
 
-                        if (enumerable.Any(e =>
-                                e is DeleteProductImageCommandHandler.ProductNotFoundError ||
-                                e is DeleteProductImageCommandHandler.ImageNotFoundError))
+                        if (enumerable
+                            .Any(e => e is DeleteProductImageCommandHandler.ProductNotFoundError || e is DeleteProductImageCommandHandler.ImageNotFoundError))
                             return Results.NotFound(Envelope.Of(enumerable));
                         else if (enumerable.Any(e => e is DeleteProductImageCommandHandler.CustomerMismatchError))
                             return Results.Forbid();
@@ -173,8 +172,7 @@ public class ProductModule : CarterModule
             .RequireAuthorization(Policies.RequireSellerPolicy);
 
         app.MapPut("/{id:guid}",
-                async (ISender sender, Guid id, UpdateProductRequest request, ClaimsPrincipal userClaims,
-                    CancellationToken cancellationToken) =>
+                async (ISender sender, Guid id, UpdateProductRequest request, ClaimsPrincipal userClaims, CancellationToken cancellationToken) =>
                 {
                     if (ExtractUserDataFromClaims(userClaims).IsFailure)
                         return Results.Unauthorized();
@@ -222,6 +220,7 @@ public class ProductModule : CarterModule
                         onFailure: errors =>
                         {
                             var enumerable = errors as Error[] ?? errors.ToArray();
+                            
                             if(enumerable.Any(e => e is IncreaseQuantityCommandHandler.ProductNotFoundError))
                                 return Results.NotFound(Envelope.Of(enumerable));
                             else if (enumerable.Any(e => e is IncreaseQuantityCommandHandler.CustomerMismatchError))
@@ -248,6 +247,7 @@ public class ProductModule : CarterModule
                         onFailure: errors =>
                         {
                             var enumerable = errors as Error[] ?? errors.ToArray();
+                            
                             if (enumerable.Any(e => e is DecreaseQuantityCommandHandler.ProductNotFoundError))
                                 return Results.NotFound(Envelope.Of(enumerable));
                             else if (enumerable.Any(e => e is DecreaseQuantityCommandHandler.CustomerMismatchError))
@@ -272,6 +272,7 @@ public class ProductModule : CarterModule
                     onFailure: errors =>
                     {
                         var enumerable = errors as Error[] ?? errors.ToArray();
+                        
                         if (enumerable.Any(e => e is DeleteProductCommandHandler.ProductNotFoundError))
                             return Results.NotFound(Envelope.Of(enumerable));
                         else if (enumerable.Any(e => e is DeleteProductCommandHandler.CustomerMismatchError))

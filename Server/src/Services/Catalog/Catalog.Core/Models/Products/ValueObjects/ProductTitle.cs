@@ -16,16 +16,12 @@ public record ProductTitle
 
     public static Result<ProductTitle> Create(string title)
     {
-        var result = Result<ProductTitle>.Try()
+        return Result<ProductTitle>.Try(new ProductTitle(title))
             .Check(string.IsNullOrWhiteSpace(title), 
                 new TitleRequiredError())
             .Check(title.Length > MaxTitleLength || title.Length < MinTitleLength,
                 new OutOfLengthError()) 
             .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new ProductTitle(title);
     }
 
     public sealed record TitleRequiredError() : Error("Title is required", "Title must be not empty");

@@ -1,5 +1,4 @@
-﻿using Catalog.Application.UseCases.Products.Commands.DeleteProductImage;
-using Catalog.Core.Models.Categories.ValueObjects;
+﻿using Catalog.Core.Models.Categories.ValueObjects;
 using Catalog.Core.Models.Images.ValueObjects;
 using FluentValidation;
 using Shared.Core.Validation.FluentValidation;

@@ -13,11 +13,9 @@ public record ImageId
     
     public static Result<ImageId> Create(Guid imageId)
     {
-        if (imageId == Guid.Empty)
-        {
-            return new ImageIdRequiredError();
-        }
-        return new ImageId(imageId);
+        return Result<ImageId>.Try(new ImageId(imageId))
+            .Check(imageId == Guid.Empty, new ImageIdRequiredError())
+            .Build();
     }
 
     public sealed record ImageIdRequiredError() : Error("ImageId is required", "ImageId cannot be null or empty");

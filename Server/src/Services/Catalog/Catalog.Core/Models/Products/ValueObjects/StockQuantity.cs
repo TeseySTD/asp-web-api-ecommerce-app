@@ -16,8 +16,9 @@ public record StockQuantity
     
     public static Result<StockQuantity> Create(int stockQuantity)
     {
-        if (stockQuantity < 0) return new QuantityLesserThanZeroError();
-        return Create((uint)stockQuantity);
+         return Result<StockQuantity>.Try(new StockQuantity((uint) stockQuantity))
+             .Check(stockQuantity < 0, new QuantityLesserThanZeroError())
+             .Build(); 
     }
     
     public sealed record QuantityLesserThanZeroError() : Error("Quantity must be greater.", "Quantity must be greater than -1.");

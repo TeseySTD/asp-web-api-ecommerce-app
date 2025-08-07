@@ -3,7 +3,6 @@ using Catalog.Core.Models.Categories.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Domain.Classes;
-using Shared.Core.Domain.Interfaces;
 
 namespace Catalog.Application.UseCases.Categories.EventHandlers;
 

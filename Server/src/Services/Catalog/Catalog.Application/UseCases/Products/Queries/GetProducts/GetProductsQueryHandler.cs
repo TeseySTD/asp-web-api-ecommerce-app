@@ -1,12 +1,9 @@
 ﻿using Catalog.Application.Common.Interfaces;
-using Catalog.Application.Dto.Category;
 using Catalog.Application.Dto.Product;
-using Catalog.Core.Models.Categories;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Shared.Core.API;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Products.Queries.GetProducts;

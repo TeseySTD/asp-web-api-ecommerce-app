@@ -11,17 +11,12 @@ public record SellerId
         Value = value;
     }
 
-    public static Result<SellerId> Create(Guid productId)
+    public static Result<SellerId> Create(Guid sellerId)
     {
-        var result = Result<SellerId>.Try()
-            .Check(productId == Guid.Empty,
-                new IdRequiredError())
+        return Result<SellerId>.Try(new SellerId(sellerId))
+            .Check(sellerId == Guid.Empty, new IdRequiredError())
             .Build();
-
-        if (result.IsFailure)
-            return result;
-        return new SellerId(productId);
     }
 
-    public sealed record IdRequiredError() : Error("Product Id cannot be empty", "ProductId value object failure");
+    public sealed record IdRequiredError() : Error("Seller Id cannot be empty", "SellerId value object failure");
 }

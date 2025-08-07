@@ -1,6 +1,4 @@
-﻿using Catalog.Application.Dto.Image;
-
-namespace Catalog.Application.Dto.Product;
+﻿namespace Catalog.Application.Dto.Product;
 
 public record ProductWriteDto(
     Guid Id,

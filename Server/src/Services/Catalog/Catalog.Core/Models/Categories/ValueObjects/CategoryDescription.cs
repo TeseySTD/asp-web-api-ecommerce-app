@@ -17,16 +17,12 @@ public record CategoryDescription
 
     public static Result<CategoryDescription> Create(string value)
     {
-        var result = Result<CategoryDescription>.Try()
+        return Result<CategoryDescription>.Try(new CategoryDescription(value))
             .Check(string.IsNullOrWhiteSpace(value),
                 new DescriptionRequiredError())
             .Check(value.Length < MinDescriptionLength || value.Length > MaxDescriptionLength,
                 new OutOfLengthError())
             .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new CategoryDescription(value);
     }
     
     public sealed record DescriptionRequiredError() : Error ("Description is required.", " Description cannot be whitespace or empty.");

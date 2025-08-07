@@ -1,13 +1,11 @@
 ﻿using System.Text.Json;
 using Catalog.Application.Common.Interfaces;
 using Catalog.Application.Dto.Category;
-using Catalog.Core.Models.Categories;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Categories.Queries.GetCategoryById;
@@ -30,9 +28,14 @@ public class GetCategoryByIdQueryHandler : IQueryHandler<GetCategoryByIdQuery, C
             return JsonSerializer.Deserialize<CategoryReadDto>(cachedCategory!)!;
 
         var result = await GetCategoryById(request, cancellationToken);
-        if (result.IsSuccess)
-            await _cache.SetStringAsync($"category-{request.Id.Value}", JsonSerializer.Serialize(result.Value),
-                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
+        if (result.IsFailure)
+            return result;
+
+        await _cache.SetStringAsync(
+            $"category-{request.Id.Value}",
+            JsonSerializer.Serialize(result.Value),
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) }
+        );
 
         return result;
     }

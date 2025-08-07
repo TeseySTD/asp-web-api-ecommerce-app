@@ -25,13 +25,9 @@ public class ImagesModule : CarterModule
                 {
                     var contentType = image.ContentType.ToString().ToLower();
                     if (image.ContentType == ImageContentType.SVG)
-                    {
                         contentType = "image/svg+xml";
-                    }
                     else
-                    {
                         contentType = $"image/{contentType}";
-                    }
 
                     return Results.File(
                         image.Data.Value,

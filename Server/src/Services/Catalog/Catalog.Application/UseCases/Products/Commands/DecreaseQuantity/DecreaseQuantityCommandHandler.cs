@@ -24,6 +24,27 @@ public class DecreaseQuantityCommandHandler : ICommandHandler<DecreaseQuantityCo
 
     public async Task<Result> Handle(DecreaseQuantityCommand request, CancellationToken cancellationToken)
     {
+        var validationResult = await ValidateDataAsync(request, cancellationToken);
+
+        if (validationResult.IsFailure)
+            return validationResult;
+
+        var product = validationResult.Value;
+        product.DecreaseQuantity((uint)request.Quantity);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await _cache.SetStringAsync($"product-{product.Id.Value}",
+            JsonSerializer.Serialize(product.Adapt<ProductReadDto>()),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+        return Result.Success();
+    }
+
+    private async Task<Result<Product>> ValidateDataAsync(DecreaseQuantityCommand request, CancellationToken cancellationToken)
+    {
         Product? product = null;
         var productId = ProductId.Create(request.Id).Value;
         var sellerId = SellerId.Create(request.SellerId).Value;
@@ -31,7 +52,7 @@ public class DecreaseQuantityCommandHandler : ICommandHandler<DecreaseQuantityCo
         var validationResult = await Result.Try()
             .Check(!await _context.Products.AnyAsync(p => p.Id == productId), new ProductNotFoundError(request.Id))
             .DropIfFail()
-            .CheckAsync(async () => !await _context.Products.AnyAsync(p => p.Id == productId && p.SellerId == sellerId), 
+            .CheckAsync(async () => !await _context.Products.AnyAsync(p => p.Id == productId && p.SellerId == sellerId),
                 new CustomerMismatchError(request.SellerId))
             .CheckAsync(async () =>
             {
@@ -44,25 +65,16 @@ public class DecreaseQuantityCommandHandler : ICommandHandler<DecreaseQuantityCo
             }, new NotEnoughtQuantityError())
             .BuildAsync();
 
-        if (validationResult.IsSuccess)
-        {
-            product!.DecreaseQuantity((uint)request.Quantity);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            await _cache.SetStringAsync($"product-{product.Id.Value}",
-                JsonSerializer.Serialize(product.Adapt<ProductReadDto>()),
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-                });
-        }
-
-        return validationResult;
+        return validationResult.Map(
+            onSuccess: () => product!,
+            onFailure: e => Result<Product>.Failure(e));
     }
 
     public sealed record ProductNotFoundError(Guid ProductId)
         : Error($"Product not found", $"Product not found, incorrect id:{ProductId}");
+
     public sealed record NotEnoughtQuantityError() : Error($"Not enough quantity", $"Not enough quantity in stock");
+
     public sealed record CustomerMismatchError(Guid SellerId) : Error("You can`t decrease quantity of this product!",
         $"Your id {SellerId} doesn’t match with seller’s id in product.");
 }

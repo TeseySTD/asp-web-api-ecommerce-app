@@ -27,9 +27,42 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
 
     public async Task<Result> Handle(AddProductImagesCommand request, CancellationToken cancellationToken)
     {
+        var result = await ValidateDataAsync(request, cancellationToken);
+
+        if (result.IsFailure)
+            return result;
+
+        var product = result.Value;
+
+        foreach (var imageDto in request.Images)
+        {
+            var fileName = FileName.Create(imageDto.FileName).Value;
+            var data = ImageData.Create(imageDto.Data).Value;
+            var contentType = Enum.Parse<ImageContentType>(imageDto.ContentType, ignoreCase: true);
+
+            var image = Image.Create(fileName, data, contentType);
+            await _context.Images.AddAsync(image);
+            product.AddImage(image);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await _cache.SetStringAsync($"product-{product.Id.Value}",
+            JsonSerializer.Serialize(product.Adapt<ProductReadDto>()),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+        return Result.Success();
+    }
+
+    private async Task<Result<Product>> ValidateDataAsync(AddProductImagesCommand request, CancellationToken cancellationToken)
+    {
         var productId = ProductId.Create(request.ProductId).Value;
         var sellerId = SellerId.Create(request.SellerId).Value;
         Product? product = null;
+        
         var result = await Result.Try()
             .Check(!await _context.Products.AnyAsync(p => p.Id == productId),
                 new ProductNotFoundError(request.ProductId))
@@ -49,31 +82,10 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
                 },
                 new MaxImagesError(request.ProductId))
             .BuildAsync();
-
-        if (result.IsFailure)
-            return result;
-
-        foreach (var imageDto in request.Images)
-        {
-            var fileName = FileName.Create(imageDto.FileName).Value;
-            var data = ImageData.Create(imageDto.Data).Value;
-            var contentType = Enum.Parse<ImageContentType>(imageDto.ContentType, ignoreCase: true);
-
-            var image = Image.Create(fileName, data, contentType);
-            await _context.Images.AddAsync(image);
-            product!.AddImage(image);
-        }
-
-        await _context.SaveChangesAsync(cancellationToken);
-
-        await _cache.SetStringAsync($"product-{product!.Id.Value}",
-            JsonSerializer.Serialize(product.Adapt<ProductReadDto>()),
-            new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            });
-
-        return Result.Success();
+        
+        return result.Map(
+            onSuccess: () => product!,
+            onFailure: e => Result<Product>.Failure(e));
     }
 
     public sealed record ProductNotFoundError(Guid Id)

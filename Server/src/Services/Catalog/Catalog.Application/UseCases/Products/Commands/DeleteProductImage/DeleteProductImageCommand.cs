@@ -1,5 +1,4 @@
-﻿using Catalog.Application.Common.Interfaces;
-using Shared.Core.CQRS;
+﻿using Shared.Core.CQRS;
 
 namespace Catalog.Application.UseCases.Products.Commands.DeleteProductImage;
 

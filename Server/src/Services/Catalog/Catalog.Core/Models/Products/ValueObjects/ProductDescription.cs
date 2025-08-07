@@ -16,17 +16,13 @@ public record ProductDescription
 
     public static Result<ProductDescription> Create(string description)
     {
-        var result = Result<ProductDescription>.Try()
-            .Check(string.IsNullOrWhiteSpace(description),
+        return Result<ProductDescription>.Try(new ProductDescription(description))
+            .Check(string.IsNullOrWhiteSpace(description), 
                 new DescriptionRequiredError())
             .DropIfFail()
             .Check(description.Length < MinDescriptionLength || description.Length > MaxDescriptionLength,
                 new OutOfLengthError())
             .Build();
-
-        if (result.IsFailure)
-            return result;
-        return new ProductDescription(description);
     }
 
     public sealed record DescriptionRequiredError()

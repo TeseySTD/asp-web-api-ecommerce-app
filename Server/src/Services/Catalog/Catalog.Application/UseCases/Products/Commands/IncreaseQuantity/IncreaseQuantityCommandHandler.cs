@@ -28,7 +28,8 @@ public class IncreaseQuantityCommandHandler : ICommandHandler<IncreaseQuantityCo
         var sellerId = SellerId.Create(request.SellerId).Value;
         
         var validationResult = await Result.Try()
-            .Check(!await _context.Products.AnyAsync(p => p.Id == productId), new ProductNotFoundError(request.Id))
+            .Check(!await _context.Products.AnyAsync(p => p.Id == productId), 
+                new ProductNotFoundError(request.Id))
             .DropIfFail()
             .CheckAsync(async () => !await _context.Products.AnyAsync(p => p.Id == productId && p.SellerId == sellerId),
                 new CustomerMismatchError(request.SellerId))
@@ -52,7 +53,7 @@ public class IncreaseQuantityCommandHandler : ICommandHandler<IncreaseQuantityCo
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
 
-        return validationResult;
+        return Result.Success();
     }
 
     public sealed record ProductNotFoundError(Guid ProductId) : Error("Product not found",

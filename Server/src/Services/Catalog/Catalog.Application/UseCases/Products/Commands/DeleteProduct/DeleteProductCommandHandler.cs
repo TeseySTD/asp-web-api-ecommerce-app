@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Shared.Core.Auth;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Products.Commands.DeleteProduct;
@@ -26,7 +25,8 @@ public class DeleteProductCommandHandler : ICommandHandler<DeleteProductCommand>
                 new ProductNotFoundError(request.ProductId.Value))
             .DropIfFail()
             .CheckAsync(async () => !await _context.Products
-                .AnyAsync(p => p.Id == request.ProductId && p.SellerId == request.SellerId) && request.Role != UserRole.Admin,
+                .AnyAsync(p => p.Id == request.ProductId && p.SellerId == request.SellerId) 
+                && request.Role != UserRole.Admin,
                 new CustomerMismatchError(request.SellerId.Value))
             .BuildAsync();
         

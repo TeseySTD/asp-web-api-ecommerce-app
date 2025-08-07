@@ -2,7 +2,6 @@ using System.Text.Json;
 using Catalog.Core.Models.Products.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Shared.Core.Domain.Interfaces;
 
 namespace Catalog.Application.UseCases.Products.EventHandlers.Domain;
 
