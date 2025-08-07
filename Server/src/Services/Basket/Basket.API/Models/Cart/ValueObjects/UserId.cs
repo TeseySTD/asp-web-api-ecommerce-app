@@ -18,14 +18,9 @@ public struct UserId
     
     public static Result<UserId> Create(Guid productId)
     {
-        var result = Result<UserId>.Try()
-            .Check(productId == Guid.Empty,
-                new IdRequiredError())
+        return Result<UserId>.Try(new UserId(productId))
+            .Check(productId == Guid.Empty, new IdRequiredError())
             .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new UserId(productId);
     }
 
     public sealed record IdRequiredError() : Error("User Id cannot be empty", "UserId value object failure");

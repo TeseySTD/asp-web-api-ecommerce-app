@@ -31,16 +31,19 @@ public record Payment
         PaymentMethod = paymentMethod ?? "Unknown";
     }
 
-    public static Result<Payment> Create(string cardName, string cardNumber, string? expiration, string cvv,
-        string? paymentMethod)
+    public static Result<Payment> Create(string cardName, string cardNumber, string? expiration, string cvv, string? paymentMethod)
     {
         return Result<Payment>.Try(new Payment(cardName, cardNumber, expiration, cvv, paymentMethod))
-            .Check(string.IsNullOrWhiteSpace(cardName), new CardNameRequiredError())
-            .Check(string.IsNullOrWhiteSpace(cardNumber), new CardNumberRequiredError())
-            .Check(!Regex.IsMatch(cardNumber, VisaMasterCardNumberRegex), new InvalidCardNumberError(cardNumber))
-            .Check(string.IsNullOrWhiteSpace(cvv), new CVVRequiredError())
+            .Check(string.IsNullOrWhiteSpace(cardName), 
+                new CardNameRequiredError())
+            .Check(string.IsNullOrWhiteSpace(cardNumber),
+                new CardNumberRequiredError())
+            .Check(!Regex.IsMatch(cardNumber, VisaMasterCardNumberRegex),
+                new InvalidCardNumberError(cardNumber))
+            .Check(string.IsNullOrWhiteSpace(cvv), 
+                new CVVRequiredError())
             .CheckIf(
-                !string.IsNullOrWhiteSpace(cvv),
+                checkCondition: !string.IsNullOrWhiteSpace(cvv),
                 cvv.Length != CVVLength,
                 new CVVLengthError(cvv.Length))
             .Build();

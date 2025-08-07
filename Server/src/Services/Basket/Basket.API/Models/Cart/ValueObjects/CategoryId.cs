@@ -17,14 +17,9 @@ public record CategoryId
     public static CategoryId From(Guid value) => new(value);
     public static Result<CategoryId> Create(Guid categoryId)
     {
-        var result = Result<CategoryId>.Try()
-            .Check(categoryId == Guid.Empty,
-                new IdIsRequiredError())
+        return Result<CategoryId>.Try(new CategoryId(categoryId))
+            .Check(categoryId == Guid.Empty, new IdIsRequiredError())
             .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new CategoryId(categoryId);
     }
     
     public sealed record IdIsRequiredError() : Error($"Category Id is required", "CategoryId cannot be empty.");

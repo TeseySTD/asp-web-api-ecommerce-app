@@ -21,16 +21,10 @@ public record CategoryName
 
     public static Result<CategoryName> Create(string value)
     {
-        var result = Result<CategoryName>.Try()
-            .Check(string.IsNullOrWhiteSpace(value),
-                new NameRequiredError())
-            .Check(value.Length > MaxNameLength,
-                new NameIsOutOfLengthError())
+        return Result<CategoryName>.Try(new CategoryName(value))
+            .Check(string.IsNullOrWhiteSpace(value), new NameRequiredError())
+            .Check(value.Length > MaxNameLength, new NameIsOutOfLengthError())
             .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new CategoryName(value);
     }
     
     public sealed record NameRequiredError() : Error($"Name cannot be empty", "Name cannot be empty or whitespace");

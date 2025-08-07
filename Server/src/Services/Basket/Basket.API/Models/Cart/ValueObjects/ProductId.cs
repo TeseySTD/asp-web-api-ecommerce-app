@@ -22,14 +22,9 @@ public record ProductId
 
     public static Result<ProductId> Create(Guid productId)
     {
-        var result = Result<ProductId>.Try()
-            .Check(productId == Guid.Empty,
-                new IdRequiredError())
+        return Result<ProductId>.Try(new ProductId(productId))
+            .Check(productId == Guid.Empty, new IdRequiredError())
             .Build();
-
-        if (result.IsFailure)
-            return result;
-        return new ProductId(productId);
     }
 
     public sealed record IdRequiredError() : Error("Product Id cannot be empty", "ProductId value object failure");

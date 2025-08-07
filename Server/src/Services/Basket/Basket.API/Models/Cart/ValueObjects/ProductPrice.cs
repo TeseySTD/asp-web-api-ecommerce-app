@@ -20,14 +20,10 @@ public record ProductPrice
     }
 
     public static Result<ProductPrice> Create(decimal price){
-        var result = Result<ProductPrice>.Try()
+        return Result<ProductPrice>.Try(new ProductPrice(price))
             .Check(price < MinPrice || price > MaxPrice,
                 new OutOfRangeError())
             .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new ProductPrice(price);
     }
 
     public sealed record OutOfRangeError()

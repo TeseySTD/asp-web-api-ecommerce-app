@@ -27,7 +27,9 @@ public class CartRepository : ICartRepository
     public async Task<Result<IEnumerable<ProductCart>>> GetCartsByProductId(ProductId productId,
         CancellationToken cancellationToken = default)
     {
-        var carts = await _session.Query<ProductCart>().Where(c => c.Items.Any(i => i.Id.Value == productId.Value))
+        var carts = await _session
+            .Query<ProductCart>()
+            .Where(c => c.Items.Any(i => i.Id.Value == productId.Value))
             .ToListAsync();
         return !carts.IsEmpty()
             ? Result<IEnumerable<ProductCart>>.Success(carts)
@@ -98,8 +100,7 @@ public class CartRepository : ICartRepository
         }
     }
 
-    public async Task<Result> RemoveProductFromCart(UserId userId, ProductId productId,
-        CancellationToken cancellationToken = default)
+    public async Task<Result> RemoveProductFromCart(UserId userId, ProductId productId, CancellationToken cancellationToken = default)
     {
         try
         {

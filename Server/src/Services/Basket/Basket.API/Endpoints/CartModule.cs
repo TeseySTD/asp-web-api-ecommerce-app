@@ -27,10 +27,7 @@ public class CartModule : CarterModule
 
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/{id:guid}", async (
-            ISender sender,
-            Guid id,
-            CancellationToken cancellationToken) =>
+        app.MapGet("/{id:guid}", async (ISender sender, Guid id, CancellationToken cancellationToken) =>
         {
             var query = new GetCartByUserIdQuery(id);
 
@@ -42,10 +39,7 @@ public class CartModule : CarterModule
             );
         }).WithName("Get Cart");
 
-        app.MapPost("/checkout", async (
-            ISender sender,
-            CheckoutBasketRequest request,
-            CancellationToken cancellationToken) =>
+        app.MapPost("/checkout", async (ISender sender, CheckoutBasketRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new CheckoutBasketCommand(
                 request.Adapt<CheckoutBasketDto>()
@@ -65,10 +59,7 @@ public class CartModule : CarterModule
             );
         }).WithName("Checkout Basket");
 
-        app.MapPost("/", async (
-            ISender sender,
-            SaveCartRequest request,
-            CancellationToken cancellationToken) =>
+        app.MapPost("/", async (ISender sender, SaveCartRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new SaveCartCommand(request.Dto);
 
@@ -80,11 +71,7 @@ public class CartModule : CarterModule
             );
         }).WithName("Save Cart");
 
-        app.MapPost("/{userId:guid}", async (
-            ISender sender,
-            Guid userId,
-            ProductCartItemDto product,
-            CancellationToken cancellationToken) =>
+        app.MapPost("/{userId:guid}", async (ISender sender, Guid userId, ProductCartItemDto product, CancellationToken cancellationToken) =>
         {
             var cmd = new StoreProductCommand(userId, product);
 
@@ -111,11 +98,7 @@ public class CartModule : CarterModule
             );
         }).WithName("Delete Cart");
 
-        app.MapDelete("/{userId:guid}/{productId:guid}", async (
-            ISender sender,
-            Guid userId,
-            Guid productId,
-            CancellationToken cancellationToken) =>
+        app.MapDelete("/{userId:guid}/{productId:guid}", async (ISender sender, Guid userId, Guid productId, CancellationToken cancellationToken) =>
         {
             var cmd = new RemoveProductCommand(userId, productId);
 
