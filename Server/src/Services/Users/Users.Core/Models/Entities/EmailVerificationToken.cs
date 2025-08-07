@@ -7,7 +7,7 @@ public class EmailVerificationToken : Entity<EmailVerificationTokenId>
 {
     public DateTime ExpiresOnUtc { get; set; }
     public UserId UserId { get; set; } = null!;
-    public User User { get; set; } = null!;
+    public User? User { get; set; }
     
     public static EmailVerificationToken Create(UserId userId, DateTime expiresOnUtc)
     {

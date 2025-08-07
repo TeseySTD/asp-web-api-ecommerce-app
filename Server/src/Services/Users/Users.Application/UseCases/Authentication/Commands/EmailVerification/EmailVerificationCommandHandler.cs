@@ -13,11 +13,29 @@ public class EmailVerificationCommandHandler(IApplicationDbContext context) : IC
 {
     public async Task<Result> Handle(EmailVerificationCommand request, CancellationToken cancellationToken)
     {
+        var result = await ValidateDataAsync(request, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            var token = result.Value;
+            var user = token.User;
+
+            user!.VerifyEmail();
+            context.EmailVerificationTokens.Remove(token);
+
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        return result;
+    }
+
+    private async Task<Result<EmailVerificationToken>> ValidateDataAsync(EmailVerificationCommand request,
+        CancellationToken cancellationToken)
+    {
         var tokenId = EmailVerificationTokenId.Create(request.Id).Value;
         EmailVerificationToken? token = null;
-        User? user = null;
 
-        var result = await Result.Try()
+        var validationResult = await Result<EmailVerificationToken>.Try()
             .Check(!await context.EmailVerificationTokens.AnyAsync(t => t.Id == tokenId),
                 new TokenNotFoundError(tokenId.Value))
             .DropIfFail()
@@ -29,27 +47,22 @@ public class EmailVerificationCommandHandler(IApplicationDbContext context) : IC
 
                 if (token!.ExpiresOnUtc < DateTime.UtcNow)
                     return new TokenExpiredError(token.ExpiresOnUtc);
-                return Result.Success();
+                return Result<EmailVerificationToken>.Success(token);
             })
-            .Check( () =>
+            .Check(() =>
             {
-                user = token!.User;
-                
+                var user = token!.User;
+
                 if (user is null)
-                    return new TokenUserNotFoundError(token!.UserId.Value); 
-                return Result.Success();
+                    return new TokenUserNotFoundError(token!.UserId.Value);
+                return Result<EmailVerificationToken>.Success(token);
             })
             .BuildAsync();
 
-        if (result.IsSuccess)
-        {
-            user!.VerifyEmail();
-            context.EmailVerificationTokens.Remove(token!);
-
-            await context.SaveChangesAsync(cancellationToken);
-        }
-
-        return result;
+        return validationResult.Map(
+            onSuccess: () => token!,
+            onFailure: errors => Result<EmailVerificationToken>.Failure(errors)
+        );
     }
 
     public sealed record TokenNotFoundError(Guid TokenId) : Error("Email verification token not found",
