@@ -28,13 +28,33 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
             CustomerId.Create(customerId).Value,
             Payment.Create("Jane Doe", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
-            OrderId.Create(Guid.NewGuid()).Value
+            [],
+            OrderId.Create(Guid.NewGuid()).Value,
+            OrderStatus.InProgress
         ),
         Order.Create(
             CustomerId.Create(customerId).Value,
             Payment.Create("Somebody One", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
-            OrderId.Create(Guid.NewGuid()).Value
+            [],
+            OrderId.Create(Guid.NewGuid()).Value,
+            OrderStatus.InProgress
+        ),
+        Order.Create(
+            CustomerId.Create(customerId).Value,
+            Payment.Create("John Doe", "4111111111111111", "12/25", "123", "Visa").Value,
+            Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
+            [],
+            OrderId.Create(Guid.NewGuid()).Value,
+            OrderStatus.InProgress
+        ),
+        Order.Create(
+            CustomerId.Create(customerId).Value,
+            Payment.Create("John Doe", "4111111111111111", "12/25", "123", "Visa").Value,
+            Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
+            [],
+            OrderId.Create(Guid.NewGuid()).Value,
+            OrderStatus.Completed
         )
     ];
 
@@ -43,7 +63,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     {
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
-        var query = new GetOrdersQuery(new PaginationRequest(), customerId);
+        var query = new GetOrdersQuery(new PaginationRequest(), customerId, null);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
 
         // Act
@@ -64,7 +84,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 1, PageSize: orders.Count), customerId);
+        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 1, PageSize: orders.Count), customerId, null);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
 
         // Act
@@ -81,11 +101,12 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
         var orders = GetTestListOrders(customerId.Value);
+        var filteredOrders = orders.Where(o => o.Status == OrderStatus.InProgress).ToList();
 
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: orders.Count - 1), customerId);
+        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: filteredOrders.Count() - 1), customerId, OrderStatus.InProgress);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
 
         // Act
@@ -93,9 +114,10 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
 
         // Assert
         Assert.True(result.IsSuccess);
-        result.Value.Data.Should().HaveCount(orders.Count - 1);
+        result.Value.Data.Should().HaveCount(filteredOrders.Count() - 1);
         result.Value.Data.Should().AllSatisfy(dto =>
         {
+            dto.Status.Should().Be(OrderStatus.InProgress.ToString());
             orders.Should().Contain(o =>
                 dto.OrderId == o.Id.Value &&
                 dto.CustomerId == o.CustomerId.Value &&
@@ -133,7 +155,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: orders.Count), customerId);
+        var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: orders.Count), customerId, null);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
 
         // Act

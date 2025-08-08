@@ -32,14 +32,35 @@ public class GetOrdersTest : ApiTest
             CustomerId.Create(customerId).Value,
             Payment.Create("Jane Doe", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
-            OrderId.Create(Guid.NewGuid()).Value
+            [],
+            OrderId.Create(Guid.NewGuid()).Value,
+            OrderStatus.InProgress
         ),
         Order.Create(
             CustomerId.Create(customerId).Value,
             Payment.Create("Somebody One", "4111111111111111", "12/25", "123", "Visa").Value,
             Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
-            OrderId.Create(Guid.NewGuid()).Value
+            [],
+            OrderId.Create(Guid.NewGuid()).Value,
+            OrderStatus.InProgress
+        ),
+        Order.Create(
+            CustomerId.Create(customerId).Value,
+            Payment.Create("John Doe", "4111111111111111", "12/25", "123", "Visa").Value,
+            Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
+            [],
+            OrderId.Create(Guid.NewGuid()).Value,
+            OrderStatus.InProgress
+        ),
+        Order.Create(
+            CustomerId.Create(customerId).Value,
+            Payment.Create("John Doe", "4111111111111111", "12/25", "123", "Visa").Value,
+            Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
+            [],
+            OrderId.Create(Guid.NewGuid()).Value,
+            OrderStatus.Completed
         )
+
     ];
 
     private HttpRequestMessage GenerateHttpRequest(string url, Guid? userId = null, string role = "Default")
@@ -126,11 +147,12 @@ public class GetOrdersTest : ApiTest
         // Arrange
         var customerId = Guid.NewGuid();
         var orders = GetTestListOrders(customerId);
+        var filteredOrders = orders.Where(o => o.Status == OrderStatus.InProgress);
 
         ApplicationDbContext.Orders.AddRange(orders);
         await ApplicationDbContext.SaveChangesAsync();
 
-        var request = GenerateHttpRequest(RequestUrl + $"/?customerId={customerId}&pageIndex=0", customerId);
+        var request = GenerateHttpRequest(RequestUrl + $"/?customerId={customerId}&pageIndex=0&orderStatus=inprogress", customerId);
 
         // Act
         var response = await HttpClient.SendAsync(request);
@@ -138,10 +160,12 @@ public class GetOrdersTest : ApiTest
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        foreach (var o in orders)
+        foreach (var o in filteredOrders)
         {
             json.Should()
-                .Contain(o.CustomerId.Value.ToString());
+                .Contain(o.CustomerId.Value.ToString()).And
+                .Contain(o.Status.ToString()).And
+                .Contain(o.Id.Value.ToString());
         }
     }
 

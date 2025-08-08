@@ -23,18 +23,23 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PaginatedResu
         var pageIndex = request.PaginationRequest.PageIndex;
         var pageSize = request.PaginationRequest.PageSize;
 
-        var orders = await _context.Orders
-            .AsNoTracking()
+        var query = _context.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
             .Where(o => o.CustomerId == request.CustomerId)
+            .AsNoTracking();
+        
+        if(request.OrderStatus != null)
+            query = query.Where(o => o.Status == request.OrderStatus);
+
+        var orders = await query
             .Skip(pageSize * pageIndex)
             .Take(pageSize)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Product)
             .ToListAsync(cancellationToken);
 
         if (!orders.Any())
-            return new OrdersNotFoundError(); 
-        
+            return new OrdersNotFoundError();
+
         var orderDtos = orders.Select(o =>
         {
             var products = o.OrderItems.Select(oi =>
