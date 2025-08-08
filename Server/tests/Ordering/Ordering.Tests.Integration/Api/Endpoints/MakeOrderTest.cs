@@ -4,6 +4,8 @@ using System.Text;
 using Newtonsoft.Json;
 using Ordering.API.Http.Order.Requests;
 using Ordering.Application.UseCases.Orders.Commands.CreateOrder;
+using Ordering.Core.Models.Products;
+using Ordering.Core.Models.Products.ValueObjects;
 using Ordering.Tests.Integration.Common;
 
 namespace Ordering.Tests.Integration.Api.Endpoints;
@@ -17,8 +19,8 @@ public class MakeOrderTest : ApiTest
     {
     }
 
-    private MakeOrderRequest CreateTestRequest() => new(
-        [new(Guid.NewGuid(), 10)],
+    private MakeOrderRequest CreateTestRequest(CreateOrderItemRequest[] items) => new(
+        items,
         CardName: "John Doe",
         CardNumber: "4111111111111111",
         Expiration: "12/25",
@@ -48,13 +50,13 @@ public class MakeOrderTest : ApiTest
     public async Task WhenUnathorized_ThenReturnsUnauthorized()
     {
         // Arrange
-        var dto = CreateTestRequest();
+        var dto = CreateTestRequest([]);
         var json = JsonConvert.SerializeObject(dto);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        
+
         // Act
         var response = await HttpClient.PostAsync(RequestUrl, content);
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -64,14 +66,12 @@ public class MakeOrderTest : ApiTest
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var dto = CreateTestRequest() with
-        {
-            OrderItems =
+        var dto = CreateTestRequest(
             [
                 new(productId, 10),
                 new(productId, 8)
             ]
-        };
+        );
 
         var request = GenerateHttpRequest(dto, Guid.NewGuid());
 
@@ -87,10 +87,52 @@ public class MakeOrderTest : ApiTest
     }
 
     [Fact]
+    public async Task WhenProductsNotExists_ThenShouldReturnBadRequest()
+    {
+        // Arrange
+        Guid[] nonExistingProductIds = [Guid.NewGuid(), Guid.NewGuid()];
+        var dto = CreateTestRequest(
+            [
+                new(nonExistingProductIds[0], 10),
+                new(nonExistingProductIds[1], 8)
+            ]
+        );
+        var request = GenerateHttpRequest(dto, Guid.NewGuid());
+
+        var expectedContent = MakeSystemErrorApiOutput(new CreateOrderCommandHandler.ProductsNotFound(nonExistingProductIds));
+        
+        // Act
+        var response = await HttpClient.SendAsync(request);
+        var actualContent = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(expectedContent, actualContent, ignoreAllWhiteSpace: true);
+    }
+
+    [Fact]
     public async Task WhenDataIsCorrect_ThenShouldReturnOk()
     {
-        var dto = CreateTestRequest();
+        var product1 = Product.Create(
+            id: ProductId.Create(Guid.NewGuid()).Value,
+            title: ProductTitle.Create("Test #1").Value,
+            description: ProductDescription.Create("Test Description #1").Value
+        );
+        var product2 = Product.Create(
+            id: ProductId.Create(Guid.NewGuid()).Value,
+            title: ProductTitle.Create("Test #2").Value,
+            description: ProductDescription.Create("Test Description #2").Value
+        );
 
+        ApplicationDbContext.Products.AddRange(product1, product2);
+        await ApplicationDbContext.SaveChangesAsync();
+
+        var dto = CreateTestRequest(
+            [
+                new(product1.Id.Value, 10),
+                new(product2.Id.Value, 8)
+            ]
+        );
         var request = GenerateHttpRequest(dto, Guid.NewGuid());
 
         // Act

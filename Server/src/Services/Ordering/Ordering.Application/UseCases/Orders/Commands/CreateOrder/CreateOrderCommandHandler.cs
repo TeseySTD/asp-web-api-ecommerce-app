@@ -1,7 +1,9 @@
 ﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
 using Ordering.Core.Models.Orders;
 using Ordering.Core.Models.Orders.ValueObjects;
+using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.CQRS;
 using Shared.Core.Validation.Result;
 using Shared.Messaging.Events.Order;
@@ -24,10 +26,29 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
     {
         var orderId = OrderId.Create(Guid.NewGuid()).Value;
 
-        var result = Result<Guid>.Try()
+        var result = await Result<Guid>.Try()
             .Check(() => request.Value.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
                 new OrderItemIsNotUniqueError())
-            .Build();
+            .DropIfFail()
+            .CheckAsync(async () =>
+            {
+                var productIds = request.Value.OrderItems
+                    .Select(o => ProductId.Create(o.ProductId).Value)
+                    .ToList();
+                
+                var existingProductIds = await _context.Products
+                    .AsNoTracking()
+                    .Where(p => productIds.Contains(p.Id))
+                    .Select(p => p.Id)
+                    .ToListAsync();
+                
+                var missingProductsIds = productIds.Except(existingProductIds).Select(id => id.Value).ToList();
+                
+                if(missingProductsIds.Any())
+                    return new ProductsNotFound(missingProductsIds);
+                return Result<Guid>.Success(default);
+            })
+            .BuildAsync();
         if (result.IsFailure)
             return result;
 
@@ -76,4 +97,10 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
     }
     
     public sealed record OrderItemIsNotUniqueError() : Error("Order item is not unique.", $"Each order item must be unique.");
+
+    public sealed record ProductsNotFound : Error
+    {
+        public ProductsNotFound(IEnumerable<Guid> productIds) : base("Products not found!", $"Products in order not found: {string.Join(", ", productIds)}")
+        {}
+    } 
 }

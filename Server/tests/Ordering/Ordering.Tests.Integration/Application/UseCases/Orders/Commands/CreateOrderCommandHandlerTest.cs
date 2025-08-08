@@ -6,6 +6,8 @@ using Ordering.Application.Dto.Order;
 using Ordering.Application.UseCases.Orders.Commands.CreateOrder;
 using Ordering.Core.Models.Orders;
 using Ordering.Core.Models.Orders.ValueObjects;
+using Ordering.Core.Models.Products;
+using Ordering.Core.Models.Products.ValueObjects;
 using Ordering.Tests.Integration.Common;
 using Shared.Messaging.Events.Order;
 
@@ -20,19 +22,12 @@ public class CreateOrderCommandHandlerTest : IntegrationTest
         _publishEndpointMock = Substitute.For<IPublishEndpoint>();
     }
 
-    private Order CreateTestOrder() => Order.Create(
-        CustomerId.Create(Guid.NewGuid()).Value,
-        Payment.Create("John Doe", "4111111111111111", "12/25", "123", "Visa").Value,
-        Address.Create("456 Oak Rd", "USA", "CA", "12345").Value,
-        OrderId.Create(Guid.NewGuid()).Value
-    );
-
     private (Guid ProductId, uint Quantity) CreateTestOrderItemDto(Guid productId, uint quantity) =>
         (productId, quantity);
 
-    private OrderWriteDto CreateTestOrderWriteDto() => new(
+    private OrderWriteDto CreateTestOrderWriteDto(IEnumerable<(Guid, uint)> items) => new(
         UserId: Guid.NewGuid(),
-        [(ProductId: Guid.NewGuid(), Quantity: 3)],
+        items,
         (cardName: "John Doe", cardNumber: "4111111111111111", expiration: "12/25", cvv: "123", paymentMethod: "Visa"),
         (addressLine: "456 Oak Rd", country: "USA", state: "CA", zipCode: "12345")
     );
@@ -41,42 +36,85 @@ public class CreateOrderCommandHandlerTest : IntegrationTest
     public async Task WhenOrderItemIsNotUnique_ThenReturnsFailureResult()
     {
         // Arrange
-        var order = CreateTestOrder();
         var productId = Guid.NewGuid();
 
-        ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
-
-        var dto = CreateTestOrderWriteDto() with
-        {
-            OrderItems = [CreateTestOrderItemDto(productId, 3), CreateTestOrderItemDto(productId, 4)]
-        };
+        var dto = CreateTestOrderWriteDto(
+            [
+                CreateTestOrderItemDto(productId, 3),
+                CreateTestOrderItemDto(productId, 4)
+            ]
+        );
         var command = new CreateOrderCommand(dto);
         var handler = new CreateOrderCommandHandler(ApplicationDbContext, _publishEndpointMock);
-        
+
         // Act
         var result = await handler.Handle(command, default);
-        
+
         // Assert
         Assert.True(result.IsFailure);
         result.Errors.Should().ContainSingle(e => e == new CreateOrderCommandHandler.OrderItemIsNotUniqueError());
     }
 
     [Fact]
+    public async Task WhenProductsInOrderNotExists_ThenReturnsFailureResult()
+    {
+        // Arrange
+        var nonExistingProductId1 = Guid.NewGuid();
+        var nonExistingProductId2 = Guid.NewGuid();
+
+        var dto = CreateTestOrderWriteDto(
+            [
+                CreateTestOrderItemDto(nonExistingProductId1, 3),
+                CreateTestOrderItemDto(nonExistingProductId2, 4)
+            ]
+        );
+        var command = new CreateOrderCommand(dto);
+        var handler = new CreateOrderCommandHandler(ApplicationDbContext, _publishEndpointMock);
+
+        // Act
+        var result = await handler.Handle(command, default);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var expectedError =
+            new CreateOrderCommandHandler.ProductsNotFound([nonExistingProductId1, nonExistingProductId2]);
+        result.Errors.Should().ContainSingle(e => e == expectedError);
+    }
+
+    [Fact]
     public async Task WhenDataIsCorrect_ThenReturnsSuccessResultCreateOrderAndPublishEndpoint()
     {
         // Arrange
-        var orderDto = CreateTestOrderWriteDto();
-        
+        var product1 = Product.Create(
+            id: ProductId.Create(Guid.NewGuid()).Value,
+            title: ProductTitle.Create("Test #1").Value,
+            description: ProductDescription.Create("Test Description #1").Value
+        );
+        var product2 = Product.Create(
+            id: ProductId.Create(Guid.NewGuid()).Value,
+            title: ProductTitle.Create("Test #2").Value,
+            description: ProductDescription.Create("Test Description #2").Value
+        );
+
+        ApplicationDbContext.Products.AddRange(product1, product2);
+        await ApplicationDbContext.SaveChangesAsync(default);
+
+        var orderDto = CreateTestOrderWriteDto(
+            [
+                CreateTestOrderItemDto(product1.Id.Value, 3),
+                CreateTestOrderItemDto(product2.Id.Value, 4)
+            ]
+        );
+
         var command = new CreateOrderCommand(orderDto);
         var handler = new CreateOrderCommandHandler(ApplicationDbContext, _publishEndpointMock);
-        
+
         // Act
         var result = await handler.Handle(command, default);
-        
+
         // Assert
         Assert.True(result.IsSuccess);
-        
+
         var order = await ApplicationDbContext.Orders.FirstAsync();
         Assert.NotNull(order);
         order.Should().Satisfy<Order>(o =>
