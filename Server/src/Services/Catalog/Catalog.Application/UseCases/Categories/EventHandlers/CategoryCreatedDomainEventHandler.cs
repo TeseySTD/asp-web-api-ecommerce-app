@@ -11,22 +11,19 @@ namespace Catalog.Application.UseCases.Categories.EventHandlers;
 public class CategoryCreatedDomainEventHandler : INotificationHandler<CategoryCreatedDomainEvent>
 {
     private ILogger<CategoryCreatedDomainEventHandler> _logger;
-    private IPublishEndpoint _publishEndpoint;
 
-    public CategoryCreatedDomainEventHandler(ILogger<CategoryCreatedDomainEventHandler> logger, IPublishEndpoint publishEndpoint)
+    public CategoryCreatedDomainEventHandler(ILogger<CategoryCreatedDomainEventHandler> logger )
     {
         _logger = logger;
-        _publishEndpoint = publishEndpoint;
     }
 
-    public async Task Handle(CategoryCreatedDomainEvent notification, CancellationToken cancellationToken)
+    public Task Handle(CategoryCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         var domainEvent = notification as DomainEvent;
         _logger.LogInformation("Domain event {Type} on {Time} handled: {DomainEvent}",
             domainEvent.EventType, domainEvent.OccurredOnUtc,
             JsonSerializer.Serialize(notification, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true}));
         
-        await _publishEndpoint.Publish<CategoryCreatedEvent>(
-            new(notification.CategoryId.Value, notification.CategoryName.Value));
+        return Task.CompletedTask;
     }
 }
