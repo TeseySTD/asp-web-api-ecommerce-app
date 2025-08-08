@@ -10,6 +10,20 @@ namespace Catalog.Tests.Unit.Core.Models.Categories;
 public class CategoryTest
 {
     [Fact]
+    public void WhenCreateIsCalledWithValidData_ThenCategoryCreatedAndEventIsDispatched()
+    {
+        // Act
+        var category = Category.Create(
+            CategoryName.Create("Name").Value,
+            CategoryDescription.Create("Description").Value
+        );
+        
+        // Assert
+        category.DomainEvents.Should().ContainSingle(e => e is CategoryCreatedDomainEvent)
+            .Which.As<CategoryCreatedDomainEvent>().CategoryId.Should().Be(category.Id);
+    }
+
+    [Fact]
     public void WhenUpdateIsCalledWithValidData_ThenPropertiesAreUpdatedAndCategoryUpdatedEventIsDispatched()
     {
         // Arrange

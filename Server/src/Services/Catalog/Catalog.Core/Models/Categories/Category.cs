@@ -23,7 +23,7 @@ public class Category : AggregateRoot<CategoryId>
     public static Category Create(CategoryId id, CategoryName name, CategoryDescription description)
     {
         var category = new Category(id, name, description);
-        category.AddDomainEvent(new CategoryCreatedDomainEvent(category.Id));
+        category.AddDomainEvent(new CategoryCreatedDomainEvent(category.Id, category.Name));
         
         return category;
     }

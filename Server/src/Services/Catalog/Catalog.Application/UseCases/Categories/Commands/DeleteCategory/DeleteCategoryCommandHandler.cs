@@ -1,8 +1,10 @@
 ﻿using Catalog.Application.Common.Interfaces;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Shared.Core.CQRS;
 using Shared.Core.Validation.Result;
+using Shared.Messaging.Events.Category;
 
 namespace Catalog.Application.UseCases.Categories.Commands.DeleteCategory;
 
@@ -10,19 +12,23 @@ public class DeleteCategoryCommandHandler : ICommandHandler<DeleteCategoryComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IDistributedCache _cache;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public DeleteCategoryCommandHandler(IApplicationDbContext context, IDistributedCache cache)
+    public DeleteCategoryCommandHandler(IApplicationDbContext context, IDistributedCache cache, IPublishEndpoint publishEndpoint)
     {
         _context = context;
         _cache = cache;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<Result> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
         var result = await DeleteCategory(request);
 
-        if (result.IsSuccess)
+        if (result.IsSuccess){ 
             await _cache.RemoveAsync($"category-{request.Id.Value}");
+            await _publishEndpoint.Publish(new CategoryDeletedEvent(request.Id.Value));
+        }
 
         return result;
     }

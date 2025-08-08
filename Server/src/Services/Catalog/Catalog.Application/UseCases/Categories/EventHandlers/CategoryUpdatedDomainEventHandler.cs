@@ -1,26 +1,31 @@
 ﻿using System.Text.Json;
 using Catalog.Core.Models.Categories.Events;
+using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Domain.Classes;
+using Shared.Messaging.Events.Category;
 
 namespace Catalog.Application.UseCases.Categories.EventHandlers;
 
 public class CategoryUpdatedDomainEventHandler : INotificationHandler<CategoryUpdatedDomainEvent>
 {
     private readonly ILogger<CategoryUpdatedDomainEventHandler> _logger;
-
-    public CategoryUpdatedDomainEventHandler(ILogger<CategoryUpdatedDomainEventHandler> logger)
+    private readonly IPublishEndpoint _publishEndpoint;
+    public CategoryUpdatedDomainEventHandler(ILogger<CategoryUpdatedDomainEventHandler> logger, IPublishEndpoint publishEndpoint)
     {
         _logger = logger;
+        _publishEndpoint = publishEndpoint;
     }
 
-    public Task Handle(CategoryUpdatedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(CategoryUpdatedDomainEvent notification, CancellationToken cancellationToken)
     {
         var domainEvent = notification as DomainEvent;
         _logger.LogInformation("Domain event {Type} on {Time} handled: {DomainEvent}",
             domainEvent.EventType, domainEvent.OccurredOnUtc,
             JsonSerializer.Serialize(notification, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true}));
-        return Task.CompletedTask;
+
+        await _publishEndpoint.Publish<CategoryUpdatedEvent>(
+            new(notification.Category.Id.Value, notification.Category.Name.Value));
     }
 }

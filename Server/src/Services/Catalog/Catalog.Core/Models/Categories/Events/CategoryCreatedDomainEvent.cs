@@ -4,4 +4,4 @@ using Shared.Core.Domain.Interfaces;
 
 namespace Catalog.Core.Models.Categories.Events;
 
-public record CategoryCreatedDomainEvent(CategoryId CategoryId) : DomainEvent;
+public record CategoryCreatedDomainEvent(CategoryId CategoryId, CategoryName CategoryName) : DomainEvent;
