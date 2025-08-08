@@ -1,4 +1,5 @@
-﻿using Basket.API.Data.Abstractions;
+﻿using System.Linq.Expressions;
+using Basket.API.Data.Abstractions;
 using Basket.API.Models.Cart;
 using Basket.API.Models.Cart.Entities;
 using Basket.API.Models.Cart.ValueObjects;
@@ -22,6 +23,24 @@ public class CartRepository : ICartRepository
         return cart is not null
             ? Result<ProductCart>.Success(cart)
             : new ICartRepository.CartWithUserIdNotFoundError(userId.Value);
+    }
+
+    public async Task<Result<IEnumerable<ProductCart>>> GetCartsByPredicate(
+        Expression<Func<ProductCart, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var carts = await _session
+                .Query<ProductCart>()
+                .Where(predicate)
+                .ToListAsync();
+
+            return Result<IEnumerable<ProductCart>>.Success(carts);
+        }
+        catch (Exception e)
+        {
+            return new ICartRepository.PredicateExceptionError(e.Message, e.StackTrace ?? string.Empty);
+        }
     }
 
     public async Task<Result<IEnumerable<ProductCart>>> GetCartsByProductId(ProductId productId,
@@ -100,7 +119,8 @@ public class CartRepository : ICartRepository
         }
     }
 
-    public async Task<Result> RemoveProductFromCart(UserId userId, ProductId productId, CancellationToken cancellationToken = default)
+    public async Task<Result> RemoveProductFromCart(UserId userId, ProductId productId,
+        CancellationToken cancellationToken = default)
     {
         try
         {

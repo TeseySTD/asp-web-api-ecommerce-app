@@ -52,4 +52,6 @@ public class ProductCartItem : Entity<ProductId>
     public void Update(ProductTitle title, ProductPrice price, ProductCartItemCategory? category,
         IEnumerable<string> imageUrls) =>
         (Title, Price, Category, ImageUrls) = (title, price, category, imageUrls.ToList());
+    
+    public void Update(ProductCartItemCategory? category) => Update(Title, Price, category, ImageUrls);
 }
