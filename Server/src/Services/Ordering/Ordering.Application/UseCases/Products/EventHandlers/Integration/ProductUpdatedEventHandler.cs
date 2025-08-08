@@ -5,7 +5,7 @@ using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Messaging.Events;
 using Shared.Messaging.Events.Product;
 
-namespace Ordering.Application.UseCases.Orders.EventHandlers.Integration;
+namespace Ordering.Application.UseCases.Products.EventHandlers.Integration;
 
 public class ProductUpdatedEventHandler : IntegrationEventHandler<ProductUpdatedEvent>
 {

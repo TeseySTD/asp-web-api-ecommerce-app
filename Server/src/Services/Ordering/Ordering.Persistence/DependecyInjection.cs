@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using MassTransit;
+﻿using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -7,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Ordering.Application.Common.Interfaces;
 using Ordering.Application.UseCases.Orders.EventHandlers.Integration;
 using Ordering.Application.UseCases.Orders.Sagas;
+using Ordering.Application.UseCases.Products.EventHandlers.Integration;
 using Ordering.Persistence.Interceptors;
 using Shared.Messaging.Broker;
-using Shared.Messaging.Events.Basket;
 
 namespace Ordering.Persistence;
 

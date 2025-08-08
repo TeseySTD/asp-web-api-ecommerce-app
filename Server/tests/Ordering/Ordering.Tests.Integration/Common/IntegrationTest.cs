@@ -7,7 +7,7 @@ namespace Ordering.Tests.Integration.Common;
 public class IntegrationTest : BaseIntegrationTest, IAsyncLifetime
 {
     private DatabaseFixture _databaseFixture;
-    protected readonly IApplicationDbContext ApplicationDbContext; 
+    protected readonly ApplicationDbContext ApplicationDbContext; 
     protected IntegrationTest(DatabaseFixture databaseFixture)
     {
         _databaseFixture = databaseFixture;
