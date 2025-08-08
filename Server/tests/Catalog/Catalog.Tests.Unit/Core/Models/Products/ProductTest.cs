@@ -12,6 +12,24 @@ namespace Catalog.Tests.Unit.Core.Models.Products;
 public class ProductTest
 {
     [Fact]
+    public void WhenProductCreateIsCalledWithValidData_ThenProductCreatedEventIsDispatched()
+    {
+        // Act
+        var product = Product.Create(
+            ProductTitle.Create("Test Title").Value,
+            ProductDescription.Create("Test Description").Value,
+            ProductPrice.Create(100).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
+            categoryId: CategoryId.Create(Guid.NewGuid()).Value
+        );
+
+        // Assert
+        product.Should().NotBeNull();
+        product.DomainEvents.Should().ContainSingle(e => e is ProductCreatedDomainEvent)
+            .Which.As<ProductCreatedDomainEvent>().Product.Should().BeSameAs(product);
+    }
+
+    [Fact]
     public void WhenUpdateIsCalledWithValidData_ThenItUpdatesAndProductUpdatedEventIsDispatched()
     {
         // Arrange 
@@ -23,7 +41,7 @@ public class ProductTest
             categoryId: CategoryId.Create(Guid.NewGuid()).Value
         );
         original.StockQuantity = StockQuantity.Create(5).Value;
-        
+
         var newTitle = ProductTitle.Create("NewTitle").Value;
         var newDesc = ProductDescription.Create("NewDesc").Value;
         var newPrice = ProductPrice.Create(150).Value;
@@ -63,7 +81,7 @@ public class ProductTest
         var img = Image.Create(
             fileName: FileName.Create("image.jpg").Value,
             data: ImageData.Create([1, 2, 3, 4]).Value,
-            contentType: ImageContentType.PNG 
+            contentType: ImageContentType.PNG
         );
 
         // Act
@@ -90,7 +108,7 @@ public class ProductTest
         var img = Image.Create(
             fileName: FileName.Create("image.jpg").Value,
             data: ImageData.Create([1, 2, 3, 4]).Value,
-            contentType: ImageContentType.PNG 
+            contentType: ImageContentType.PNG
         );
         product.AddImage(img);
 
@@ -138,7 +156,7 @@ public class ProductTest
 
         // Act 
         Action act = () => product.DecreaseQuantity(5);
-        
+
         // Assert 
         act.Should().Throw<ArgumentException>()
             .WithMessage("*greater than the quantity*");

@@ -46,7 +46,8 @@ public class Product : AggregateRoot<ProductId>
         ProductPrice price, SellerId sellerId, CategoryId? categoryId)
     {
         var product = new Product(id, title, description, price, sellerId, categoryId);
-        product.AddDomainEvent(new ProductCreatedDomainEvent(id));
+        product.AddDomainEvent(new ProductCreatedDomainEvent(product));
+        product.StockQuantity = StockQuantity.Create(0).Value;
         return product;
     }
 

@@ -5,19 +5,23 @@ using Catalog.Core.Models.Products;
 using Catalog.Core.Models.Products.ValueObjects;
 using Catalog.Tests.Integration.Common;
 using FluentAssertions;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using NSubstitute;
 using Shared.Core.Auth;
+using Shared.Messaging.Events.Product;
 
 namespace Catalog.Tests.Integration.Application.UseCases.Products.Commands;
 
 public class DeleteProductCommandHandlerTest : IntegrationTest
 {
     private readonly IDistributedCache _cache;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public DeleteProductCommandHandlerTest(DatabaseFixture databaseFixture) : base(databaseFixture)
     {
+        _publishEndpoint = Substitute.For<IPublishEndpoint>();
         _cache = Substitute.For<IDistributedCache>();
     }
 
@@ -38,7 +42,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         var sellerId = SellerId.Create(Guid.NewGuid()).Value;
         var role = UserRole.Default;
         var cmd = new DeleteProductCommand(nonExistentId, sellerId, role);
-        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
+        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache, _publishEndpoint);
 
         // Act
         var result = await handler.Handle(cmd, default);
@@ -61,7 +65,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var cmd = new DeleteProductCommand(product.Id, fakeSellerId, UserRole.Default);
-        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
+        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache, _publishEndpoint);
 
         // Act
         var result = await handler.Handle(cmd, default);
@@ -84,7 +88,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var cmd = new DeleteProductCommand(product.Id, product.SellerId, UserRole.Default);
-        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
+        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache, _publishEndpoint);
 
         // Act
         var result = await handler.Handle(cmd, default);
@@ -96,6 +100,9 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         var deletedProduct = await ApplicationDbContext.Products
             .FirstOrDefaultAsync(p => p.Id == product.Id);
         deletedProduct.Should().BeNull();
+
+        // Verify event is dispatched
+        await _publishEndpoint.Received(1).Publish(Arg.Is<ProductDeletedEvent>(e => e.ProductId == product.Id.Value));
 
         // Verify cache removal
         await _cache.Received(1).RemoveAsync($"product-{id}");
@@ -114,7 +121,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var cmd = new DeleteProductCommand(product.Id, fakeSellerId, UserRole.Admin);
-        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
+        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache, _publishEndpoint);
 
         // Act
         var result = await handler.Handle(cmd, default);
@@ -126,7 +133,10 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         var deletedProduct = await ApplicationDbContext.Products
             .FirstOrDefaultAsync(p => p.Id == product.Id);
         deletedProduct.Should().BeNull();
-
+        
+        // Verify event is dispatched
+        await _publishEndpoint.Received(1).Publish(Arg.Is<ProductDeletedEvent>(e => e.ProductId == product.Id.Value));
+        
         // Verify cache removal
         await _cache.Received(1).RemoveAsync($"product-{id}");
     }
@@ -143,7 +153,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var cmd = new DeleteProductCommand(product.Id, product.SellerId, UserRole.Default);
-        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
+        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache, _publishEndpoint);
 
         // Act
         var result = await handler.Handle(cmd, default);
@@ -157,6 +167,9 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
             .FirstOrDefaultAsync(p => p.Id == product.Id);
         deletedProduct.Should().BeNull();
 
+        // Verify event is dispatched
+        await _publishEndpoint.Received(1).Publish(Arg.Is<ProductDeletedEvent>(e => e.ProductId == product.Id.Value));
+        
         // Verify cache removal
         await _cache.Received(1).RemoveAsync($"product-{id}");
     }
@@ -177,7 +190,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
         await ApplicationDbContext.SaveChangesAsync(default);
 
         var cmd = new DeleteProductCommand(product1.Id, product1.SellerId, UserRole.Default);
-        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache);
+        var handler = new DeleteProductCommandHandler(ApplicationDbContext, _cache, _publishEndpoint);
 
         // Act
         var result = await handler.Handle(cmd, default);
@@ -193,6 +206,12 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
             .FirstOrDefaultAsync(p => p.Id == product2.Id);
         remainingProduct.Should().NotBeNull();
 
+
+        // Verify event is dispatched
+        await _publishEndpoint.Received(1).Publish(Arg.Is<ProductDeletedEvent>(e => e.ProductId == product1.Id.Value));
+        await _publishEndpoint.DidNotReceive().Publish(Arg.Is<ProductDeletedEvent>(e => e.ProductId == product2.Id.Value));
+        
+        // Verify cache removal
         await _cache.Received(1).RemoveAsync($"product-{product1Id}");
         await _cache.DidNotReceive().RemoveAsync($"product-{product2Id}");
     }
