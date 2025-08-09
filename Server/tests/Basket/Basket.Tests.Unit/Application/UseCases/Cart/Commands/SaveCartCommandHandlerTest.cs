@@ -40,7 +40,7 @@ public class SaveCartCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenSaveSucceeds_ThenReturnsSuccessResult()
+    public async Task Handle_SaveSucceeds_ReturnsSuccessResult()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -70,7 +70,7 @@ public class SaveCartCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenSaveFails_ThenReturnsFailureResult()
+    public async Task Handle_SaveFails_ReturnsFailureResult()
     {
         // Arrange
         var userId = Guid.NewGuid();

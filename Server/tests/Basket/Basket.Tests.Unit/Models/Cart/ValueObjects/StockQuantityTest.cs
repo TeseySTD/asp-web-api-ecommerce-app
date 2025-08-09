@@ -6,7 +6,7 @@ namespace Basket.Tests.Unit.Models.Cart.ValueObjects;
 public class StockQuantityTest
 {
     [Fact]
-    public void WhenQuantityIsLesserThanOne_ThenReturnsFailureResult()
+    public void Create_QuantityIsLesserThanOne_ReturnsQuantityLesserThanOneError()
     {
         // Arrange
         uint quantity = 0;
@@ -20,7 +20,7 @@ public class StockQuantityTest
     }
 
     [Fact]
-    public void WhenQuantityIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectQuantity_ReturnsSuccessResult()
     {
         // Arrange
         uint quantity = 1;

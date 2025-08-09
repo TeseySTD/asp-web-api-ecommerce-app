@@ -41,7 +41,7 @@ public class StoreProductCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenProductAlreadyInCart_ThenReturnsProductAlreadyInCartError()
+    public async Task Handle_ProductIdThatAlreadyInCart_ReturnsProductAlreadyInCartError()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -69,7 +69,7 @@ public class StoreProductCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenValidRequest_ThenReturnsSuccessResult()
+    public async Task Handle_ValidRequest_ReturnsSuccessResult()
     {
         // Arrange
         var userId = Guid.NewGuid();

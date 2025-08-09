@@ -28,7 +28,7 @@ public class CategoryUpdatedEventHandlerTest
 
 
     [Fact]
-    public async Task WhenCartsFound_ThenUpdatesItemsAndSavesEachCart()
+    public async Task Handle_CartsFound_UpdatesItemsAndSavesEachCart()
     {
         // Arrange
         var productId = Guid.NewGuid();

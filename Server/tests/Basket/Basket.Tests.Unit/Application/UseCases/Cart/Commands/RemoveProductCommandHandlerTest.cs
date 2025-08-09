@@ -19,7 +19,7 @@ public class RemoveProductCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenCartNotFound_ThenReturnsCartNotFoundError()
+    public async Task Handle_NonExistentUserId_ReturnsCartWithUserIdNotFoundError()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -45,7 +45,7 @@ public class RemoveProductCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenProductNotInCart_ThenReturnsProductNotFoundError()
+    public async Task Handle_ProductIdThatNotInCart_ReturnsProductInCartNotFound()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -69,7 +69,7 @@ public class RemoveProductCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenValidRequest_ThenReturnsSuccessResult()
+    public async Task Handle_ValidRequest_ReturnsSuccessResult()
     {
         // Arrange
         var userId = Guid.NewGuid();

@@ -20,7 +20,7 @@ public class GetCartByUserIdQueryHandlerTest
     }
 
     [Fact]
-    public async Task WhenCartExists_ThenReturnsSuccessWithCart()
+    public async Task Handle_CartExists_ReturnsSuccessWithCart()
     {
         // Arrange
         var userIdGuid = Guid.NewGuid();
@@ -44,7 +44,7 @@ public class GetCartByUserIdQueryHandlerTest
     }
 
     [Fact]
-    public async Task WhenCartNotFound_ThenReturnsFailureResult()
+    public async Task Handle_CartNotFound_ReturnsCartWithUserIdNotFoundError()
     {
         // Arrange
         var userIdGuid = Guid.NewGuid();

@@ -6,7 +6,7 @@ namespace Basket.Tests.Unit.Models.Cart.Entities;
 public class ProductCartItemTest
 {
     [Fact]
-    public void WhenProductIsUpdated_ThenPropertiesAreChanged()
+    public void Update_WithValidData_UpdatesAllProperties()
     {
         // Arrange
         var productCartItemToUpdate = ProductCartItem.Create(

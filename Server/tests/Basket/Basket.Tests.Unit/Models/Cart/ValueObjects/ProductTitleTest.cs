@@ -8,7 +8,7 @@ public class ProductTitleTest
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("   ")]
-    public void WhenProductTitleIsEmpty_ThenReturnsFailureResult(string productTitle)
+    public void Create_EmptyProductTitle_ReturnsTitleRequiredError(string productTitle)
     {
         // Act
         var result = ProductTitle.Create(productTitle);
@@ -21,7 +21,7 @@ public class ProductTitleTest
     [Theory]
     [InlineData(ProductTitle.MaxTitleLength + 1)]
     [InlineData(ProductTitle.MinTitleLength - 1)]
-    public void WhenProductTitleIsOutOfLength_ThenReturnsFailureResult(int productTitleLength)
+    public void Create_ProductTitleIsOutOfLength_ReturnsOutOfLengthError(int productTitleLength)
     {
         // Arrange
         var title = string.Concat(Enumerable.Repeat("a", productTitleLength));
@@ -35,7 +35,7 @@ public class ProductTitleTest
     }
 
     [Fact]
-    public void WhenStringIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectString_ReturnsSuccessResult()
     {
         // Arrange
         var title = "test";

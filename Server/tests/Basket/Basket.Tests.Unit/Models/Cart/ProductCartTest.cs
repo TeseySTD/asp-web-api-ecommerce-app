@@ -21,7 +21,7 @@ public class ProductCartTest
     );
 
     [Fact]
-    public void WhenCreateWithNoItems_ThenShouldInitializeEmptyCart()
+    public void Create_NoItems_ShouldInitializeEmptyCart()
     {
         // Act
         var cart = ProductCart.Create(_userId);
@@ -33,7 +33,7 @@ public class ProductCartTest
     }
 
     [Fact]
-    public void WhenCreateWithItems_ThenShouldInitializeCartWithItems()
+    public void Create_WithItems_ShouldInitializeCartWithItems()
     {
         // Arrange
         var id1 = ProductId.Create(Guid.NewGuid()).Value;
@@ -55,7 +55,7 @@ public class ProductCartTest
     }
 
     [Fact]
-    public void WhenAddItem_ThenShouldAddSingleItemToCart()
+    public void AddItem_WithItem_ShouldAddSingleItemToCart()
     {
         // Arrange
         var cart = ProductCart.Create(_userId);
@@ -71,7 +71,7 @@ public class ProductCartTest
     }
 
     [Fact]
-    public void WhenAddItems_ThenShouldAddMultipleItemsToCart()
+    public void AddItems_WithItems_ShouldAddMultipleItemsToCart()
     {
         // Arrange
         var cart = ProductCart.Create(_userId);
@@ -90,7 +90,7 @@ public class ProductCartTest
     }
 
     [Fact]
-    public void WhenRemoveItem_ThenShouldRemoveItemById()
+    public void RemoveItem_WithItemId_ShouldRemoveItemById()
     {
         // Arrange
         var idToRemove = ProductId.Create(Guid.NewGuid()).Value;
@@ -107,7 +107,7 @@ public class ProductCartTest
     }
 
     [Fact]
-    public void WhenHasItem_ThenShouldReturnCorrectBoolean()
+    public void HasItem_WithItemId_ShouldReturnCorrectBoolean()
     {
         // Arrange
         var presentId = ProductId.Create(Guid.NewGuid()).Value;

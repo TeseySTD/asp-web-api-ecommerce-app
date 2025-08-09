@@ -6,7 +6,7 @@ namespace Basket.Tests.Unit.Models.Cart.ValueObjects;
 public class UserIdTest
 {
     [Fact]
-    public void WhenUserIdIsEmpty_ThenReturnsFailureResult()
+    public void Create_EmptyId_ReturnsIdRequiredError()
     {
         // Arrange
         var userId = Guid.Empty;
@@ -20,7 +20,7 @@ public class UserIdTest
     }
 
     [Fact]
-    public void WhenIdIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectId_ReturnsSuccessResult()
     {
         // Arrange
         var userId = Guid.NewGuid();

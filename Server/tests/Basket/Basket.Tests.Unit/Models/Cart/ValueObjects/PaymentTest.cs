@@ -8,7 +8,7 @@ public class PaymentTest
     [InlineData("John Doe", "4111111111111111", "12/25", "123", "Visa")]
     [InlineData("Jane Smith", "5555555555554444", "01/26", "456", "MasterCard")]
     [InlineData("Bob Johnson", "4000000000000002", null, "789", null)]
-    public void WhenValidInput_ThenReturnsSuccess(string cardName, string cardNumber, string? expiration, string cvv, string? paymentMethod)
+    public void Create_ValidInput_ReturnsSuccessResult(string cardName, string cardNumber, string? expiration, string cvv, string? paymentMethod)
     {
         // Act
         var result = Payment.Create(cardName, cardNumber, expiration, cvv, paymentMethod);
@@ -26,7 +26,7 @@ public class PaymentTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void WhenEmptyCardName_ThenReturnsCardNameRequiredError(string emptyCardName)
+    public void Create_EmptyCardName_ReturnsCardNameRequiredError(string emptyCardName)
     {
         // Act
         var result = Payment.Create(emptyCardName, "4111111111111111", "12/25", "123", "Visa");
@@ -39,7 +39,7 @@ public class PaymentTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void WhenEmptyCardNumber_ThenReturnsCardNumberRequiredError(string emptyCardNumber)
+    public void Create_EmptyCardNumber_ReturnsCardNumberRequiredError(string emptyCardNumber)
     {
         // Act
         var result = Payment.Create("John Doe", emptyCardNumber, "12/25", "123", "Visa");
@@ -54,7 +54,7 @@ public class PaymentTest
     [InlineData("378282246310005")] // Amex (not supported)
     [InlineData("411111111111111")] // Too short Visa
     [InlineData("41111111111111111")] // Too long Visa
-    public void WhenInvalidCardNumber_ThenReturnsInvalidCardNumberError(string invalidCardNumber)
+    public void Create_InvalidCardNumber_ReturnsInvalidCardNumberError(string invalidCardNumber)
     {
         // Act
         var result = Payment.Create("John Doe", invalidCardNumber, "12/25", "123", "Visa");
@@ -67,7 +67,7 @@ public class PaymentTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void WhenEmptyCVV_ThenReturnsCVVRequiredError(string emptyCVV)
+    public void Create_EmptyCVV_ReturnsCVVRequiredError(string emptyCVV)
     {
         // Act
         var result = Payment.Create("John Doe", "4111111111111111", "12/25", emptyCVV, "Visa");
@@ -81,7 +81,7 @@ public class PaymentTest
     [InlineData("12")] // Too short
     [InlineData("1234")] // Too long
     [InlineData("12345")] // Way too long
-    public void WhenInvalidCVVLength_ThenReturnsCVVLengthError(string invalidCVV)
+    public void Create_InvalidCVVLength_ReturnsCVVLengthError(string invalidCVV)
     {
         // Act
         var result = Payment.Create("John Doe", "4111111111111111", "12/25", invalidCVV, "Visa");
@@ -95,7 +95,7 @@ public class PaymentTest
     [InlineData("4111111111111111", "12/25", "123")] // Valid Visa
     [InlineData("5555555555554444", "01/26", "456")] // Valid MasterCard
     [InlineData("4000000000000002", "03/27", "789")] // Another valid Visa
-    public void WhenValidVisaOrMasterCard_ThenReturnsSuccess(string cardNumber, string expiration, string cvv)
+    public void Create_ValidVisaOrMasterCard_ReturnsSuccessResult(string cardNumber, string expiration, string cvv)
     {
         // Act
         var result = Payment.Create("Test User", cardNumber, expiration, cvv, "Test");
@@ -106,7 +106,7 @@ public class PaymentTest
     }
 
     [Fact]
-    public void WhenNullExpirationAndPaymentMethod_ThenSetsDefaultValues()
+    public void Create_NullExpirationAndPaymentMethod_SetsDefaultValues()
     {
         // Act
         var result = Payment.Create("John Doe", "4111111111111111", null, "123", null);

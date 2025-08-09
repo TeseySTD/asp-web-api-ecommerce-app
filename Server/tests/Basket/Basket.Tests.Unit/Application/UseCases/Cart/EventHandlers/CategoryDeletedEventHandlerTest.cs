@@ -27,7 +27,7 @@ public class CategoryDeletedEventHandlerTest
     }
 
     [Fact]
-    public async Task WhenCartsFound_ThenUpdatesItemsDeletesCategoryAndSavesEachCart()
+    public async Task Hadnle_CartsFound_UpdatesItemsDeletesCategoryAndSavesEachCart()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());

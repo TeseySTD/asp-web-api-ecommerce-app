@@ -38,7 +38,7 @@ public class ProductUpdatedEventHandlerTest
     }
 
     [Fact]
-    public async Task WhenNoCartsFound_ThenLogsInfoAndDoesNotSave()
+    public async Task Handle_NoCartsFound_LogsInfoAndDoesNotSave()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -62,7 +62,7 @@ public class ProductUpdatedEventHandlerTest
     }
 
     [Fact]
-    public async Task WhenCartsFound_ThenUpdatesItemsAndSavesEachCart()
+    public async Task Handle_CartsFound_UpdatesItemsAndSavesEachCart()
     {
         // Arrange
         var productId = Guid.NewGuid();

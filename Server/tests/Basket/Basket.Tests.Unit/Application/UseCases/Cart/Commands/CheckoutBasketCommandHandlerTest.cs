@@ -83,7 +83,7 @@ public class CheckoutBasketCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenValidCartWithItems_ThenReturnsSuccessAndPublishesEvent()
+    public async Task Handle_ValidCartWithItems_ReturnsSuccessAndPublishesEvent()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -132,7 +132,7 @@ public class CheckoutBasketCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenCartNotFound_ThenReturnsFailure()
+    public async Task Handle_NonExistentUserId_ReturnsCartWithUserIdNotFoundError()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -155,7 +155,7 @@ public class CheckoutBasketCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenDeleteCartFails_ThenReturnsFailure()
+    public async Task Handle_DeleteCartFails_ReturnsFailureResult()
     {
         // Arrange
         var userId = Guid.NewGuid();

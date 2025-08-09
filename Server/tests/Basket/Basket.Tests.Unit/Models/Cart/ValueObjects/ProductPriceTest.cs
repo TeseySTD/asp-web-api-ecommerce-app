@@ -5,7 +5,7 @@ namespace Basket.Tests.Unit.Models.Cart.ValueObjects;
 public class ProductPriceTest
 {
     [Fact] 
-    public void WhenPriceIsOutOfRange_ThenReturnsFailureResult()
+    public void Create_PriceIsOutOfRange_ReturnsOutOfRangeError()
     {
         // Arrange
         var price = ProductPrice.MinPrice - 0.01m;
@@ -19,7 +19,7 @@ public class ProductPriceTest
     }
 
     [Fact]
-    public void WhenPriceIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectPrice_ReturnsSuccessResult()
     {
         // Arrange
         var price = 10m;

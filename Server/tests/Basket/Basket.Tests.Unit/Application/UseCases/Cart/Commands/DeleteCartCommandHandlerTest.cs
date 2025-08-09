@@ -19,7 +19,7 @@ public class DeleteCartCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenCartIsNotFound_ThenReturnsFailureResult()
+    public async Task Handle_NonExistentUserId_ReturnsCartWithUserIdNotFoundError()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -38,7 +38,7 @@ public class DeleteCartCommandHandlerTest
     }
 
     [Fact]
-    public async Task WhenDataIsValid_ThenReturnsSuccessResult()
+    public async Task Handle_ValidData_ReturnsSuccessResult()
     {
         // Arrange
         var userId = Guid.NewGuid();
