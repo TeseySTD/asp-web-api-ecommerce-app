@@ -29,7 +29,7 @@ public class DeleteCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task DeleteCart_UserUnauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -42,7 +42,7 @@ public class DeleteCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCartIsNotFound_ThenReturnsNotFound()
+    public async Task DeleteCart_CartIsNotFound_ReturnsNotFound()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -61,7 +61,7 @@ public class DeleteCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCartIsFound_ThenReturnsOk()
+    public async Task DeleteCart_CartIsFound_ReturnsOk()
     {
         // Arrange
         var userId = Guid.NewGuid();

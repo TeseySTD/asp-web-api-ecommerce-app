@@ -33,7 +33,7 @@ public class GetCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task GetCart_UserUnauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -46,7 +46,7 @@ public class GetCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCartNotFound_ThenReturnsNotFound()
+    public async Task GetCart_CartNotFound_ReturnsNotFound()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -65,7 +65,7 @@ public class GetCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCartIsInDb_ThenReturnsOk()
+    public async Task  GetCart_CartIsInDb_ReturnsOk()
     {
         // Arrange
         var userId = Guid.NewGuid();

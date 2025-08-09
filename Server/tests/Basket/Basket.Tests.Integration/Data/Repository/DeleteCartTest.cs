@@ -13,7 +13,7 @@ public class DeleteCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartNotExist_ThenReturnsNotFoundError()
+    public async Task DeleteCart_CartNotExist_ReturnsCartWithUserIdNotFoundError()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
@@ -27,7 +27,7 @@ public class DeleteCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartExists_ThenRemovesCart()
+    public async Task DeleteCart_CartExists_ThenRemovesCart()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());

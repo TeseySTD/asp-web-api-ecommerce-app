@@ -14,7 +14,7 @@ public class GetCartByUserIdTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartDoesNotExist_ThenReturnsNotFoundError()
+    public async Task GetCartByUserId_CartDoesNotExist_ReturnsCartWithUserIdNotFoundError()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
@@ -28,7 +28,7 @@ public class GetCartByUserIdTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartExists_ThenReturnsCart()
+    public async Task  GetCartByUserId_CartExists_ReturnsCart()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());

@@ -14,7 +14,7 @@ public class RemoveProductFromCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartNotExist_ThenReturnsFailureResult()
+    public async Task RemoveProductFromCart_CartNotExist_ReturnsCartWithUserIdNotFoundError()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
@@ -29,7 +29,7 @@ public class RemoveProductFromCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenItemNotExist_ThenReturnsFailureResult()
+    public async Task RemoveProductFromCart_ItemNotExist_ReturnsProductInCartNotFound()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
@@ -49,7 +49,7 @@ public class RemoveProductFromCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenItemExists_ThenRemovesItemAndReturnsSuccessResult()
+    public async Task RemoveProductFromCart_ItemExists_RemovesItemAndReturnsSuccessResult()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());

@@ -13,7 +13,7 @@ public class GetCartsByPredicateTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenNoCartsMatchPredicate_ThenReturnsEmptyList()
+    public async Task GetCartsByPredicate_NoCartsMatchPredicate_ReturnsEmptyList()
     {
         // Arrange
         var productId = ProductId.Create(Guid.NewGuid()).Value;
@@ -29,7 +29,7 @@ public class GetCartsByPredicateTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartsMatchPredicate_ThenReturnsCarts()
+    public async Task GetCartsByPredicate_CartsMatchPredicate_ReturnsCarts()
     {
         var userId1 = UserId.From(Guid.NewGuid());
         var userId2 = UserId.From(Guid.NewGuid());

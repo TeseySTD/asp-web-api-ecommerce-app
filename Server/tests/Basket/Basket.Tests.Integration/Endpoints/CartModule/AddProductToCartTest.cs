@@ -54,7 +54,7 @@ public class AddProductToCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task AddProductToCart_UserUnauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -76,7 +76,7 @@ public class AddProductToCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductIsAlreadyInCart_ThenReturnsBadRequest()
+    public async Task AddProductToCart_ProductIdIsAlreadyInCart_ReturnsBadRequest()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -113,7 +113,7 @@ public class AddProductToCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenRequestIsCorrect_ThenReturnsOk()
+    public async Task AddProductToCart_RequestIsCorrect_ReturnsOk()
     {
         // Arrange
         var userId = Guid.NewGuid();

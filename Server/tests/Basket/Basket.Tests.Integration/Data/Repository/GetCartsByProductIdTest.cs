@@ -14,7 +14,7 @@ public class GetCartsByProductIdTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenNoCartsContainProduct_ThenReturnsNotFoundError()
+    public async Task  GetCartsByProductId_NoCartsContainProduct_ReturnsCartWithProductIdNotFoundError()
     {
         // Arrange
         var productId = ProductId.Create(Guid.NewGuid()).Value;
@@ -28,7 +28,7 @@ public class GetCartsByProductIdTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartsContainProduct_ThenReturnsCarts()
+    public async Task GetCartsByProductId_CartsContainProduct_ReturnsCarts()
     {
         // Arrange
         var userId1 = UserId.From(Guid.NewGuid());

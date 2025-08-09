@@ -23,7 +23,7 @@ public class StoreProductInCartTest : IntegrationTest
         );
 
     [Fact]
-    public async Task WhenNewCart_ThenAddsItemAndReturnsSuccessfullResult()
+    public async Task StoreProductInCart_NewCart_ShouldAddItemAndReturnsSuccessfullResult()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
@@ -44,7 +44,7 @@ public class StoreProductInCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenProductIsDuplicate_ThenReturnsFailureResult()
+    public async Task StoreProductInCart_ProductIsDuplicate_ReturnsProductAlreadyInCartError()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
@@ -63,7 +63,7 @@ public class StoreProductInCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCartDoesNotExist_ThenCreatesNewAndReturnsSuccess()
+    public async Task StoreProductInCart_CartDoesNotExist_ShouldCreateNewAndReturnsSuccess()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());

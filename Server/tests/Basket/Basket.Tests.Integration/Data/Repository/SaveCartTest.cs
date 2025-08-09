@@ -12,7 +12,7 @@ public class SaveCartTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenSaveCart_ThenSavesAndReturnsCart()
+    public async Task SaveCart_SavesCart_ShouldSaveAndReturnsCart()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());

@@ -53,7 +53,7 @@ public class CheckoutBasketTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task CheckoutBasket_UserUnauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -67,7 +67,7 @@ public class CheckoutBasketTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCartNotFound_ThenReturnsNotFound()
+    public async Task CheckoutBasket_CartNotFound_ReturnsNotFound()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -87,7 +87,7 @@ public class CheckoutBasketTest : ApiTest
 
 
     [Fact]
-    public async Task WhenValidRequest_ThenReturnsOk()
+    public async Task CheckoutBasket_ValidRequest_ReturnsOk()
     {
         // Arrange
         var userId = Guid.NewGuid();

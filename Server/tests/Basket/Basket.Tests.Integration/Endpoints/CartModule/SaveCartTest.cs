@@ -49,7 +49,7 @@ public class SaveCartTest : ApiTest
     );
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task SaveCart_UserUnauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -69,7 +69,7 @@ public class SaveCartTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenSaveSucceeds_ThenReturnsOk()
+    public async Task SaveCart_SaveSucceeds_ReturnsOk()
     {
         // Arrange
         var userId = Guid.NewGuid();
