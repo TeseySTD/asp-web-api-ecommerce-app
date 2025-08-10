@@ -7,7 +7,7 @@ public class EmailVerificationTokenIdTest
 {
     
     [Fact]
-    public void WhenIdIsEmpty_ThenReturnsFailureResult()
+    public void Create_IdIsEmpty_ReturnsIdRequiredError()
     {
         // Arrange
         var id = Guid.Empty;
@@ -21,7 +21,7 @@ public class EmailVerificationTokenIdTest
     }
 
     [Fact]
-    public void WhenIdIsCorrect_ThenReturnsSuccessResult()
+    public void Create_IdIsCorrect_ReturnsSuccessResult()
     {
         // Arrange
         var id = Guid.NewGuid();

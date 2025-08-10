@@ -22,7 +22,7 @@ public class HashedPasswordTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_EmptyOrWhitespace_ReturnsFailure_HashPasswordCannnotBeEmpty(string password)
+    public void Create_EmptyOrWhitespace_ReturnsHashedPasswordEmptyError(string password)
     {
         // Act
         var createHashedPasswordResult = HashedPassword.Create(password);

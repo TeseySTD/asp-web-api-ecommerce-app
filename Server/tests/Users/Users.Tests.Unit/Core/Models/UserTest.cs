@@ -20,7 +20,7 @@ public class UserTest
     );
 
     [Fact]
-    public void VerifyEmail_WhenCalled_SetsIsEmailVerifiedAndAddsDomainEvent()
+    public void VerifyEmail_WhenCalled_SetsIsEmailVerifiedAndDispatchUserEmailVerifiedDomainEvent()
     {
         // Arrange
         var user = CreateDefaultUser();
@@ -34,7 +34,7 @@ public class UserTest
     }
 
     [Fact]
-    public void UpdateUser_WhenCalled_UpdatesPropertiesAndAddsDomainEvent()
+    public void UpdateUser_WhenCalled_UpdatesPropertiesAndDispatchUserUpdatedDomainEvent()
     {
         // Arrange
         var user = CreateDefaultUser();

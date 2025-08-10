@@ -6,7 +6,7 @@ namespace Users.Tests.Unit.Core.Models.ValueObjects;
 public class UserIdTest
 {
     [Fact]
-    public void WhenUserIdIsEmpty_ThenReturnsFailureResult()
+    public void Create_IdIsEmpty_ReturnsIdRequiredError()
     {
         // Arrange
         var userId = Guid.Empty;
@@ -20,7 +20,7 @@ public class UserIdTest
     }
 
     [Fact]
-    public void WhenIdIsCorrect_ThenReturnsSuccessResult()
+    public void Create_IdIsCorrect_ReturnsSuccessResult()
     {
         // Arrange
         var userId = Guid.NewGuid();

@@ -32,7 +32,7 @@ public class EmailTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_EmptyOrWhitespaceEmail_ReturnsFailure_EmailIsRequired(string emailString)
+    public void Create_EmptyOrWhitespaceEmail_ReturnsEmailIsRequiredError(string emailString)
     {
         // Act
         var result = Email.Create(emailString);
@@ -57,7 +57,7 @@ public class EmailTest
     [InlineData("email@.com")] // Domain starts with a dot
     [InlineData("email@-domain.com")] // Domain starts with a hyphen
     [InlineData("email@domain-.com")] // Domain ends with a hyphen
-    public void Create_InvalidEmailFormat_ReturnsFailure_EmailIsNotValid(string emailString)
+    public void Create_InvalidEmailFormat_ReturnsEmailIsNotValidError(string emailString)
     {
         // Act
         var result = Email.Create(emailString);

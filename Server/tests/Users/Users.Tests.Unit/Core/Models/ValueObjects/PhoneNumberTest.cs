@@ -30,7 +30,7 @@ public class PhoneNumberTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")] // Whitespace only
-    public void Create_EmptyOrWhitespacePhoneNumber_ReturnsFailure_PhoneNumberIsRequired(string phoneNumberString)
+    public void Create_EmptyOrWhitespacePhoneNumber_ReturnsPhoneNumberRequiredError(string phoneNumberString)
     {
         // Act
         var result = PhoneNumber.Create(phoneNumberString);
@@ -50,7 +50,7 @@ public class PhoneNumberTest
     [InlineData("+1234567890")] // Incorrect country code (not Ukrainian)
     [InlineData("099 123 456")] // Missing last two digits
     [InlineData("09912345678")] // One digit too many
-    public void Create_InvalidPhoneNumberFormat_ReturnsFailure_PhoneNumberIsIncorrect(string phoneNumberString)
+    public void Create_InvalidPhoneNumberFormat_ReturnsPhoneNumberFormatError(string phoneNumberString)
     {
         // Act
         var result = PhoneNumber.Create(phoneNumberString);
