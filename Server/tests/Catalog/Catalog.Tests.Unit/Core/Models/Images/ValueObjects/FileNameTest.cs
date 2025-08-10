@@ -9,7 +9,7 @@ public class FileNameTest
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("   ")]
-    public void WhenFileNameIsWhitespaceOrEmpty_ThenReturnsFailureResult(string filename)
+    public void Create_FileNameIsWhitespaceOrEmpty_ReturnsFileNameRequiredError(string filename)
     {
         // Act
         var result = FileName.Create(filename);
@@ -20,7 +20,7 @@ public class FileNameTest
     }
 
     [Fact]
-    public void WhenFileNameIsOutOfLength_ThenReturnsFailureResult()
+    public void Create_FileNameIsOutOfLength_ReturnsOutOfLengthError()
     {
         // Arrange
         var filename = new string('a', FileName.MaxLength + 1);
@@ -34,7 +34,7 @@ public class FileNameTest
     }
 
     [Fact]
-    public void WhenFileNameIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectFileName_ReturnsSuccessResult()
     {
         // Arrange
         var filename = "test-file-name";

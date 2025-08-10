@@ -12,7 +12,7 @@ namespace Catalog.Tests.Unit.Core.Models.Products;
 public class ProductTest
 {
     [Fact]
-    public void WhenProductCreateIsCalledWithValidData_ThenProductCreatedEventIsDispatched()
+    public void Create_ValidData_ShouldCreateProductAndDispatchProductCreatedDomainEvent()
     {
         // Act
         var product = Product.Create(
@@ -30,7 +30,7 @@ public class ProductTest
     }
 
     [Fact]
-    public void WhenUpdateIsCalledWithValidData_ThenItUpdatesAndProductUpdatedEventIsDispatched()
+    public void Update_ValidData_ShouldUpdatePropertiesAndDispatchProductUpdatedDomainEvent()
     {
         // Arrange 
         var original = Product.Create(
@@ -68,7 +68,7 @@ public class ProductTest
     }
 
     [Fact]
-    public void WhenAddImageAndImagesUnderLimit_ThenImageIsAddedAndListGrows()
+    public void AddImage_ImagesUnderLimit_ShouldAddImageToList()
     {
         // Arrange
         var product = Product.Create(
@@ -94,7 +94,7 @@ public class ProductTest
     }
 
     [Fact]
-    public void WhenRemoveImageAndImageExists_ThenImageIsRemovedAndEventEmitted()
+    public void RemoveImage_ImageExists_ShouldRemoveImageAndDispatchProductUpdatedDomainEvent()
     {
         // Arrange
         var product = Product.Create(
@@ -122,7 +122,7 @@ public class ProductTest
     }
 
     [Fact]
-    public void WhenDecreaseQuantityWithLessThanOrEqualStock_ThenReducesStockCorrectly()
+    public void DecreaseQuantity_LessThanOrEqualStock_ShouldReduceStockCorrectly()
     {
         // Arrange
         var product = Product.Create(
@@ -142,7 +142,7 @@ public class ProductTest
     }
 
     [Fact]
-    public void WhenDecreaseQuantityWithGreaterThanStock_ThenThrowsArgumentException()
+    public void DecreaseQuantity_QuantityGreaterThanStock_ShouldThrowArgumentException()
     {
         // Arrange
         var product = Product.Create(

@@ -6,7 +6,7 @@ namespace Catalog.Tests.Unit.Core.Models.Images.ValueObjects;
 public class ImageDataTest
 {
     [Fact]
-    public void WhenImageDataIsEmpty_ThenReturnsFailureResult()
+    public void Create_EmptyImageData_ReturnsImageDataRequiredError()
     {
         // Arrange
         byte[] data = [];
@@ -20,7 +20,7 @@ public class ImageDataTest
     }
 
     [Fact]
-    public void WhenImageDataIsTooBig_ThenReturnsFailureResult()
+    public void Create_ImageDataIsTooBig_ReturnsOutOfLengthError()
     {
         // Arrange
         byte[] data = Enumerable.Repeat((byte)0xff, ImageData.MaxSize + 1).ToArray();
@@ -34,7 +34,7 @@ public class ImageDataTest
     }
 
     [Fact]
-    public void WhenDataIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectData_ReturnsSuccessResult()
     {
         // Arrange
         byte[] data = [1, 2, 3];

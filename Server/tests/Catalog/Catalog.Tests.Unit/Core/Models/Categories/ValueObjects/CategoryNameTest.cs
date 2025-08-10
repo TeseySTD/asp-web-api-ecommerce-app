@@ -9,7 +9,7 @@ public class CategoryNameTest
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("   ")]
-    public void WhenNameIsEmptyOrWhiteSpace_ThenReturnsFailureResult(string categoryName)
+    public void Create_NameIsEmptyOrWhiteSpace_ReturnsNameRequiredError(string categoryName)
     {
         // Act
         var result = CategoryName.Create(categoryName);
@@ -20,7 +20,7 @@ public class CategoryNameTest
     }
 
     [Fact]
-    public void WhenNameIsOutOfLength_ThenReturnsFailureResult()
+    public void Create_NameIsOutOfLength_ReturnsNameIsOutOfLengthError()
     {
         // Arrange
         var categoryName = new string('a', CategoryName.MaxNameLength + 1);
@@ -34,7 +34,7 @@ public class CategoryNameTest
     }
 
     [Fact]
-    public void WhenNameIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectName_ReturnsSuccessResult()
     {
         // Arrange
         var categoryName = "test";

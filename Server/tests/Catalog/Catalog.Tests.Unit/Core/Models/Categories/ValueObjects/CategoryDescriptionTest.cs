@@ -10,7 +10,7 @@ public class CategoryDescriptionTest
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("   ")]
-    public void WhenDescriptionIsEmptyOrWhitespace_ThenReturnsFailureResult(string description)
+    public void Create_DescriptionIsEmptyOrWhitespace_ReturnsDescriptionRequiredError(string description)
     {
         // Act
         var result = CategoryDescription.Create(description);
@@ -23,7 +23,7 @@ public class CategoryDescriptionTest
     [Theory]
     [InlineData(CategoryDescription.MinDescriptionLength - 1)]
     [InlineData(CategoryDescription.MaxDescriptionLength + 1)]
-    public void WhenDescriptionIsOutOfLenght_ThenReturnsFailureResult(int length)
+    public void Create_DescriptionIsOutOfLenght_ReturnsOutOfLengthError(int length)
     {
         // Arrange
         var description = new string('a', length);
@@ -37,7 +37,7 @@ public class CategoryDescriptionTest
     }
 
     [Fact]
-    public void WhenDescriptionIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectDescriptiont_ReturnsSuccessResult()
     {
         // Arrange
         var description = "test description";

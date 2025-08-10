@@ -6,7 +6,7 @@ namespace Catalog.Tests.Unit.Core.Models.Products.ValueObjects;
 public class StockQuantityTest
 {
     [Fact]
-    public void WhenQuantityIsLesserThanZero_ThenReturnsFailureResult()
+    public void Create_QuantityIsLessThanZero_ReturnsQuantityLesserThanZeroError()
     {
         // Arrange
         var quantity = -1;
@@ -20,7 +20,7 @@ public class StockQuantityTest
     }
 
     [Fact]
-    public void WhenQuantityIsCorrect_ThenReturnsSuccessResult()
+    public void Create_CorrectQuantity_ReturnsSuccessResult()
     {
         // Arrange
         uint quantity = 1;

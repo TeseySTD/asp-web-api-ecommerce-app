@@ -9,7 +9,7 @@ public class ProductDescriptionTest
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("  ")]
-    public void WhenDescriptionIsNullEmptyOrWhiteSpace_ThenReturnsFailure(string description)
+    public void Create_DescriptionIsEmptyOrWhiteSpace_ReturnsDescriptionRequiredError(string description)
     {
         // Act
         var productDescription = ProductDescription.Create(description);
@@ -22,7 +22,7 @@ public class ProductDescriptionTest
     [Theory]
     [InlineData(ProductDescription.MaxDescriptionLength + 1)]
     [InlineData(ProductDescription.MinDescriptionLength - 1)]
-    public void WhenDescriptionIsOutOfLength_ThenReturnsFailure(int descriptionLength)
+    public void Create_DescriptionIsOutOfLength_ReturnsOutOfLengthError(int descriptionLength)
     {
         // Arrange
         var stringDescription = string.Concat(Enumerable.Repeat('a', descriptionLength));
@@ -36,7 +36,7 @@ public class ProductDescriptionTest
     }
 
     [Fact]
-    public void WhenStringIsCorrect_ThenReturnsSuccess()
+    public void Create_CorrectString_ReturnsSuccess()
     {
         // Arrange
         var stringDescription = "This is a test";

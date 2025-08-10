@@ -10,7 +10,7 @@ namespace Catalog.Tests.Unit.Core.Models.Categories;
 public class CategoryTest
 {
     [Fact]
-    public void WhenCreateIsCalledWithValidData_ThenCategoryCreatedAndEventIsDispatched()
+    public void Create_ValidData_ShouldCreateCategoryAndDispatchCategoryCreatedDomainEvent()
     {
         // Act
         var category = Category.Create(
@@ -24,7 +24,7 @@ public class CategoryTest
     }
 
     [Fact]
-    public void WhenUpdateIsCalledWithValidData_ThenPropertiesAreUpdatedAndCategoryUpdatedEventIsDispatched()
+    public void Update_ValidData_ShouldUpdateCategoryAndDispatchCategoryUpdatedDomainEvent()
     {
         // Arrange
         var original = Category.Create(
@@ -46,7 +46,7 @@ public class CategoryTest
     }
 
     [Fact]
-    public void WhenAddImageAndImagesUnderLimit_ThenImageIsAddedToList()
+    public void AddImage_ImagesCountUnderLimit_ShouldAddImagesToCategory()
     {
         // Arrange
         var category = Category.Create(
@@ -69,7 +69,7 @@ public class CategoryTest
     }
 
     [Fact]
-    public void WhenRemoveImageAndImageExists_Then_mageIsRemoved_And_CategoryUpdatedEventDispatched()
+    public void RemoveImage_ImageExists_ShouldRemoveImageAndDispatchCategoryUpdatedDomainEvent()
     {
         // Arrange
         var category = Category.Create(
