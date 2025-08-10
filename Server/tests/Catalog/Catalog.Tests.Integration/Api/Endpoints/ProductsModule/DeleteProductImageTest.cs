@@ -61,6 +61,7 @@ public class DeleteProductImageTest : ApiTest
         await ApplicationDbContext.SaveChangesAsync();
 
         product.AddImage(image);
+        product.ClearDomainEvents();
         await ApplicationDbContext.SaveChangesAsync();
 
         var request = GenerateRequest(productId, image.Id.Value, sellerId);

@@ -68,7 +68,7 @@ public class ProductTest
     }
 
     [Fact]
-    public void AddImage_ImagesUnderLimit_ShouldAddImageToList()
+    public void AddImage_ImagesUnderLimit_ShouldAddImageToListAndDispatchProductUpdatedDomainEvent()
     {
         // Arrange
         var product = Product.Create(
@@ -91,6 +91,45 @@ public class ProductTest
         product.Images.Should().HaveCount(1);
         product.Images[0].ProductId.Should().Be(product.Id);
         product.Images[0].Id.Should().Be(img.Id);
+
+        product.DomainEvents.Should().Contain(e => e is ProductUpdatedDomainEvent)
+            .Which.As<ProductUpdatedDomainEvent>().Product.Should().BeSameAs(product);
+    }
+
+    [Fact]
+    public void AddImages_ImagesUnderLimit_ShouldAddImagesToListAndDispatchProductUpdatedDomainEvent()
+    {
+        // Arrange
+        var product = Product.Create(
+            ProductTitle.Create("Title").Value,
+            ProductDescription.Create("Desc").Value,
+            ProductPrice.Create(50).Value,
+            SellerId.Create(Guid.NewGuid()).Value,
+            categoryId: null
+        );
+        var img1 = Image.Create(
+            fileName: FileName.Create("image1.jpg").Value,
+            data: ImageData.Create([1, 2, 3, 4]).Value,
+            contentType: ImageContentType.PNG
+        );
+        var img2 = Image.Create(
+            fileName: FileName.Create("image2.jpg").Value,
+            data: ImageData.Create([1, 2, 3, 4]).Value,
+            contentType: ImageContentType.PNG
+        );
+
+        // Act
+        product.AddImages([ img1, img2 ]);
+
+        // Assert
+        product.Images.Should().HaveCount(2);
+        product.Images[0].ProductId.Should().Be(product.Id);
+        product.Images[0].Id.Should().Be(img1.Id);
+        product.Images[1].ProductId.Should().Be(product.Id);
+        product.Images[1].Id.Should().Be(img2.Id);
+
+        product.DomainEvents.Should().Contain(e => e is ProductUpdatedDomainEvent)
+            .Which.As<ProductUpdatedDomainEvent>().Product.Should().BeSameAs(product);
     }
 
     [Fact]
@@ -111,6 +150,7 @@ public class ProductTest
             contentType: ImageContentType.PNG
         );
         product.AddImage(img);
+        product.ClearDomainEvents();
 
         // Act
         product.RemoveImage(imageId);

@@ -77,9 +77,23 @@ public class Product : AggregateRoot<ProductId>
     {
         var productImage = ProductImage.Create(image.Id, Id);
         if (Images.Count < MaxImagesCount)
+        { 
             Images.Add(productImage);
+            AddDomainEvent(new ProductUpdatedDomainEvent(this));
+        }
     }
 
+    public void AddImages(IEnumerable<Image> images)
+    {
+        var productImages = images.Select(i => ProductImage.Create(i.Id, Id));
+        var enumerable = productImages as ProductImage[] ?? productImages.ToArray();
+        if(Images.Count + enumerable.Count() <= MaxImagesCount)
+        { 
+            Images.AddRange(enumerable);
+            AddDomainEvent(new ProductUpdatedDomainEvent(this)); 
+        }
+    }
+    
     public void RemoveImage(ImageId imageId)
     {
         Images.RemoveAll(i => i.Id == imageId);

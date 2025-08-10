@@ -4,6 +4,7 @@ using Catalog.Application.Dto.Product;
 using Catalog.Core.Models.Images;
 using Catalog.Core.Models.Images.ValueObjects;
 using Catalog.Core.Models.Products;
+using Catalog.Core.Models.Products.Entities;
 using Catalog.Core.Models.Products.ValueObjects;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,7 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
             return result;
 
         var product = result.Value;
+        var productImages = new List<Image>();
 
         foreach (var imageDto in request.Images)
         {
@@ -42,8 +44,9 @@ public class AddProductImagesCommandHandler : ICommandHandler<AddProductImagesCo
 
             var image = Image.Create(fileName, data, contentType);
             await _context.Images.AddAsync(image);
-            product.AddImage(image);
+            productImages.Add(image);
         }
+        product.AddImages(productImages);
 
         await _context.SaveChangesAsync(cancellationToken);
 

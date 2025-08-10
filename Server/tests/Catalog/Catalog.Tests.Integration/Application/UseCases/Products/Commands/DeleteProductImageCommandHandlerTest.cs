@@ -150,8 +150,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
         ApplicationDbContext.Images.AddRange(image1, image2);
         await ApplicationDbContext.SaveChangesAsync(default);
 
-        product.AddImage(image1);
-        product.AddImage(image2);
+        product.AddImages([ image1, image2 ]);
         await ApplicationDbContext.SaveChangesAsync(default);
 
         ConfigureMapster();
@@ -166,7 +165,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
 
         var updatedProduct = await ApplicationDbContext.Products
             .Include(p => p.Category)
-            .ThenInclude(c => c.Images)
+                .ThenInclude(c => c.Images)
             .Include(p => p.Images)
             .FirstAsync(p => p.Id == product.Id);
 
