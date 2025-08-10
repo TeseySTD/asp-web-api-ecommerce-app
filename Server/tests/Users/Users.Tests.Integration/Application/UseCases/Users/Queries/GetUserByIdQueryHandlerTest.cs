@@ -18,7 +18,7 @@ public class GetUserByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenIdIsNotInDb_ThenReturnsFailureResult()
+    public async Task Handle_IdIsNotInDb_ReturnsNotFoundError()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -34,7 +34,7 @@ public class GetUserByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenUserIsInDb_ThenReturnsSuccessResult()
+    public async Task Handle_UserIsInDb_ReturnsSuccessResult()
     {
         // Arrange
         var userId = Guid.NewGuid();

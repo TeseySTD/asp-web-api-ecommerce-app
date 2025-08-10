@@ -28,7 +28,7 @@ public class RefreshTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenDoesNotExist_ThenReturnsBadRequest()
+    public async Task Refresh_TokenDoesNotExist_ReturnsBadRequest()
     {
         // Assert
         var refreshToken = "fake-refresh-token";
@@ -47,7 +47,7 @@ public class RefreshTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenIsExpired_ThenReturnsBadRequest()
+    public async Task Refresh_TokenIsExpired_ReturnsBadRequest()
     {
         // Arrange
         var testUser = CreateTestUser();
@@ -75,7 +75,7 @@ public class RefreshTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenIsValid_ThenReturnsOk()
+    public async Task Refresh_TokenIsValid_ReturnsOk()
     {
         // Arrange
         var testUser = CreateTestUser();

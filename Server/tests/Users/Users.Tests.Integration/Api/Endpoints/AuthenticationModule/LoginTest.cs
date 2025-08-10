@@ -31,7 +31,7 @@ public class LoginTest : ApiTest
         );
 
     [Fact]
-    public async Task WhenUserIsNotRegistered_ThenBadRequestIsReturned()
+    public async Task Login_UserIsNotRegistered_BadRequestIsReturned()
     {
         // Arrange
         var userEmail = "test@test.com";
@@ -52,7 +52,7 @@ public class LoginTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenPasswordIsNotOfUser_ThenBadRequestIsReturned()
+    public async Task Login_PasswordIsNotOfUser_BadRequestIsReturned()
     {
         // Arrange
         var userEmail = "test@test.com";
@@ -81,7 +81,7 @@ public class LoginTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCredentialsAreCorrecct_ThenOkIsReturned()
+    public async Task Login_CredentialsAreCorrecct_OkIsReturned()
     {
         // Arrange
         var userEmail = "test@test.com";

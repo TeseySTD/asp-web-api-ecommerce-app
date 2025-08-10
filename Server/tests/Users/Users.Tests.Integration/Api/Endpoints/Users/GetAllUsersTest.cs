@@ -42,7 +42,7 @@ public class GetAllUsersTest : ApiTest
     };
 
     [Fact]
-    public async Task WhenDbHasNoUsers_ThenReturnsNotFound()
+    public async Task GetAllUsers_DbHasNoUsers_ReturnsNotFound()
     {
         // Act
         var response = await HttpClient.GetAsync(RequestUrl);
@@ -52,7 +52,7 @@ public class GetAllUsersTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenQueryIsOutOfRange_ThenReturnsNotFound()
+    public async Task GetAllUsers_RequestIsOutOfRange_ReturnsNotFound()
     {
         // Arrange 
         var users = CreateTestUsersList();
@@ -67,7 +67,7 @@ public class GetAllUsersTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnsUsers()
+    public async Task GetAllUsers_DataIsCorrect_ReturnsUsers()
     {
         // Arrange
         var users = CreateTestUsersList();

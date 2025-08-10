@@ -32,7 +32,7 @@ public class LoginUserCommandHandlerTest : IntegrationTest
     );
     
     [Fact]
-    public async Task WhenUserWithEmailIsNotInDb_ThenReturnsFailureResult()
+    public async Task Handle_UserWithEmailIsNotInDb_ReturnsEmailNotFoundError()
     {
         // Arrange
         var email = "test@test.com";
@@ -48,7 +48,7 @@ public class LoginUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenPasswordIsNotOfUser_ThenReturnsFailureResult()
+    public async Task Handle_PasswordIsNotOfUser_ReturnsIncorrectPasswordError()
     {
         // Arrange
         var email = "test@test.com";
@@ -74,7 +74,7 @@ public class LoginUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnsSuccessResult()
+    public async Task Handle_DataIsCorrect_ReturnsSuccessResult()
     {
         // Arrange
         var email = "test@test.com";

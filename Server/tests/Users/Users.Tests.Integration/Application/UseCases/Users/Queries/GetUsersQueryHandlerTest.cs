@@ -42,7 +42,7 @@ public class GetUsersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDbHasNoUsers_ThenReturnsFailureResult()
+    public async Task Handle_DbHasNoUsers_ReturnsUserNotFoundError()
     {
         // Arrange
         var query = new GetUsersQuery(new PaginationRequest());
@@ -57,7 +57,7 @@ public class GetUsersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenQueryIsOutOfRange_ThenReturnsFailureResult()
+    public async Task Handle_QueryIsOutOfRange_ReturnsUserNotFoundError()
     {
         // Arrange
         var users = CreateTestUsersList();
@@ -76,7 +76,7 @@ public class GetUsersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDbHasUsers_ThenReturnsSuccessResult()
+    public async Task Handle_DbHasUsers_ReturnsSuccessResult()
     {
         // Arrange
         var users = CreateTestUsersList();
@@ -106,7 +106,7 @@ public class GetUsersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenQueryAskLimitedCount_ThenReturnsSuccessResult()
+    public async Task Handle_QueryAskLimitedCount_ReturnsSuccessResult()
     {
         // Arrange
         var users = CreateTestUsersList();

@@ -56,7 +56,7 @@ public class UpdateUserTest : ApiTest
     private StringContent GenerateRequestBody() => GenerateRequestBody(CreateTestUser(Guid.NewGuid()));
 
     [Fact]
-    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    public async Task UpdateUser_Unathorized_ReturnsUnauthorized()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -69,7 +69,7 @@ public class UpdateUserTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenIdIsNotBelongToUser_ThenReturnsForbidden()
+    public async Task UpdateUser_IdIsNotBelongToUser_ReturnsForbidden()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -86,7 +86,7 @@ public class UpdateUserTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenIdIsNotFound_ThenReturnsNotFound()
+    public async Task UpdateUser_IdIsNotInDb_ReturnsNotFound()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -107,7 +107,7 @@ public class UpdateUserTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenEmailIsAlreadySet_ThenReturnsBadRequest()
+    public async Task UpdateUser_EmailIsAlreadySet_ReturnsBadRequest()
     {
         // Arrange
         var user = CreateTestUser(Guid.NewGuid());
@@ -136,7 +136,7 @@ public class UpdateUserTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenPhoneNumberIsAlreadySet_ThenReturnsBadRequest()
+    public async Task UpdateUser_PhoneNumberIsAlreadySet_ReturnsBadRequest()
     {
         // Arrange
         var user = CreateTestUser(Guid.NewGuid());
@@ -165,7 +165,7 @@ public class UpdateUserTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUpdateDataIsCorrect_ThenReturnsOk()
+    public async Task UpdateUser_UpdateDataIsCorrect_ReturnsOk()
     {
         // Arrange
         var userToUpdate = CreateTestUser(Guid.NewGuid());

@@ -16,7 +16,7 @@ public class RegisterTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUserDataIncorrect_ThenBadRequestIsReturned()
+    public async Task Register_UserDataIncorrect_BadRequestIsReturned()
     {
         // Arrange 
         var incorrectUserName = "";
@@ -36,7 +36,7 @@ public class RegisterTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUserDataCorrect_ThenOkIsReturned()
+    public async Task Register_UserDataIsCorrect_OkIsReturned()
     {
         // Arrange 
         var userName = "test";

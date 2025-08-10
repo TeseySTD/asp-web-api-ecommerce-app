@@ -33,7 +33,7 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenEmailVerificationTokenIsNotInDb_ThenReturnsFailureResult()
+    public async Task Handle_EmailVerificationTokenIsNotInDb_ReturnsTokenNotFoundError()
     {
         // Arrange
         var tokenId = Guid.NewGuid();
@@ -49,7 +49,7 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenEmailVerificationTokenExpired_ThenReturnsFailureResult()
+    public async Task Handle_EmailVerificationTokenExpired_ReturnsTokenExpiredError()
     {
         // Arrange
         var user = CreateTestUser();
@@ -71,7 +71,7 @@ public class EmailVerificationCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataCorrect_ThenReturnsSuccessResult()
+    public async Task Handle_DataCorrect_ReturnsSuccessResult()
     {
         // Arrange
         var user = CreateTestUser();

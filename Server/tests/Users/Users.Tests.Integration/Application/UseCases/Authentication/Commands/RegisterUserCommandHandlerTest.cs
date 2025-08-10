@@ -74,7 +74,7 @@ public class RegisterUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCreateUserFails_ThenReturnsFailureResult()
+    public async Task Handle_CreateUserFails_ReturnsFailureResult()
     {
         // Arrange
         var dto = CreateUserWriteDto();
@@ -94,7 +94,7 @@ public class RegisterUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenLinkFactoryFails_ThenDoesNotSendEmailOrSaveTokensAndReturnsFailureResult()
+    public async Task Handle_LinkFactoryFails_ShouldDoesNotSendEmailOrSaveTokensAndReturnFailureResult()
     {
         // Arrange
         var dto = CreateUserWriteDto();
@@ -125,7 +125,7 @@ public class RegisterUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenAllServicesWorks_ThenSavesTokensSendsEmailAndReturnsDtoSuccessResult()
+    public async Task Handle_AllServicesWorks_SavesTokensSendsEmailAndReturnsDtoSuccessResult()
     {
         // Arrange
         var dto = CreateUserWriteDto();

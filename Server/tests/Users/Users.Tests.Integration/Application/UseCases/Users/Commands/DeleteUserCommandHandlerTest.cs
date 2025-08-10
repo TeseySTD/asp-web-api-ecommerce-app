@@ -26,7 +26,7 @@ public class DeleteUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenIdIsNotInDb_ThenReturnsFailureResult()
+    public async Task Handle_IdIsNotInDb_ReturnsUserNotFoundError()
     {
         // Arrange 
         var user = CreateTestUser(Guid.NewGuid());
@@ -48,7 +48,7 @@ public class DeleteUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenIdIsCorrect_ThenReturnsSuccessResult()
+    public async Task Handle_IdIsCorrect_ReturnsSuccessResult()
     {
         // Arrange 
         var userToDeleteId = Guid.NewGuid();

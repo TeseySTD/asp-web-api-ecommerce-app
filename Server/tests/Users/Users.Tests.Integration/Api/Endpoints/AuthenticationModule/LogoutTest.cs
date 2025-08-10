@@ -26,7 +26,7 @@ public class LogoutTest : ApiTest
     );
 
     [Fact]
-    public async Task WhenNotAuthenticated_ThenReturnsUnauthorized()
+    public async Task Logout_NotAuthenticated_ReturnsUnauthorized()
     {
         // Arrange 
         var request = new HttpRequestMessage(HttpMethod.Delete, RequestUrl);
@@ -39,7 +39,7 @@ public class LogoutTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenLogoutForNonExistingUser_ThenReturnsBadRequest()
+    public async Task Logout_NonExistingUser_ReturnsBadRequest()
     {
         // Arrange
         var user = CreateTestUser();
@@ -60,7 +60,7 @@ public class LogoutTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnsOk()
+    public async Task Logout_DataIsCorrect_ReturnsOk()
     {
         // Arrange
         var user = CreateTestUser();

@@ -17,7 +17,7 @@ public class GetUserByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUserWithIdIsNotFound_ThenReturnsNotFound()
+    public async Task GetUserById_UserWithIdIsNotInDb_ReturnsNotFound()
     {
         // Arrange 
         var userId = Guid.NewGuid();
@@ -30,7 +30,7 @@ public class GetUserByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUserWithIdIsFound_ThenReturnsUser()
+    public async Task GetUserById_UserWithIdIsInDb_ReturnsUser()
     {
         // Arrange
         var user = User.Create(

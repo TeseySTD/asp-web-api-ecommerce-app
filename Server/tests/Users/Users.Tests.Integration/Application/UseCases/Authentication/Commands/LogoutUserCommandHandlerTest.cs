@@ -17,7 +17,7 @@ public class LogoutUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenUserIsNotInDb_ThenReturnsFailureResult()
+    public async Task Handle_UserIsNotInDb_ReturnsUserNotFoundError()
     {
         // Arrange 
         var userId = Guid.NewGuid();
@@ -34,7 +34,7 @@ public class LogoutUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnsSuccessResult()
+    public async Task Handle_DataIsCorrect_ReturnsSuccessResult()
     {
         // Arrange
         var user = User.Create(

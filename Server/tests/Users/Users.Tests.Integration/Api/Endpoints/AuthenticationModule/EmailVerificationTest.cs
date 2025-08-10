@@ -27,7 +27,7 @@ public class EmailVerificationTest : ApiTest
     );
 
     [Fact]
-    public async Task WhenTokenDoesNotExist_ThenReturnsBadRequest()
+    public async Task EmailVerification_TokenDoesNotExist_ReturnsBadRequest()
     {
         // Arrange
         var tokenId = Guid.NewGuid();
@@ -44,7 +44,7 @@ public class EmailVerificationTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenTokenIsExpired_ThenReturnsBadRequest()
+    public async Task EmailVerification_TokenIsExpired_ReturnsBadRequest()
     {
         // Arrange
         var user = CreateTestUser();
@@ -67,7 +67,7 @@ public class EmailVerificationTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenTokenIsCorrect_ThenReturnsOk()
+    public async Task EmailVerification_TokenIsCorrect_ReturnsOk()
     {
         // Arrange
         var user = CreateTestUser();

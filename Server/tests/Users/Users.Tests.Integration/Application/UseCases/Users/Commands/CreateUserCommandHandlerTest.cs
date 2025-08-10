@@ -39,7 +39,7 @@ public class CreateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenEmailIsNotUnique_ThenReturnsFailureResult()
+    public async Task Handle_EmailIsNotUnique_ReturnsEmailIsTakenError()
     {
         // Arrange
         var dto = CreateTestUserWriteDto();
@@ -63,7 +63,7 @@ public class CreateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenPhoneNumberIsNotUnique_ThenReturnsFailureResult()
+    public async Task Handle_PhoneNumberIsNotUnique_ReturnsPhoneIsTakenError()
     {
         // Arrange
         var dto = CreateTestUserWriteDto();
@@ -87,7 +87,7 @@ public class CreateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnSuccessResult()
+    public async Task Handle_DataIsCorrect_ReturnSuccessResult()
     {
         // Arrange
         var dto = CreateTestUserWriteDto();

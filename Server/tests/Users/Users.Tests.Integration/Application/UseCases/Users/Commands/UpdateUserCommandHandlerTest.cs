@@ -42,7 +42,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenIdIsNotInDb_ThenReturnsFailureResult()
+    public async Task Handle_IdIsNotInDb_ReturnsUserNotFoundError()
     {
         // Arrange
         var user = CreateTestUser(Guid.NewGuid());
@@ -64,7 +64,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenEmailIsInDb_ThenReturnsFailureResult()
+    public async Task Handle_EmailIsInDb_ReturnsIncorrectEmailError()
     {
         // Arrange
         var userToUpdateId = Guid.NewGuid();
@@ -88,7 +88,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     }
     
     [Fact]
-    public async Task WhenPhoneNumberIsInDb_ThenReturnsFailureResult()
+    public async Task Handle_PhoneNumberIsInDb_ReturnsIncorrectPhoneNumberError()
     {
         // Arrange
         var userToUpdateId = Guid.NewGuid();
@@ -112,7 +112,7 @@ public class UpdateUserCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnSuccessResult()
+    public async Task Handle_DataIsCorrect_ReturnSuccessResult()
     {
         // Arrange
         var userToUpdateId = Guid.NewGuid();

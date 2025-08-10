@@ -31,7 +31,7 @@ public class RefreshTokenCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenIsNotInDb_ThenReturnsFailureResult()
+    public async Task Handle_RefreshTokenIsNotInDb_ReturnsTokenNotFoundError()
     {
         // Arrange
         var refreshTokenString = "refreshToken";
@@ -47,7 +47,7 @@ public class RefreshTokenCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenIsExpired_ThenReturnsFailureResult()
+    public async Task Handle_RefreshTokenIsExpired_ReturnsTokenExpiredError()
     {
         // Arrange
         var userId = UserId.Create(Guid.NewGuid()).Value;
@@ -73,7 +73,7 @@ public class RefreshTokenCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRefreshTokenIsValid_ThenReturnsSuccessResult()
+    public async Task Handle_RefreshTokenIsValid_ReturnsSuccessResult()
     {
         // Arrange
         var userId = UserId.Create(Guid.NewGuid()).Value;

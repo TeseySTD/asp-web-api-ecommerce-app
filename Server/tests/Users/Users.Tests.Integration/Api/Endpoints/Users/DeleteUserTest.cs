@@ -28,7 +28,7 @@ public class DeleteUserTest : ApiTest
         );
 
     [Fact]
-    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    public async Task DeleteUser_Unathorized_ReturnsUnauthorized()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -41,7 +41,7 @@ public class DeleteUserTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenIdIsNotBelongToUser_ThenReturnsForbidden()
+    public async Task DeleteUser_IdIsNotBelongToUser_ReturnsForbidden()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -58,7 +58,7 @@ public class DeleteUserTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUserIsNotInDb_ThenReturnsNotFound()
+    public async Task DeleteUser_UserIsNotInDb_ReturnsNotFound()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -79,7 +79,7 @@ public class DeleteUserTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUserIsInDb_ThenReturnsOk()
+    public async Task DeleteUser_UserIsInDb_ReturnsOk()
     {
         // Arrange 
         var userToDelete = CreateTestUser(Guid.NewGuid());
