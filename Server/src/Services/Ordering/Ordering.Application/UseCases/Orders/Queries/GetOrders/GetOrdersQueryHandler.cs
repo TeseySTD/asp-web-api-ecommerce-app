@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
 using Ordering.Application.Dto.Order;
-using Ordering.Core.Models.Orders.ValueObjects;
+using Shared.Core.API;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Ordering.Application.UseCases.Orders.Queries.GetOrders;
 
-public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, IEnumerable<OrderReadDto>>
+public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PaginatedResult<OrderReadDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -17,17 +17,28 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, IEnumerable<O
         _context = context;
     }
 
-    public async Task<Result<IEnumerable<OrderReadDto>>> Handle(GetOrdersQuery request,
+    public async Task<Result<PaginatedResult<OrderReadDto>>> Handle(GetOrdersQuery request,
         CancellationToken cancellationToken)
     {
-        if (!await _context.Orders.AnyAsync())
-            return new Error("No orders found", "There are no orders in the database.");
+        var pageIndex = request.PaginationRequest.PageIndex;
+        var pageSize = request.PaginationRequest.PageSize;
 
-        var orders = await _context.Orders
-            .AsNoTracking()
+        var query = _context.Orders
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
+            .Where(o => o.CustomerId == request.CustomerId)
+            .AsNoTracking();
+        
+        if(request.OrderStatus != null)
+            query = query.Where(o => o.Status == request.OrderStatus);
+
+        var orders = await query
+            .Skip(pageSize * pageIndex)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
+
+        if (!orders.Any())
+            return new OrdersNotFoundError();
 
         var orderDtos = orders.Select(o =>
         {
@@ -42,16 +53,18 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, IEnumerable<O
             return new OrderReadDto(
                 OrderId: o.Id.Value,
                 CustomerId: o.CustomerId.Value,
-                OrderDate: o.OrderDate.ToString(),
+                OrderDate: o.OrderDate.ToString(CultureInfo.InvariantCulture),
                 Status: o.Status.ToString(),
                 CardName: o.Payment.CardName,
-                ShortCardNumber: o.Payment.CardNumber,
+                ShortCardNumber: o.Payment.CardNumber.Substring(0, 3),
                 Address: o.DestinationAddress.AddressLine,
                 Products: products,
                 TotalPrice: o.TotalPrice
             );
         }).ToList();
 
-        return orderDtos;
+        return new PaginatedResult<OrderReadDto>(pageIndex, pageSize, orderDtos);
     }
+
+    public sealed record OrdersNotFoundError() : Error("No orders found", "There are no orders in the database.");
 }

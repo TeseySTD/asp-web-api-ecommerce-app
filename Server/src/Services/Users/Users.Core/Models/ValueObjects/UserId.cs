@@ -12,11 +12,12 @@ public record UserId
 
     public Guid Value { get; set; }
 
-    public static Result<UserId> Create(Guid value)
+    public static Result<UserId> Create(Guid productId)
     {
-        if(value == Guid.Empty)
-            return new Error("User id cannot be empty", nameof(value));
-        
-        return new UserId(value);
+        return Result<UserId>.Try(new UserId(productId))
+            .Check(productId == Guid.Empty, new IdRequiredError())
+            .Build();
     }
+
+    public sealed record IdRequiredError() : Error("User Id cannot be empty", "UserId value object failure");
 }

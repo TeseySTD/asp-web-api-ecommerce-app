@@ -1,4 +1,3 @@
-using Ordering.Core.Models.Orders.ValueObjects;
 using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.Domain.Classes;
 
@@ -26,8 +25,7 @@ public class Product : AggregateRoot<ProductId>
         return product;
     }
 
-    public void Update(ProductTitle title, ProductDescription description,
-        OrderItemPrice price)
+    public void Update(ProductTitle title, ProductDescription description)
     {
         Title = title;
         Description = description;

@@ -7,4 +7,5 @@ public interface ITokenProvider
 {
     public string GenerateJwtToken(User user);
     public RefreshToken GenerateRefreshToken(User user);
+    public EmailVerificationToken GenerateEmailVerificationToken(User user);
 }

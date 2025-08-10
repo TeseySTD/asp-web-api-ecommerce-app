@@ -1,16 +1,15 @@
 ﻿using Catalog.Application.Common.Interfaces;
-using Catalog.Application.Dto.Category;
 using Catalog.Application.Dto.Product;
-using Catalog.Core.Models.Categories;
+using Catalog.Core.Models.Categories.ValueObjects;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Shared.Core.API;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Products.Queries.GetProducts;
 
-public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, IReadOnlyList<ProductReadDto>>
+public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, PaginatedResult<ProductReadDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -19,18 +18,53 @@ public sealed class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, IR
         _context = context;
     }
 
-    public async Task<Result<IReadOnlyList<ProductReadDto>>> Handle(GetProductsQuery request,
+    public async Task<Result<PaginatedResult<ProductReadDto>>> Handle(GetProductsQuery request,
         CancellationToken cancellationToken)
     {
-        if (!_context.Products.Any())
-            return Result<IReadOnlyList<ProductReadDto>>.Failure(Error.NotFound);
+        var pageIndex = request.PaginationRequest.PageIndex;
+        var pageSize = request.PaginationRequest.PageSize;
+        var filter = request.FilterRequest;
 
-        var productDtos = await _context.Products
+        var query = _context.Products
             .Include(p => p.Category)
-            .AsNoTracking()
+                .ThenInclude(c => c.Images)
+            .AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(filter.Title))
+        {
+            var term = filter.Title!.ToLower();
+            query = query.Where(p =>
+                ((string) p.Title).ToLower().Contains(term));
+        }
+        if (filter.CategoryId.HasValue)
+        {
+            var categoryId = CategoryId.Create( filter.CategoryId.Value ).Value;
+            query = query.Where(p => p.CategoryId != null && p.CategoryId == categoryId);
+        }
+        if (filter.MinPrice.HasValue)
+        {
+            var min = filter.MinPrice.Value;
+            query = query.Where(p => ((decimal) p.Price) >= min);
+        }
+        if (filter.MaxPrice.HasValue)
+        {
+            var max = filter.MaxPrice.Value;
+            query = query.Where(p => ((decimal) p.Price) <= max);
+        }
+
+        var productDtos = await query 
+            .Skip(pageSize * pageIndex)
+            .Take(pageSize)
             .ProjectToType<ProductReadDto>()
             .ToListAsync(cancellationToken);
 
-        return productDtos.ToList().AsReadOnly();
+        if (!productDtos.Any())
+            return Error.NotFound;
+
+        return new PaginatedResult<ProductReadDto>(
+            pageIndex,
+            pageSize,
+            productDtos.ToList().AsReadOnly()
+        );
     }
 }

@@ -5,5 +5,6 @@ public record UpdateProductRequest(
     string Description,
     decimal Price,
     uint Quantity,
+    Guid SellerId,
     Guid? CategoryId
 );

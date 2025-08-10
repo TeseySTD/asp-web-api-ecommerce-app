@@ -31,5 +31,10 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
                 c => c.Value,
                 value => CategoryDescription.Create(value).Value)
             .HasMaxLength(CategoryDescription.MaxDescriptionLength);
+        
+        builder.HasMany(x => x.Images)
+            .WithOne()
+            .HasForeignKey(x => x.CategoryId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

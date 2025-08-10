@@ -6,7 +6,6 @@ using Catalog.Core.Models.Categories.ValueObjects;
 using Mapster;
 using Microsoft.Extensions.Caching.Distributed;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Categories.Commands.CreateCategory;
@@ -28,7 +27,11 @@ public class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryComman
 
         if (result.IsSuccess)
             await _cache.SetStringAsync($"category-{result.Value.Id.Value}",
-                JsonSerializer.Serialize(result.Value.Adapt<CategoryDto>()));
+                JsonSerializer.Serialize(result.Value.Adapt<CategoryReadDto>()),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
 
         return result.Map(
             onSuccess: value => value.Id,

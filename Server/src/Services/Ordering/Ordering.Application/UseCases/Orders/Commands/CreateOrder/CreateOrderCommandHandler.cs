@@ -1,28 +1,56 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Common.Interfaces;
 using Ordering.Core.Models.Orders;
-using Ordering.Core.Models.Orders.Entities;
 using Ordering.Core.Models.Orders.ValueObjects;
-using Ordering.Core.Models.Products;
 using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
+using Shared.Messaging.Events.Order;
 
 namespace Ordering.Application.UseCases.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Guid>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public CreateOrderCommandHandler(IApplicationDbContext context)
+    public CreateOrderCommandHandler(IApplicationDbContext context,
+        IPublishEndpoint publishEndpoint)
     {
         _context = context;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<Result<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         var orderId = OrderId.Create(Guid.NewGuid()).Value;
+
+        var result = await Result<Guid>.Try()
+            .Check(() => request.Value.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
+                new OrderItemIsNotUniqueError())
+            .DropIfFail()
+            .CheckAsync(async () =>
+            {
+                var productIds = request.Value.OrderItems
+                    .Select(o => ProductId.Create(o.ProductId).Value)
+                    .ToList();
+                
+                var existingProductIds = await _context.Products
+                    .AsNoTracking()
+                    .Where(p => productIds.Contains(p.Id))
+                    .Select(p => p.Id)
+                    .ToListAsync();
+                
+                var missingProductsIds = productIds.Except(existingProductIds).Select(id => id.Value).ToList();
+                
+                if(missingProductsIds.Any())
+                    return new ProductsNotFound(missingProductsIds);
+                return Result<Guid>.Success(default);
+            })
+            .BuildAsync();
+        if (result.IsFailure)
+            return result;
 
         var payment = Payment.Create(
             cvv: request.Value.Payment.cvv,
@@ -39,67 +67,40 @@ public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, Gui
             zipCode: request.Value.DestinationAddress.zipCode
         ).Value;
 
-        var orderItems = new List<OrderItem>();
-        foreach (var item in request.Value.OrderItems)
-        {
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.Id == ProductId.Create(item.ProductId).Value, 
-                    cancellationToken);
-
-            if (product == null)
-            {
-                product = Product.Create(
-                    id: ProductId.Create(item.ProductId).Value,
-                    title: ProductTitle.Create(item.ProductName).Value,
-                    description: ProductDescription.Create(item.ProductDescription).Value
-                );
-            
-                await _context.Products.AddAsync(product, cancellationToken);
-            }
-
-            var orderItem = OrderItem.Create(
-                orderId: orderId,
-                product: product,
-                quantity: OrderItemQuantity.Create(item.Quantity).Value,
-                price: OrderItemPrice.Create(item.Price).Value
-            );
-
-            orderItems.Add(orderItem);
-        }
         var order = Order.Create(
             id: orderId,
             payment: payment,
             destinationAddress: destinationAddress,
-            orderItems: orderItems,
             customerId: CustomerId.Create(request.Value.UserId).Value
         );
 
-        return (await Add(order, cancellationToken))
-            .Map
-            (
-                onSuccess: () => Result<Guid>.Success(order.Id.Value),
-                onFailure: errors => Result<Guid>.Failure(errors)
-            );
+        await AddOrder(order, request.Value.OrderItems, cancellationToken);
+        return order.Id.Value;
     }
 
-    public async Task<Result> Add(Order order, CancellationToken cancellationToken)
+    public async Task AddOrder(Order order, IEnumerable<(Guid ProductId, uint Quantity)> orderItems,
+        CancellationToken cancellationToken)
     {
-        var resultBuilder = Result.Try()
-            .Check(await _context.Orders.AnyAsync(o => o.Id == order.Id, cancellationToken),
-                new Error(nameof(Order), $"Order with id: {order.Id} already exists"))
-            .Check(order.OrderItems.Any(o => o.Product == null),
-                new Error("Order items error", "Product in order item cannot be null."))
-            .DropIfFailed()
-            .Check(() => order.OrderItems.GroupBy(o => o.ProductId).Any(g => g.Count() > 1),
-                new Error("Order items error", "Each order item must be unique."));
-
-        var result = resultBuilder.Build();
-        if (result.IsFailure)
-            return result;
-
         await _context.Orders.AddAsync(order, cancellationToken);
+        var makeOrderEvent = new OrderMadeEvent(
+            OrderId: order.Id.Value,
+            CustomerId: order.CustomerId.Value,
+            Products: orderItems.Select(oi =>
+                new ProductWithQuantityDto(
+                    oi.ProductId,
+                    oi.Quantity
+                )
+            ).ToList()
+        );
+        await _publishEndpoint.Publish(makeOrderEvent);
         await _context.SaveChangesAsync(cancellationToken);
-
-        return Result.Success();
     }
+    
+    public sealed record OrderItemIsNotUniqueError() : Error("Order item is not unique.", $"Each order item must be unique.");
+
+    public sealed record ProductsNotFound : Error
+    {
+        public ProductsNotFound(IEnumerable<Guid> productIds) : base("Products not found!", $"Products in order not found: {string.Join(", ", productIds)}")
+        {}
+    } 
 }

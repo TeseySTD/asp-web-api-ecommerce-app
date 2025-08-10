@@ -8,24 +8,26 @@ public record ProductDescription
     public const int MaxDescriptionLength = 500;
     public const int MinDescriptionLength = 10;
     public string Value { get; private set; }
-    
+
     private ProductDescription(string description)
-    {   
+    {
         Value = description;
     }
-    
-    public static Result<ProductDescription> Create(string description){
-        var result = Result<ProductDescription>.Try()
-            .Check(string.IsNullOrEmpty(description),
-                new Error("Description is required", nameof(description)))
+
+    public static Result<ProductDescription> Create(string description)
+    {
+        return Result<ProductDescription>.Try(new ProductDescription(description))
+            .Check(string.IsNullOrWhiteSpace(description), 
+                new DescriptionRequiredError())
+            .DropIfFail()
             .Check(description.Length < MinDescriptionLength || description.Length > MaxDescriptionLength,
-                new Error("Product description is out of length",
-                    $"Product description must be between {MinDescriptionLength} and {MaxDescriptionLength} characters."))
+                new OutOfLengthError())
             .Build();
-            
-        if(result.IsFailure)
-            return result;
-        return new ProductDescription(description);
     }
 
+    public sealed record DescriptionRequiredError()
+        : Error($"Product description is required", "Product description cannot be empty");
+
+    public sealed record OutOfLengthError() : Error($"Product description is out of length",
+        $"Product description must be between {MinDescriptionLength} and {MaxDescriptionLength} characters.");
 }

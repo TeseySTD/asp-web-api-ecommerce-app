@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Users.Application.Common.Interfaces;
 
 namespace Users.Persistence.Extensions;
 

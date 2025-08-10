@@ -20,7 +20,7 @@ public class CanceledOrderEventHandler : IntegrationEventHandler<CanceledOrderEv
     public override async Task Handle(ConsumeContext<CanceledOrderEvent> context)
     {
         Logger.Log(LogLevel.Warning, "Order with id {Id} cancelled by reason {Reason}"
-            , context.Message.Id, context.Message.Reason);
+            , context.Message.OrderId, context.Message.Reason);
 
         var orderId = OrderId.Create(context.Message.OrderId).Value;
         var order = await _dbContext.Orders.FindAsync(orderId);

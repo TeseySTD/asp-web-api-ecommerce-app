@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shared.Core.Domain.Classes;
 using Users.Application.Common.Interfaces;
+using Users.Application.UseCases.Authentication.Commands.EmailVerification;
 using Users.Core.Models;
 using Users.Core.Models.Entities;
 
@@ -11,6 +12,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
 
     public ApplicationDbContext(DbContextOptions options) : base(options)
     {

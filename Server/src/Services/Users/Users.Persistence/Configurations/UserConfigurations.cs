@@ -50,5 +50,7 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
             .HasConversion(
                 r => r.ToString(),
                 value => Enum.Parse<UserRole>(value));
+        
+        builder.Property(u => u.IsEmailVerified);
     }
 }

@@ -1,6 +1,8 @@
 using Carter;
 using Shared.Core.Auth;
 using Shared.Core.Extensions;
+using Users.API;
+using Users.API.Extensions;
 using Users.Application;
 using Users.Infrastructure.Extensions;
 using Users.Persistence;
@@ -15,7 +17,8 @@ services.AddSwaggerGenWithAuthScheme();
 services
     .AddApplicationLayerServices(builder.Configuration)
     .AddPersistenceLayerServices(builder.Configuration)
-    .AddInfrastructureLayerServices();
+    .AddInfrastructureLayerServices(builder.Configuration)
+    .AddApiLayerServices(builder.Configuration);
 
 services.AddCarter();
 
@@ -29,7 +32,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerDarkThemeUI();
-    app.ApplyMigrations();
+    if (app.Environment.EnvironmentName != "Testing")
+        app.ApplyMigrations();
 }
 app.UseHttpsRedirection();
 
@@ -39,3 +43,5 @@ app.UseAuthorization();
 app.MapCarter();
 
 app.Run();
+
+public partial class Program { }

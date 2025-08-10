@@ -21,23 +21,28 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, T
     public async Task<Result<TokensDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         if (!await _context.RefreshTokens.AnyAsync(r => r.Token == request.Token))
-            return new Error("Refresh token not found", $"Refresh token {request.Token} not found");
+            return new TokenNotFoundError(request.Token);
 
         var refreshToken = await _context.RefreshTokens
             .Include(r => r.User)
             .FirstOrDefaultAsync(r => r.Token == request.Token);
         if (refreshToken!.ExpiresOnUtc < DateTime.UtcNow)
-            return new Error("Refresh token has expired",
-                $"Refresh token expiration was in {refreshToken.ExpiresOnUtc}");
+            return new TokenExpiredError(refreshToken.ExpiresOnUtc);
 
         _context.RefreshTokens.Remove(refreshToken);
 
-        var newRefreshToken = _tokenProvider.GenerateRefreshToken(refreshToken!.User);
-        var newAccessToken = _tokenProvider.GenerateJwtToken(refreshToken!.User);
-        
+        var newRefreshToken = _tokenProvider.GenerateRefreshToken(refreshToken.User);
+        var newAccessToken = _tokenProvider.GenerateJwtToken(refreshToken.User);
+
         await _context.RefreshTokens.AddAsync(newRefreshToken, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         return new TokensDto(newAccessToken, newRefreshToken.Token);
     }
+
+    public sealed record TokenNotFoundError(string Token) : Error("Refresh token not found", $"Refresh token {Token} not found");
+
+    public sealed record TokenExpiredError(DateTime Expires) : Error("Refresh token has expired",
+            $"Refresh token expiration was in {Expires}");
+
 }

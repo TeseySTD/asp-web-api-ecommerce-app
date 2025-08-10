@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
 using Ordering.API.Http.Order.Requests;
 using Ordering.Application.Dto.Order;
 using Ordering.Application.UseCases.Orders.Commands.CreateOrder;
@@ -10,8 +11,12 @@ public class MakeOrderEndpoint : OrdersEndpoint
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("/", async (ISender sender, MakeOrderRequest request) =>
+        app.MapPost("/", async (ISender sender, MakeOrderRequest request, ClaimsPrincipal userClaims) =>
         {
+            if(ExtractUserDataFromClaims(userClaims).IsFailure)
+                return Results.Unauthorized();
+            var customerId = ExtractUserDataFromClaims(userClaims).Value.customerId;
+            
             var payment = (
                 request.CardName,
                 request.CardNumber,
@@ -28,11 +33,11 @@ public class MakeOrderEndpoint : OrdersEndpoint
             );
 
             var orderItems = request.OrderItems.Select(i =>
-                (i.ProductId, i.ProductName, i.ProductDescription, i.Quantity, i.Price)
+                (i.ProductId, i.Quantity)
             );
 
             var dto = new OrderWriteDto(
-                UserId: request.UserId,
+                UserId: customerId,
                 OrderItems: orderItems,
                 Payment: payment,
                 DestinationAddress: address
@@ -45,6 +50,6 @@ public class MakeOrderEndpoint : OrdersEndpoint
                 onSuccess: value => Results.Ok(value),
                 onFailure: errors => Results.BadRequest(Envelope.Of(errors))
             );
-        }).RequireAuthorization();
+        });
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace Catalog.Core.Models.Products.ValueObjects;
+﻿using Microsoft.IdentityModel.Tokens;
+using Shared.Core.Validation.Result;
+
+namespace Catalog.Core.Models.Products.ValueObjects;
 
 public record StockQuantity
 {
@@ -9,8 +12,14 @@ public record StockQuantity
         Value = stockQuantity;
     }
 
-    public static StockQuantity Create(uint stockQuantity)
+    public static Result<StockQuantity> Create(uint stockQuantity) => new StockQuantity(stockQuantity);
+    
+    public static Result<StockQuantity> Create(int stockQuantity)
     {
-        return new StockQuantity(stockQuantity);
+         return Result<StockQuantity>.Try(new StockQuantity((uint) stockQuantity))
+             .Check(stockQuantity < 0, new QuantityLesserThanZeroError())
+             .Build(); 
     }
+    
+    public sealed record QuantityLesserThanZeroError() : Error("Quantity must be greater.", "Quantity must be greater than -1.");
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shared.Core.API;
 using Shared.Core.CQRS;
 using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
@@ -7,7 +8,7 @@ using Users.Application.Dto.User;
 
 namespace Users.Application.UseCases.Users.Queries.GetUsers;
 
-public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, IReadOnlyCollection<UserReadDto>>
+public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PaginatedResult<UserReadDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -16,23 +17,34 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, IReadOnlyCollec
         _context = context;
     }
 
-    public async Task<Result<IReadOnlyCollection<UserReadDto>>> Handle(GetUsersQuery request,
+    public async Task<Result<PaginatedResult<UserReadDto>>> Handle(GetUsersQuery request,
         CancellationToken cancellationToken)
     {
-        if (!_context.Users.Any())
-            return new Error("Users not found", "There is no users in the database.");
-
-        var userDtos = await _context.Users.AsNoTracking().Select(u =>
-            new UserReadDto(
-                u.Id.Value,
-                u.Name.Value,
-                u.Email.Value,
-                u.HashedPassword.Value,
-                u.PhoneNumber.Value,
-                u.Role.ToString()
+        var pageIndex = request.PaginationRequest.PageIndex;
+        var pageSize = request.PaginationRequest.PageSize;
+        
+        var userDtos = await _context.Users
+            .AsNoTracking()
+            .Skip(pageSize * pageIndex)
+            .Take(pageSize)
+            .Select(u =>
+                new UserReadDto(
+                    u.Id.Value,
+                    u.Name.Value,
+                    u.Email.Value,
+                    u.HashedPassword.Value,
+                    u.PhoneNumber.Value,
+                    u.Role.ToString()
+                )
             )
-        ).ToListAsync();
+            .ToListAsync();
 
-        return userDtos.ToList().AsReadOnly();
+        if (!userDtos.Any())
+            return new UserNotFoundError();
+        
+        return new PaginatedResult<UserReadDto>(pageIndex, pageSize, userDtos);
     }
+
+    public sealed record UserNotFoundError() : Error("Users not found", "There is no users in the database.");
+
 }

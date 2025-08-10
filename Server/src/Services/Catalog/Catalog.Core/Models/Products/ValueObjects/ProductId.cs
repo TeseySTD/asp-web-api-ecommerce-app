@@ -13,14 +13,11 @@ public record ProductId
     }
     public static Result<ProductId> Create(Guid productId)
     {
-        var result = Result<ProductId>.Try()
-                .Check(productId == Guid.Empty,
-                    new Error("Product Id cannot be empty", "ProductId value object failure"))
-                .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new ProductId(productId);
+        return Result<ProductId>.Try(new ProductId(productId))
+            .Check(productId == Guid.Empty, new IdRequiredError())
+            .Build();
     }
+
+    public sealed record IdRequiredError() : Error("Product Id cannot be empty", "ProductId value object failure");
 }
 

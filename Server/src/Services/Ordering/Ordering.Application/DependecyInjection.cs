@@ -3,7 +3,6 @@ using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Behaviours;
-using Shared.Messaging.Broker;
 
 namespace Ordering.Application;
 
@@ -19,8 +18,6 @@ public static class DependecyInjection
         });
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-        
-        services.AddMessageBroker(configuration, Assembly.GetExecutingAssembly());
         return services;
     }
     

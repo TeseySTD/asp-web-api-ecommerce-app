@@ -14,8 +14,10 @@ public record HashedPassword
 
     public static Result<HashedPassword> Create(string hashedValue)
     {
-        if (string.IsNullOrEmpty(hashedValue))
-            return new Error(nameof(hashedValue), "Hashed password cannot be empty" );
+        if (string.IsNullOrEmpty(hashedValue) || string.IsNullOrWhiteSpace(hashedValue))
+            return new HashedPasswordEmptyError(); 
         return new HashedPassword(hashedValue);
     }
+    
+    public sealed record HashedPasswordEmptyError() : Error(nameof(HashedPassword), "Hashed password cannot be empty");
 }

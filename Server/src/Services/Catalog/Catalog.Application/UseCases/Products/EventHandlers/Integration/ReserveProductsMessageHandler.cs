@@ -2,8 +2,8 @@
 using Catalog.Core.Models.Products.ValueObjects;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Shared.Messaging.Events;
 using Shared.Messaging.Events.Order;
 using Shared.Messaging.Messages;
 using Shared.Messaging.Messages.Order;
@@ -13,13 +13,17 @@ namespace Catalog.Application.UseCases.Products.EventHandlers.Integration;
 public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<ReserveProductsMessage>
 {
     private readonly IApplicationDbContext _dbContext;
+    private readonly IDistributedCache _cache;
     private readonly IPublishEndpoint _publishEndpoint;
 
     public ReserveProductsMessageHandler(ILogger<IntegrationMessageHandler<ReserveProductsMessage>> logger,
-        IApplicationDbContext dbContext, IPublishEndpoint publishEndpoint) : base(logger)
+        IApplicationDbContext dbContext,
+        IPublishEndpoint publishEndpoint,
+        IDistributedCache cache) : base(logger)
     {
         _dbContext = dbContext;
         _publishEndpoint = publishEndpoint;
+        _cache = cache;
     }
 
     public override async Task Handle(ConsumeContext<ReserveProductsMessage> context)
@@ -28,7 +32,32 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
         {
             await UpdateProductQuantities(context);
 
-            await _publishEndpoint.Publish(new ReservedProductsEvent(context.Message.OrderId));
+            var orderItems = context.Message.Products;
+            var orderItemsIds = orderItems.Select(o => ProductId.Create(o.ProductId).Value);
+
+            var products = await _dbContext.Products
+                .AsNoTracking()
+                .Where(p => orderItemsIds.Contains(p.Id))
+                .Select(p => new
+                    { p.Id, Title = p.Title.Value, Description = p.Description.Value, Price = p.Price.Value })
+                .ToListAsync();
+
+            var orderItemsDtos = products.Select(p =>
+            {
+                var quantity = orderItems.First(o => o.ProductId == p.Id.Value).ProductQuantity;
+                return new OrderItemApprovedDto(
+                    Id: p.Id.Value,
+                    ProductTitle: p.Title,
+                    ProductDescription: p.Description,
+                    Quantity: quantity,
+                    UnitPrice: p.Price
+                );
+            }).ToList();
+
+            await _publishEndpoint.Publish(new ReservedProductsEvent(
+                context.Message.OrderId,
+                orderItemsDtos
+            ));
         }
     }
 
@@ -41,7 +70,7 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
         var products = await _dbContext.Products
             .AsNoTracking()
             .Where(p => productIds.Contains(p.Id))
-            .Select(p => new { p.Id, p.StockQuantity.Value })
+            .Select(p => new { p.Id, Quantity = p.StockQuantity.Value })
             .ToListAsync();
 
         var existingProductIds = products.Select(p => p.Id).ToList();
@@ -49,8 +78,7 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
 
         if (missingProducts.Any())
         {
-            var missingProductsMessage =
-                $"Missing products with IDs: {string.Join(", ", missingProducts.Select(id => id.Value))}";
+            var missingProductsMessage = GenerateMissingProductMessage(missingProducts.Select(p => p.Value));
             await PublishFailedReservation(context.Message.OrderId, missingProductsMessage);
             Logger.LogWarning(missingProductsMessage);
             return false;
@@ -61,9 +89,9 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
             var productId = ProductId.Create(orderProduct.ProductId).Value;
             var product = products.FirstOrDefault(p => p.Id == productId);
 
-            if (product == null || product.Value < orderProduct.ProductQuantity)
+            if (product!.Quantity < orderProduct.ProductQuantity)
             {
-                var insufficientQuantityMessage = $"Insufficient quantity for product {productId.Value}";
+                var insufficientQuantityMessage = GenerateIssuficientQuantityMessage(productId.Value);
                 await PublishFailedReservation(context.Message.OrderId, insufficientQuantityMessage);
                 Logger.LogWarning(insufficientQuantityMessage);
                 return false;
@@ -82,7 +110,10 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product != null)
+            {
                 product.DecreaseQuantity(orderProduct.ProductQuantity);
+                await _cache.RemoveAsync($"product-{product.Id.Value}");
+            }
         }
 
         await _dbContext.SaveChangesAsync(default);
@@ -94,4 +125,9 @@ public sealed class ReserveProductsMessageHandler : IntegrationMessageHandler<Re
             OrderId: orderId,
             Reason: reason));
     }
+
+    public static string GenerateMissingProductMessage(IEnumerable<Guid> missingProductIds) =>
+        $"Missing products with IDs: {string.Join(", ", missingProductIds)}";
+    public static string GenerateIssuficientQuantityMessage(Guid productId) =>
+        $"Insufficient quantity for product {productId}";
 }

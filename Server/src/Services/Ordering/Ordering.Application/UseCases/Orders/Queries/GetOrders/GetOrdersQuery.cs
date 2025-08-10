@@ -1,6 +1,9 @@
 ﻿using Ordering.Application.Dto.Order;
+using Ordering.Core.Models.Orders;
+using Ordering.Core.Models.Orders.ValueObjects;
+using Shared.Core.API;
 using Shared.Core.CQRS;
 
 namespace Ordering.Application.UseCases.Orders.Queries.GetOrders;
 
-public record GetOrdersQuery() : IQuery<IEnumerable<OrderReadDto>>;
+public record GetOrdersQuery(PaginationRequest PaginationRequest, CustomerId CustomerId, OrderStatus? OrderStatus) : IQuery<PaginatedResult<OrderReadDto>>;

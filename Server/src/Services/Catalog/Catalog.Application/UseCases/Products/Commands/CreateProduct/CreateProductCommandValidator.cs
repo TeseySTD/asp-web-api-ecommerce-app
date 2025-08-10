@@ -22,8 +22,8 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
             .MustBeCreatedWith(ProductPrice.Create);
 
         RuleFor(x => x.Value.Quantity)
-            .GreaterThan((uint)0)
-            .WithMessage("Quantity is required and must be greater than 0.");
+            .NotNull()
+            .MustBeCreatedWith(StockQuantity.Create);
         
         RuleFor(x => x.Value.CategoryId)
             .MustBeCreatedWith(CategoryId.Create);

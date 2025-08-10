@@ -3,4 +3,4 @@ using Shared.Core.CQRS;
 
 namespace Catalog.Application.UseCases.Products.Commands.UpdateProduct;
 
-public record UpdateProductCommand(ProductUpdateDto Value) : ICommand;
+public record UpdateProductCommand(Guid CurrentSellerId, ProductUpdateDto Value) : ICommand;

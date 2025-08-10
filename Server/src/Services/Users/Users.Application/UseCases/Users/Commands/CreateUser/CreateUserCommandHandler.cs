@@ -23,16 +23,15 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, User>
 
     public async Task<Result<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        var email = Email.Create(request.Value.Email).Value;
+        var number = PhoneNumber.Create(request.Value.PhoneNumber).Value;
         var result = await Result<User>.Try()
+            .Check(
+                await _context.Users.AnyAsync(u => u.Email == email, cancellationToken),
+                new EmailIsTakenError(request.Value.Email))
             .CheckAsync(
-                async () => await _context.Users.AnyAsync(u => u.Email == Email.Create(request.Value.Email).Value,
-                    cancellationToken),
-                new Error("User already exists.", $"User with email: {request.Value.Email} already exists."))
-            .CheckAsync(
-                async () => await _context.Users.AnyAsync(
-                    u => u.PhoneNumber == PhoneNumber.Create(request.Value.PhoneNumber).Value,
-                    cancellationToken),
-                new Error("User already exists.", $"User with number: {request.Value.PhoneNumber} already exists."))
+                async () => await _context.Users.AnyAsync(u => u.PhoneNumber == number, cancellationToken),
+                new PhoneIsTakenError(request.Value.PhoneNumber))
             .BuildAsync();
 
         if (result.IsFailure)
@@ -53,4 +52,11 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, User>
 
         return user;
     }
+
+    public sealed record EmailIsTakenError(string Email)
+        : Error("User already exists.", $"User with email: {Email} already exists.");
+
+    public sealed record PhoneIsTakenError(string Number) : Error("User already exists.",
+        $"User with number: {Number} already exists.");
+
 }

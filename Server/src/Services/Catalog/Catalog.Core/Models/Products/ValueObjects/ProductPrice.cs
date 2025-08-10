@@ -14,14 +14,14 @@ public record ProductPrice
     }
 
     public static Result<ProductPrice> Create(decimal price){
-        var result = Result<ProductPrice>.Try()
-            .Check(price < MinPrice || price > MaxPrice,
-                new Error("Price is out of range", $"Price must be between {MinPrice} and {MaxPrice}"))
+        return Result<ProductPrice>.Try(new ProductPrice(price))
+            .Check(price < MinPrice || price > MaxPrice, new OutOfRangeError())
             .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new ProductPrice(price);
     }
+    
+    // For EF Core queries
+    public static explicit operator decimal(ProductPrice price) => price.Value;
 
+    public sealed record OutOfRangeError()
+        : Error("Price is out of range", $"Price must be between {MinPrice} and {MaxPrice}");
 }

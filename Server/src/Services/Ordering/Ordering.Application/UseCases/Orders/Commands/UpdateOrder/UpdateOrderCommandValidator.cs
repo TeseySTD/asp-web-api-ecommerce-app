@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Ordering.Core.Models.Orders.ValueObjects;
-using Ordering.Core.Models.Products.ValueObjects;
 using Shared.Core.Validation.FluentValidation;
 
 namespace Ordering.Application.UseCases.Orders.Commands.UpdateOrder;
@@ -9,25 +8,9 @@ public class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderCommand>
 {
     public UpdateOrderCommandValidator()
     {
-        RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => ProductId.Create(e.ProductId)
-        );
+        RuleFor(x => x.CustomerId).MustBeCreatedWith(CustomerId.Create);
         
-        RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => ProductTitle.Create(e.ProductName)
-        );
-
-        RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => ProductDescription.Create(e.ProductDescription)
-        );
-
-        RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => OrderItemQuantity.Create(e.Quantity)
-        );
-
-        RuleForEach(x => x.Value.OrderItems).MustBeCreatedWith(
-            (e) => OrderItemPrice.Create(e.Price)
-        );
+        RuleFor(x => x.OrderId).MustBeCreatedWith(OrderId.Create);
         
         RuleFor(x => x.Value.Payment).MustBeCreatedWith(
             (p) => Payment.Create(

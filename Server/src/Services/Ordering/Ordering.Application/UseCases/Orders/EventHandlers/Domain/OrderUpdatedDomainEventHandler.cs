@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Ordering.Core.Models.Orders.Events;
-using Shared.Core.Domain.Interfaces;
 
 namespace Ordering.Application.UseCases.Orders.EventHandlers.Domain;
 

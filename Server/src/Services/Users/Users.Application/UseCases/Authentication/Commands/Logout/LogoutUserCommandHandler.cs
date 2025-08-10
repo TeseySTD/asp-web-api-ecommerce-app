@@ -22,10 +22,9 @@ public class LogoutUserCommandHandler : ICommandHandler<LogoutUserCommand>
         var userId = UserId.Create(request.UserId).Value;
         var result = Result.Try()
             .Check(!await _context.Users.AnyAsync(u => u.Id == userId, cancellationToken),
-                new Error("User does not exists",
-                    $"User with id {request.UserId} does not exists."))
+                new UserNotFoundError(request.UserId))
             .Build();
-        
+
         if (result.IsSuccess)
         {
             await _context.RefreshTokens
@@ -35,4 +34,8 @@ public class LogoutUserCommandHandler : ICommandHandler<LogoutUserCommand>
 
         return result;
     }
+
+    public sealed record UserNotFoundError(Guid UserId) : Error("User does not exist",
+            $"User with id {UserId} does not exist.");
+
 }

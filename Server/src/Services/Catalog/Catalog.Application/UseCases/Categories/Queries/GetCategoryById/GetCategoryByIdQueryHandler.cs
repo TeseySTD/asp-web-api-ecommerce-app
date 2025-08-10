@@ -1,18 +1,16 @@
 ﻿using System.Text.Json;
 using Catalog.Application.Common.Interfaces;
 using Catalog.Application.Dto.Category;
-using Catalog.Core.Models.Categories;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Core.CQRS;
-using Shared.Core.Validation;
 using Shared.Core.Validation.Result;
 
 namespace Catalog.Application.UseCases.Categories.Queries.GetCategoryById;
 
-public class GetCategoryByIdQueryHandler : IQueryHandler<GetCategoryByIdQuery, CategoryDto>
+public class GetCategoryByIdQueryHandler : IQueryHandler<GetCategoryByIdQuery, CategoryReadDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly IDistributedCache _cache;
@@ -23,26 +21,32 @@ public class GetCategoryByIdQueryHandler : IQueryHandler<GetCategoryByIdQuery, C
         _cache = cache;
     }
 
-    public async Task<Result<CategoryDto>> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CategoryReadDto>> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
     {
         var cachedCategory = await _cache.GetStringAsync($"category-{request.Id.Value}");
         if (!cachedCategory.IsNullOrEmpty())
-            return JsonSerializer.Deserialize<CategoryDto>(cachedCategory!)!;
-        
+            return JsonSerializer.Deserialize<CategoryReadDto>(cachedCategory!)!;
+
         var result = await GetCategoryById(request, cancellationToken);
-        if(result.IsSuccess)
-            await _cache.SetStringAsync($"category-{request.Id.Value}", JsonSerializer.Serialize(result.Value));
-        
+        if (result.IsFailure)
+            return result;
+
+        await _cache.SetStringAsync(
+            $"category-{request.Id.Value}",
+            JsonSerializer.Serialize(result.Value),
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) }
+        );
+
         return result;
     }
 
-    private async Task<Result<CategoryDto>> GetCategoryById(GetCategoryByIdQuery request,
+    private async Task<Result<CategoryReadDto>> GetCategoryById(GetCategoryByIdQuery request,
         CancellationToken cancellationToken)
     {
         var result = await _context.Categories
             .AsNoTracking()
             .Where(c => c.Id == request.Id)
-            .ProjectToType<CategoryDto>()
+            .ProjectToType<CategoryReadDto>()
             .FirstOrDefaultAsync(cancellationToken);
 
         if (result == null)

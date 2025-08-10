@@ -46,7 +46,12 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .Property(p => p.StockQuantity)
             .HasConversion(
                 p => p.Value,
-                value => StockQuantity.Create(value));
+                value => StockQuantity.Create(value).Value);
+        
+        builder.Property(p => p.SellerId)
+            .HasConversion(
+                c => c.Value,
+                value => SellerId.Create(value).Value);
         
         builder.Property(p => p.CategoryId)
             .HasConversion(
@@ -58,5 +63,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasForeignKey(p => p.CategoryId)
             .HasPrincipalKey(c => c.Id)
             .OnDelete(DeleteBehavior.SetNull);
+        
+        builder.HasMany(x => x.Images)
+            .WithOne()
+            .HasForeignKey(x => x.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

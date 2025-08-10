@@ -16,16 +16,17 @@ public record ProductTitle
 
     public static Result<ProductTitle> Create(string title)
     {
-        var result = Result<ProductTitle>.Try()
-            .Check(string.IsNullOrEmpty(title), 
-                new Error("Title is required", "Title must be not empty"))
+        return Result<ProductTitle>.Try(new ProductTitle(title))
+            .Check(string.IsNullOrWhiteSpace(title), 
+                new TitleRequiredError())
             .Check(title.Length > MaxTitleLength || title.Length < MinTitleLength,
-                new Error("Title is too long", $"Product title must be between {MinTitleLength} and {MaxTitleLength} characters"))
+                new OutOfLengthError()) 
             .Build();
-        
-        if(result.IsFailure)
-            return result;
-        return new ProductTitle(title);
     }
 
+    // For EF Core queries
+    public static explicit operator string(ProductTitle productTitle) => productTitle.Value;
+    
+    public sealed record TitleRequiredError() : Error("Title is required", "Title must be not empty");
+    public sealed record OutOfLengthError() : Error("Title is out of range.", $"Product title must be between {MinTitleLength} and {MaxTitleLength} characters.");
 }

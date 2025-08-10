@@ -1,0 +1,80 @@
+﻿using System.Net;
+using System.Net.Http.Headers;
+using Shared.Core.Auth;
+using Users.Application.UseCases.Authentication.Commands.Logout;
+using Users.Core.Models;
+using Users.Core.Models.ValueObjects;
+using Users.Tests.Integration.Common;
+
+namespace Users.Tests.Integration.Api.Endpoints.AuthenticationModule;
+
+public class LogoutTest : ApiTest
+{
+    public const string RequestUrl = "/api/auth/logout";
+
+    public LogoutTest(IntegrationTestWebApplicationFactory factory, DatabaseFixture databaseFixture) : base(factory,
+        databaseFixture)
+    {
+    }
+
+    private User CreateTestUser() => User.Create(
+        name: UserName.Create("test").Value,
+        email: Email.Create("test@gmail.com").Value,
+        hashedPassword: HashedPassword.Create("12345678").Value,
+        phoneNumber: PhoneNumber.Create("+380991444743").Value,
+        role: UserRole.Default
+    );
+
+    [Fact]
+    public async Task Logout_NotAuthenticated_ReturnsUnauthorized()
+    {
+        // Arrange 
+        var request = new HttpRequestMessage(HttpMethod.Delete, RequestUrl);
+
+        // Act
+        var response = await HttpClient.SendAsync(request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Logout_NonExistingUser_ReturnsBadRequest()
+    {
+        // Arrange
+        var user = CreateTestUser();
+
+        HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(user));
+
+        var expectedContent =
+            MakeSystemErrorApiOutput( new LogoutUserCommandHandler.UserNotFoundError(user.Id.Value));
+
+        // Act
+        var response = await HttpClient.DeleteAsync(RequestUrl);
+        var actualContent = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(expectedContent, actualContent, ignoreAllWhiteSpace: true);
+    }
+
+    [Fact]
+    public async Task Logout_DataIsCorrect_ReturnsOk()
+    {
+        // Arrange
+        var user = CreateTestUser();
+        
+        ApplicationDbContext.Users.Add(user);
+        await ApplicationDbContext.SaveChangesAsync();
+        
+        HttpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", TokenProvider.GenerateJwtToken(user));
+        
+        // Act
+        var response = await HttpClient.DeleteAsync(RequestUrl);
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+}

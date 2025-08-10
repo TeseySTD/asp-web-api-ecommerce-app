@@ -1,9 +1,11 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
 using Ordering.API.Http.Order.Requests;
 using Ordering.Application.Dto.Order;
 using Ordering.Application.UseCases.Orders.Commands.UpdateOrder;
 using Ordering.Core.Models.Orders.ValueObjects;
 using Shared.Core.API;
+using Shared.Core.Validation.Result;
 
 namespace Ordering.API.Endpoints;
 
@@ -11,8 +13,12 @@ public class UpdateOrderEndpoint : OrdersEndpoint
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPut($"/{{id:guid}}", async (ISender sender,Guid id, UpdateOrderRequest request) =>
+        app.MapPut($"/{{id:guid}}", async (ISender sender, Guid id, ClaimsPrincipal userClaims, UpdateOrderRequest request) =>
         {
+            if(ExtractUserDataFromClaims(userClaims).IsFailure)
+                return Results.Unauthorized();
+            var customerId = ExtractUserDataFromClaims(userClaims).Value.customerId;
+            
             var payment = (
                 request.CardName,
                 request.CardNumber,
@@ -28,23 +34,26 @@ public class UpdateOrderEndpoint : OrdersEndpoint
                 request.ZipCode
             );
 
-            var orderItems = request.OrderItems.Select(i =>
-                (i.ProductId, i.ProductName, i.ProductDescription, i.Quantity, i.Price)
-            );
-
             var dto = new OrderUpdateDto(
-                OrderItems: orderItems,
                 Payment: payment,
                 DestinationAddress: address
             );
 
-            var cmd = new UpdateOrderCommand(OrderId.Create(id).Value, dto);
+            var cmd = new UpdateOrderCommand(customerId, id, dto);
             var result = await sender.Send(cmd);
 
             return result.Map(
                 onSuccess: () => Results.Ok(),
-                onFailure: errors => Results.BadRequest(Envelope.Of(errors))
-            );
+                onFailure: errors =>
+                {
+                    var enumerable = errors as Error[] ?? errors.ToArray();
+                    
+                    if(enumerable.Any(e => e is UpdateOrderCommandHandler.OrderNotFoundError))
+                        return Results.NotFound(Envelope.Of(enumerable));
+                    else if (enumerable.Any(e => e is UpdateOrderCommandHandler.CustomerMismatchError))
+                        return Results.Forbid();
+                    return Results.BadRequest(Envelope.Of(enumerable));
+                });
         });
     }
 }

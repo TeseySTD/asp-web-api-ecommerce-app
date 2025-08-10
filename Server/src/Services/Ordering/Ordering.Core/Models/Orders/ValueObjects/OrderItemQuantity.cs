@@ -1,5 +1,4 @@
-﻿using Shared.Core.Validation;
-using Shared.Core.Validation.Result;
+﻿using Shared.Core.Validation.Result;
 
 namespace Ordering.Core.Models.Orders.ValueObjects;
 
@@ -15,8 +14,9 @@ public record OrderItemQuantity
     public static Result<OrderItemQuantity> Create(uint quantity)
     {
         if (quantity < 1)
-            return new Error("Quantity must be greater than zero", nameof(quantity));
+            return new QuantityLessThenOneError(); 
         return new OrderItemQuantity(quantity);
     }
     
+    public sealed record QuantityLessThenOneError() : Error(nameof(OrderItemQuantity), $"Quantity must be greater than one");
 }

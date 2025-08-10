@@ -1,4 +1,3 @@
-
 using Ordering.Core.Models.Orders.Entities;
 using Ordering.Core.Models.Orders.Events;
 using Ordering.Core.Models.Orders.ValueObjects;
@@ -53,21 +52,31 @@ public class Order : AggregateRoot<OrderId>
         return order;
     }
 
+    public static Order Create(CustomerId customerId, Payment payment, Address destinationAddress,
+        OrderId? id = null)
+    {
+        return Create(customerId, payment, destinationAddress, null, id);
+    }
+
     public void AddOrderItem(OrderItem orderItem)
     {
         _orderItems.Add(orderItem);
     }
 
-    public void Update(IEnumerable<OrderItem> orderItems, Payment payment, Address destinationAddress)
+    public void Update(Payment payment, Address destinationAddress)
     {
-        _orderItems = orderItems!.ToList();
-        Payment = payment!;
-        DestinationAddress = destinationAddress!;
-        
+        Payment = payment;
+        DestinationAddress = destinationAddress;
+
         AddDomainEvent(new OrderUpdatedDomainEvent(this));
     }
 
-    public void Approve() => Status = OrderStatus.InProgress;
+    public void Approve(IEnumerable<OrderItem> orderItems)
+    {
+        _orderItems.AddRange(orderItems);
+        Status = OrderStatus.InProgress;
+    }
+
     public void Cancel() => Status = OrderStatus.Cancelled;
     public void Complete() => Status = OrderStatus.Completed;
 }
