@@ -17,7 +17,7 @@ public class OrderTest
     );
 
     [Fact]
-    public void WhenOrderIsCreated_ThenOrderIsPending()
+    public void Create_ValidData_ReturnsOrderThatIsPendingAndDispatchOrderCreatedDomainEvent()
     {
         // Act
         var order = CreateTestOrder();
@@ -29,7 +29,7 @@ public class OrderTest
     }
     
     [Fact]
-    public void WhenOrderItemAdded_ThenOrderHasIt()
+    public void AddOrderItem_ValidData_ShouldAddOrderItem()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -49,7 +49,7 @@ public class OrderTest
     }
 
     [Fact]
-    public void WhenOrderUpdateCalled_ThenUpdatesPropertiesAndAddsDomainEvent()
+    public void Update_ValidData_ShouldUpdatePropertiesAndDispatchOrderUpdatedDomainEvent()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -68,7 +68,7 @@ public class OrderTest
     }
 
     [Fact]
-    public void WhenOrderApproved_ThenOrderChangesItsState()
+    public void Approve_ValidItems_ShouldChangeOrderState()
     {
         // Assert
         var order = CreateTestOrder();
@@ -90,7 +90,7 @@ public class OrderTest
     }
 
     [Fact]
-    public void WhenOrderCanceled_ThenOrderChangesItsState()
+    public void Cancel_Called_ShouldChangeOrderState()
     {
         // Assert
         var order = CreateTestOrder();
@@ -103,7 +103,7 @@ public class OrderTest
     }
 
     [Fact]
-    public void WhenOrderCompleted_ThenOrderChangesItsState()
+    public void Complete_Called_ShouldChangeOrderState()
     {
         // Assert
         var order = CreateTestOrder();

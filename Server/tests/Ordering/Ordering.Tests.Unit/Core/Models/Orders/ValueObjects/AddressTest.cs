@@ -7,7 +7,7 @@ public class AddressTest
     [Theory]
     [InlineData("456 Oak Rd", "USA", "CA", "12345")]
     [InlineData("789 Elm Blvd", "USA", "NY", "12345-6789")]
-    public void WhenValidInput_ThenReturnsSuccess(string addressLine, string country, string state, string zip)
+    public void Create_ValidInput_ReturnsSuccess(string addressLine, string country, string state, string zip)
     {
         // Act
         var result = Address.Create(addressLine, country, state, zip);
@@ -24,7 +24,7 @@ public class AddressTest
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void WhenEmptyAddressLine_ThenReturnsAddressLineRequiredError(string emptyLine)
+    public void Create_EmptyAddressLine_ReturnsAddressLineRequiredError(string emptyLine)
     {
         // Act 
         var result = Address.Create(emptyLine, "USA", "CA", "12345");
@@ -40,7 +40,7 @@ public class AddressTest
     [InlineData("123 Main St", "USA", "CA", "1234")]
     [InlineData("123 Main St", "USA", "CA", "abcde")]
     [InlineData("123 Main St", "USA", "CA", "123456")]
-    public void WhenWithInvalidZipCodeFormat_ThenReturnsZipCodeFormatError(string line, string country, string state,
+    public void Create_InvalidZipCodeFormat_ReturnsZipCodeFormatError(string line, string country, string state,
         string zip)
     {
         // Act 

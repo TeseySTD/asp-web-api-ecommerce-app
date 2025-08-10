@@ -6,7 +6,7 @@ namespace Ordering.Tests.Unit.Core.Models.Products;
 public class ProductTest
 {
     [Fact]
-    public void WhenProductIsUpdated_ThenPropertiesAreUpdated()
+    public void Update_ValidData_ShouldUpdateProperties()
     {
         // Assert
         var productToUpdate = Product.Create(

@@ -6,7 +6,7 @@ namespace Ordering.Tests.Unit.Core.Models.Products.ValueObjects;
 public class ProductIdTest
 {
     [Fact]
-    public void WhenProductIdIsEmpty_ThenReturnFailure()
+    public void Create_ProductIdIsEmpty_ReturnProductIdRequiredError()
     {
         // Act
         var result = ProductId.Create(Guid.Empty);
@@ -17,7 +17,7 @@ public class ProductIdTest
     }
 
     [Fact]
-    public void WhenIdIsCorrect_ThenReturnSuccess()
+    public void Create_IdIsCorrect_ReturnSuccess()
     {
         // Arrange
         var id = Guid.NewGuid();

@@ -6,7 +6,7 @@ namespace Ordering.Tests.Unit.Core.Models.Products.ValueObjects;
 public class ProductDescriptionTest
 {
     [Fact]
-    public void WhenDescriptionIsEmpty_ThenReturnFailure()
+    public void Create_DescriptionIsEmpty_ReturnsProductDescriptionRequiredError()
     {
         // Act 
         var result = ProductDescription.Create("");
@@ -17,7 +17,7 @@ public class ProductDescriptionTest
     }
 
     [Fact]
-    public void WhenDescriptionIsOutOfLength_ThenReturnFailure()
+    public void Create_DescriptionIsOutOfLength_ReturnsProductDescriptionOutOfLengthError()
     {
         // Arrange
         var str = new string('a', ProductDescription.MaxDescriptionLength + 1);
@@ -32,7 +32,7 @@ public class ProductDescriptionTest
     }
 
     [Fact]
-    public void WhenDataIsCorrect_ThenReturnSuccess()
+    public void Create_DataIsCorrect_ReturnSuccess()
     {
         // Arrange
         var data = "awdawdawdawdawd";

@@ -8,7 +8,7 @@ public class OrderItemPriceTest
     [Theory]
     [InlineData(0.05)]
     [InlineData(1000000000)]
-    public void WhenOrderItemPriceIsOutOfRange_ThenReturnFailure(decimal price)
+    public void Create_PriceIsOutOfRange_ReturnsOrderItemPriceOutOfRangeError(decimal price)
     {
         // Act
         var result = OrderItemPrice.Create(price);
@@ -19,7 +19,7 @@ public class OrderItemPriceTest
     }
 
     [Fact]
-    public void WhenDataIsCorrect_ThenReturnSuccess()
+    public void Create_DataIsCorrect_ReturnsSuccess()
     {
         // Arrange
         var price = 1m;

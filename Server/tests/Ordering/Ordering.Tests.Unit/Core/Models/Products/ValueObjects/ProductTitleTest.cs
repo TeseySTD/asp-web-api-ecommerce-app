@@ -6,7 +6,7 @@ namespace Ordering.Tests.Unit.Core.Models.Products.ValueObjects;
 public class ProductTitleTest
 {
     [Fact]
-    public void WhenProductTitleIsEmpty_ThenReturnsFailure()
+    public void Create_ProductTitleIsEmpty_ReturnsProductTitleRequiredError()
     {
         // Act
         var result = ProductTitle.Create(string.Empty);
@@ -17,7 +17,7 @@ public class ProductTitleTest
     }
 
     [Fact]
-    public void WhenProductTitleIsOutOfRange_ThenReturnsFailure()
+    public void Create_ProductTitleIsOutOfRange_ReturnsProductTitleOutOfRangeError()
     {
         // Act
         var result = ProductTitle.Create("a");
@@ -28,7 +28,7 @@ public class ProductTitleTest
     }
 
     [Fact]
-    public void WhenDataCorrect_ThenReturnsSuccess()
+    public void Create_DataIsValid_ReturnsSuccess()
     {
         // Arrange
         var title = "title";

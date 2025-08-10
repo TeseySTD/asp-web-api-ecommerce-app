@@ -6,7 +6,7 @@ namespace Ordering.Tests.Unit.Core.Models.Orders.ValueObjects;
 public class OrderItemQuantityTest
 {
     [Fact]
-    public void WhenQuantityIsZero_ThenShouldReturnFailure()
+    public void Create_QuantityIsZero_ReturnsQuantityLessThenOneError()
     {
         // Act
         var result = OrderItemQuantity.Create(0);
@@ -17,7 +17,7 @@ public class OrderItemQuantityTest
     }
 
     [Fact]
-    public void WhenQuantityCorrect_ThenShouldReturnSuccess()
+    public void Create_QuantityIsCorrect_ReturnsSuccess()
     {
         // Arrange
         uint q = 10;
