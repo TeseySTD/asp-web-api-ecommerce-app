@@ -40,7 +40,7 @@ public class CustomValidatorsTest
     private readonly TestDtoValidator _validator = new();
 
     [Fact]
-    public void When_NumberIsPositive_ShouldNotHaveError()
+    public void Validate_NumberIsPositive_ShouldNotHaveError()
     {
         // Arrange
         var dto = new TestDto { Number = 5 };
@@ -56,7 +56,7 @@ public class CustomValidatorsTest
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void When_NumberIsNonPositive_ShouldHaveError(int invalid)
+    public void Validate_NumberIsNonPositive_ShouldHaveError(int invalid)
     {
         // Arrange
         var dto = new TestDto { Number = invalid };
@@ -71,7 +71,7 @@ public class CustomValidatorsTest
     }
 
     [Fact]
-    public void CanContainValidationAfterCustomValidator_ShouldHaveError()
+    public void Validate_ContainValidationAfterCustomValidator_ShouldHaveError()
     {
         // Arrange
         var customValidator = new InlineValidator<TestDto>();

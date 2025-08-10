@@ -12,9 +12,9 @@ public class ResultBuilderTest
     private static Result CreateFailure() => Result.Failure(new Error("E", "M"));
     
     [Fact]
-    public void Ctor_WithFailureResult_Throws()
+    public void Ctor_WithFailureResult_ThrowsArgumentException()
     {
-        // Arrange
+        // Arrange & Act
         Action act = () => new ResultBuilder<Result>(CreateFailure());
         
         // Assert
@@ -25,7 +25,7 @@ public class ResultBuilderTest
     [Fact]
     public void Check_ErrorCondition_FailsResult()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(true, new Error("msg", "desc"))
             .Build();
@@ -38,7 +38,7 @@ public class ResultBuilderTest
     [Fact]
     public void Check_ErrorConditionFalse_KeepsSuccess()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(false, new Error("m", "d"))
             .Build();
@@ -50,7 +50,7 @@ public class ResultBuilderTest
     [Fact]
     public void Check_ResultWithSuccess_PropagatesSuccess()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(Result.Success())
             .Build();
@@ -63,7 +63,7 @@ public class ResultBuilderTest
     [Fact]
     public void Check_ResultWithFailure_PropagatesFailure()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(CreateFailure())
             .Build();
@@ -74,7 +74,7 @@ public class ResultBuilderTest
     [Fact]
     public void Check_ResultWithNestedFailure_PropagatesFailure()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(
                 Result.Try()
@@ -96,7 +96,7 @@ public class ResultBuilderTest
     [Fact]
     public void Check_FuncWithSuccess_KeepsSuccess()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(() => false, new Error("m", "d"))
             .Build();
@@ -108,7 +108,7 @@ public class ResultBuilderTest
     [Fact]
     public void Check_FuncWithFailure_PropagatesFailure()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(() => true, new Error("m", "d"))
             .Build();
@@ -120,9 +120,9 @@ public class ResultBuilderTest
     
     
     [Fact]
-    public void CheckIf_ConditionTrue_EvaluatesCheck()
+    public void CheckIf_IfConditionTrue_EvaluatesCheck()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .CheckIf(true, true, new Error("X", "Y"))
             .Build();
@@ -133,9 +133,9 @@ public class ResultBuilderTest
     }
     
     [Fact]
-    public void CheckIf_ConditionFalse_SkipsCheck()
+    public void CheckIf_IfConditionFalse_SkipsCheck()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .CheckIf(false, true, new Error("X", "Y"))
             .Build();
@@ -145,11 +145,12 @@ public class ResultBuilderTest
     }
 
     [Fact]
-    public void CheckIf_ConditionFalse_SkipsCheckFuncCall()
+    public void CheckIf_IfConditionFalse_SkipsCheckFuncCall()
     {
         // Arrange
         var trigger = false;
 
+        // Act
         var result = Result.Try()
             .CheckIf(false, () =>
             {
@@ -166,7 +167,7 @@ public class ResultBuilderTest
     [Fact]
     public void Combine_MultipleFailures_AccumulatesErrors()
     {
-        // Arrange
+        // Arrange 
         var r1 = Result.Failure(new Error("A", "1"));
         var r2 = Result.Failure(new Error("B", "2"));
         var r3 = Result.Success();
@@ -183,9 +184,9 @@ public class ResultBuilderTest
     }
 
     [Fact]
-    public void DropIfFail_StopsFurtherChecks()
+    public void DropIfFail_WhenCalled_StopsFurtherChecks()
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(true, new Error("E", "1"))
             .DropIfFail()
@@ -198,10 +199,12 @@ public class ResultBuilderTest
     }
 
     [Fact]
-    public void DropIfFail_StopsFuncCalls()
+    public void DropIfFail_WhenCalled_StopsFuncCalls()
     {
-        // Arrange
+        // Arrange 
         bool triggered = false;
+        
+        // Act
         var result = Result.Try()
             .Check(true, new Error("E", "1"))
             .DropIfFail()
@@ -220,7 +223,7 @@ public class ResultBuilderTest
     [Fact]
     public async Task AsyncChain_SuccessScenario_BuildsSuccessfully()
     {
-        // Arrange
+        // Arrange & Act
         var result = await Result.Try()
             .CheckAsync(async () => await Task.FromResult(false), "Error", "Desc")
             .Check(false, "Another error", "Desc")
@@ -245,11 +248,12 @@ public class ResultBuilderTest
     }
 
     [Fact]
-    public async Task CheckIfAsync_CondittionTrue_SkipsFuncCalls()
+    public async Task CheckIfAsync_IfCondittionTrue_SkipsFuncCalls()
     {
         // Arrange
         var triggered = false;
         
+        // Act
         var result = await Result.Try()
             .CheckIfAsync(false, 
                 async () =>
@@ -269,7 +273,8 @@ public class ResultBuilderTest
     {
         // Arrange
         var triggered = false;
-        
+       
+        // Act
         var result = await Result.Try()
             .CheckAsync(async () => await Task.FromResult(true), "Error1", "Desc1")
             .DropIfFail() 
@@ -332,9 +337,9 @@ public class ResultBuilderTest
     [InlineData("message", "description")]
     [InlineData("m", "description")]
     [InlineData("d", "description")]
-    public void CheckWithStringParams_ErrorCondition_FailsResult(string msg, string desc)
+    public void CheckWithStringParams_ErrorConditionTrue_FailsResult(string msg, string desc)
     {
-        // Arrange
+        // Arrange & Act
         var result = Result.Try()
             .Check(true, msg, desc)
             .Build();
@@ -349,9 +354,9 @@ public class ResultBuilderTest
     [InlineData("message async", "description async")]
     [InlineData("m", "description")]
     [InlineData("d", "description")]
-    public async Task CheckAsyncWithStringParams_ErrorCondition_FailsResult(string msg, string desc)
+    public async Task CheckAsyncWithStringParams_ErrorConditionTrue_FailsResult(string msg, string desc)
     {
-        // Arrange
+        // Arrange & Act
         var result = await Result.Try()
             .CheckAsync(async () => await Task.FromResult(true), msg, desc)
             .BuildAsync();
