@@ -40,7 +40,7 @@ public class MakeOrderSagaTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenOrderMade_ThenTransitionsToCheckingCustomerAndPublishCheckCustomerMessage()
+    public async Task OrderMade_Rised_ShouldTransitToCheckingCustomerAndPublishCheckCustomerMessage()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -77,8 +77,7 @@ public class MakeOrderSagaTest : IntegrationTest
     }
 
     [Fact]
-    public async Task
-        WhenCustomerCheckedInCheckingCustomerState_ThenTransitToReservingProductsAndPublishReserveProductsMessage()
+    public async Task CheckedCustomer_InCheckingCustomerState_ShouldTransitToReservingProductsAndPublishReserveProductsMessage()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -113,7 +112,7 @@ public class MakeOrderSagaTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCustomerCheckingFailedInCheckingCustomerState_ThenFinalizesAndPublishCanceledOrderEvent()
+    public async Task ChekingCustomerFailed_FailedInCheckingCustomerState_ShouldFinalizesAndPublishCanceledOrderEvent()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -148,7 +147,7 @@ public class MakeOrderSagaTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenProductsReservedInReservingProductsState_ThenFinalizesAndPublishApprovedOrderEvent()
+    public async Task ProductsReserved_InReservingProductsState_ShouldFinalizesAndPublishApprovedOrderEvent()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -189,7 +188,7 @@ public class MakeOrderSagaTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenProductsReservationFailedInReservingProductsState_ThenFinalizesAndPublishCanceledOrderEvent()
+    public async Task ProductsReservation_FailedInReservingProductsState_ShouldFinalizesAndPublishCanceledOrderEvent()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -227,7 +226,7 @@ public class MakeOrderSagaTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCompleteWorkflow_ThenTransitionsThroughAllStatesCorrectly()
+    public async Task AllEvents_CompleteWorkflow_ShouldTransitionsThroughAllStatesCorrectly()
     {
         // Arrange
         var orderId = Guid.NewGuid();

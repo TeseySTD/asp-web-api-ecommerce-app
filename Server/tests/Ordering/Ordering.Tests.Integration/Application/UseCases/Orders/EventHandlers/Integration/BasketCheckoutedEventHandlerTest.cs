@@ -18,7 +18,7 @@ public class BasketCheckoutedEventHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenHandlerHasBeenCalled_ThenOrderIsCreated()
+    public async Task Handle_HasBeenCalled_CreatesOrder()
     {
         // Arrange
         var userId = Guid.NewGuid();

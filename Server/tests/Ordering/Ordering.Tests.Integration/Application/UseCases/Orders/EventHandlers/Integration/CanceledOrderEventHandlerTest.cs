@@ -15,7 +15,7 @@ public class CanceledOrderEventHandlerTest : IntegrationTest
         public CanceledOrderEventHandlerTest(DatabaseFixture databaseFixture) : base(databaseFixture) { }
 
         [Fact]
-        public async Task WhenHandlerHasBeenCalled_ThenOrderIsCancelled()
+        public async Task Handle_HasBeenCalled_CancelOrder()
         {
             // Arrange
             var orderIdGuid = Guid.NewGuid();

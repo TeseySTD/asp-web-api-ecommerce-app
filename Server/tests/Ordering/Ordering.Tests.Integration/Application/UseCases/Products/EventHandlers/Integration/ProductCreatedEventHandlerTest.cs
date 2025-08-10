@@ -17,7 +17,7 @@ public class ProductCreatedEventHandlerTest : IntegrationTest
     {
     }
     [Fact]
-    public async Task WhenHandlerHasBeenCalled_ThenProductIsAddedToDatabase()
+    public async Task Handle_HasBeenCalled_ShouldAddProductToDatabase()
     {
         // Arrange
         var productId = Guid.NewGuid();

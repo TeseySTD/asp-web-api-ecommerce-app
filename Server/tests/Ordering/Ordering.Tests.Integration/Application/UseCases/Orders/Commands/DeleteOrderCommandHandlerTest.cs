@@ -22,14 +22,14 @@ public class DeleteOrderCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenCustomerIsNotOrderOwner_TherReturnsFailure()
+    public async Task Handle_CustomerIsNotOrderOwner_ReturnsCustomerMismatchError()
     {
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
         var order = CreateTestOrder();
 
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var cmd = new DeleteOrderCommand(order.Id, customerId, UserRole.Default);
         var handler = new DeleteOrderCommandHandler(ApplicationDbContext);
@@ -43,7 +43,7 @@ public class DeleteOrderCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenOrderIsNotInDb_ThenReturnsFailure()
+    public async Task Handle_OrderIsNotInDb_ReturnsOrderNotFoundError()
     {
         // Arrange
         var orderId = OrderId.Create(Guid.NewGuid()).Value;
@@ -61,14 +61,14 @@ public class DeleteOrderCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenOrderIsInDbAndCustomerIdIsCorrect_ThenReturnsSuccess()
+    public async Task Handle_OrderIsInDbAndCustomerIdIsCorrect_ReturnsSuccess()
     {
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
         var order = CreateTestOrder(customerId);
 
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var cmd = new DeleteOrderCommand(order.Id, customerId, UserRole.Default);
         var handler = new DeleteOrderCommandHandler(ApplicationDbContext);
@@ -83,14 +83,14 @@ public class DeleteOrderCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenOrderInDbCustomerIsAdminAndNotOrderOwner_ThenReturnsSuccess()
+    public async Task Handle_OrderInDbCustomerIsAdminAndNotOrderOwner_ReturnsSuccess()
     {
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
         var order = CreateTestOrder();
 
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var cmd = new DeleteOrderCommand(order.Id, customerId, UserRole.Admin);
         var handler = new DeleteOrderCommandHandler(ApplicationDbContext);

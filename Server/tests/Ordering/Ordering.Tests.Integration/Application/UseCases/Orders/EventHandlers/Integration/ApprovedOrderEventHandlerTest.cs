@@ -56,7 +56,7 @@ public class ApprovedOrderEventHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenHandleWithExistingProducts_ThenApproveOrderWithOrderItems()
+    public async Task Handle_ExistingProducts_ApproveOrderWithOrderItems()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -66,7 +66,7 @@ public class ApprovedOrderEventHandlerTest : IntegrationTest
 
         ApplicationDbContext.Products.Add(existingProduct);
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var approvedEvent = GenerateEvent(orderId, productId);
         _consumeContext.Message.Returns(approvedEvent);
@@ -88,7 +88,7 @@ public class ApprovedOrderEventHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenHandleWithNonExistingProducts_ThenCreateProductsAndApproveOrder()
+    public async Task Handle_NonExistingProducts_CreatesProductsAndApproveOrder()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -97,7 +97,7 @@ public class ApprovedOrderEventHandlerTest : IntegrationTest
         var nonExistingProduct = CreateTestProduct(productId);
 
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var approvedEvent = GenerateEvent(orderId, productId); 
 

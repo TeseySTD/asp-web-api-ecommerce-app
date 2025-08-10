@@ -59,7 +59,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     ];
 
     [Fact]
-    public async Task WhenNoOrdersExist_ThenReturnsFailure()
+    public async Task Handle_NoOrdersExist_ReturnsOrdersNotFoundError()
     {
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
@@ -75,14 +75,14 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRequestIsOutOfRange_ThenReturnsFailure()
+    public async Task Handle_RequestIsOutOfRange_ReturnsOrdersNotFoundError()
     {
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
         var orders = GetTestListOrders(customerId.Value);
 
         ApplicationDbContext.Orders.AddRange(orders);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 1, PageSize: orders.Count), customerId, null);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
@@ -96,7 +96,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRequestIsValid_ThenReturnsSuccess()
+    public async Task Handle_RequestIsValid_ReturnsSuccess()
     {
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
@@ -104,7 +104,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
         var filteredOrders = orders.Where(o => o.Status == OrderStatus.InProgress).ToList();
 
         ApplicationDbContext.Orders.AddRange(orders);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: filteredOrders.Count() - 1), customerId, OrderStatus.InProgress);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);
@@ -139,7 +139,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenRequestIsValid_ThenReturnsSuccessAndCustomersOrders()
+    public async Task Handle_RequestIsValidAndHasOrdersNotWithCustomerId_ReturnsSuccessAndCustomersOrdersOnly()
     {
         // Arrange
         var customerId = CustomerId.Create(Guid.NewGuid()).Value;
@@ -153,7 +153,7 @@ public class GetOrdersQueryHandlerTest : IntegrationTest
         orders.Add(notCustomersOrder);
 
         ApplicationDbContext.Orders.AddRange(orders);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var query = new GetOrdersQuery(new PaginationRequest(PageIndex: 0, PageSize: orders.Count), customerId, null);
         var handler = new GetOrdersQueryHandler(ApplicationDbContext);

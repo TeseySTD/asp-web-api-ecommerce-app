@@ -39,7 +39,7 @@ public class GetByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task GetById_Unauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -52,7 +52,7 @@ public class GetByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotOrderOwner_ThenReturnsForbidden()
+    public async Task GetById_CustomerIsNotOrderOwner_ReturnsForbidden()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -70,7 +70,7 @@ public class GetByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenOrderIsNotFound_ThenReturnsNotFound()
+    public async Task GetById_OrderIsNotInDb_ReturnsNotFound()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -88,7 +88,7 @@ public class GetByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenOrderIsFound_ThenReturnsOk()
+    public async Task GetById_OrderIsInDb_ReturnsOk()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -106,7 +106,7 @@ public class GetByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenOrderIsFoundCustomerIsAdminAndNotOrderOwner_ThenReturnsOk()
+    public async Task GetById_OrderIsInDbCustomerIsAdminAndNotOrderOwner_ReturnsOk()
     {
         // Arrange
         var order = CreateTestOrder();

@@ -18,7 +18,7 @@ public class ProductUpdatedEventHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenHandlerHasBeenCalled_ThenProductIsUpdated()
+    public async Task Handle_HasBeenCalled_ShouldUpdateProduct()
     {
         // Arrange
         var productIdGuid = Guid.NewGuid();

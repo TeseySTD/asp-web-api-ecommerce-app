@@ -30,7 +30,7 @@ public class UpdateOrderCommandHandlerTest : IntegrationTest
 
 
     [Fact]
-    public async Task WhenOrderIsNotInDb_ThenReturnsFailure()
+    public async Task Handle_OrderIsNotInDb_ReturnsOrderNotFoundError()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -47,14 +47,14 @@ public class UpdateOrderCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotOrderOwner_ThenReturnsFailure()
+    public async Task Handle_CustomerIsNotOrderOwner_ReturnsCustomerMismatchError()
     {
         // Arrange
         var order = CreateTestOrder();
         var customerId = Guid.NewGuid();
 
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var cmd = new UpdateOrderCommand(customerId, order.Id.Value, CreateTestOrderUpdateDto());
         var handler = new UpdateOrderCommandHandler(ApplicationDbContext);
@@ -70,13 +70,13 @@ public class UpdateOrderCommandHandlerTest : IntegrationTest
     [Theory]
     [InlineData(OrderStatus.Cancelled)]
     [InlineData(OrderStatus.Completed)]
-    public async Task WhenOrderStateIsIncorrect_ThenReturnsFailure(OrderStatus orderStatus)
+    public async Task Handle_OrderStateIsIncorrect_ReturnsIncorrectOrderStateError(OrderStatus orderStatus)
     {
         // Arrange
         var order = CreateTestOrder(orderStatus);
         
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var cmd = new UpdateOrderCommand(order.CustomerId.Value, order.Id.Value, CreateTestOrderUpdateDto());
         var handler = new UpdateOrderCommandHandler(ApplicationDbContext);
@@ -90,7 +90,7 @@ public class UpdateOrderCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnsSuccess()
+    public async Task Handle_DataIsCorrect_ReturnsSuccess()
     {
         var order = CreateTestOrder();
         var newPayment = (

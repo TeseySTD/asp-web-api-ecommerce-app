@@ -58,7 +58,7 @@ public class UpdateOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    public async Task UpdateOrder_Unathorized_ReturnsUnauthorized()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -73,7 +73,7 @@ public class UpdateOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenOrderIsNotInDb_ThenReturnsNotFound()
+    public async Task UpdateOrder_OrderIsNotInDb_ReturnsNotFound()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -92,7 +92,7 @@ public class UpdateOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotOrderOwner_ThenReturnsForbidden()
+    public async Task UpdateOrder_CustomerIsNotOrderOwner_ReturnsForbidden()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -114,7 +114,7 @@ public class UpdateOrderTest : ApiTest
     [Theory]
     [InlineData(OrderStatus.Cancelled)]
     [InlineData(OrderStatus.Completed)]
-    public async Task WhenOrderStateIsIncorrect_ThenReturnsBadRequest(OrderStatus orderStatus)
+    public async Task UpdateOrder_OrderStateIsIncorrect_ReturnsBadRequest(OrderStatus orderStatus)
     {
         // Arrange
         var order = CreateTestOrder(orderStatus);
@@ -137,7 +137,7 @@ public class UpdateOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnsOk()
+    public async Task UpdateOrder_DataIsCorrect_ReturnsOk()
     {
         // Arrange
         var order = CreateTestOrder();

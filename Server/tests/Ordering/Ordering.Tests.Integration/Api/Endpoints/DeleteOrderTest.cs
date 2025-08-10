@@ -40,7 +40,7 @@ public class DeleteOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    public async Task DeleteOrder_Unathorized_ReturnsUnauthorized()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -53,7 +53,7 @@ public class DeleteOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotOrderOwner_ThenReturnsForbidden()
+    public async Task DeleteOrder_CustomerIsNotOrderOwner_ReturnsForbidden()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -72,7 +72,7 @@ public class DeleteOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenOrderIsNotFound_ThenReturnsNotFound()
+    public async Task Delete_OrderIsNotFound_ReturnsNotFound()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -90,7 +90,7 @@ public class DeleteOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenOrderIsFound_ThenReturnsOk()
+    public async Task DeleteOrder_OrderIsFound_ReturnsOk()
     {
         // Arrange
         var order = CreateTestOrder();
@@ -108,7 +108,7 @@ public class DeleteOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenOrderInDbCustomerIsAdminAndNotOrderOwner_ThenReturnsOk()
+    public async Task DeleteOrder_OrderInDbCustomerIsAdminAndNotOrderOwner_ReturnsOk()
     {
         // Arrange
         var order = CreateTestOrder();

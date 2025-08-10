@@ -77,7 +77,7 @@ public class GetOrdersTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task GetOrders_Unauthorized_ReturnsUnauthorized()
     {
         // Act
         var response = await HttpClient.GetAsync(RequestUrl + "/");
@@ -87,7 +87,7 @@ public class GetOrdersTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerRequestsOtherCustomersData_ThenReturnsForbidden()
+    public async Task GetOrders_CustomerRequestsOtherCustomersData_ReturnsForbidden()
     {
         // Arrange
         var customerId = Guid.NewGuid();
@@ -101,7 +101,7 @@ public class GetOrdersTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNoOrdersExist_ThenReturnsNotFound()
+    public async Task GetOrders_NoOrdersInDb_ReturnsNotFound()
     {
         // Arrange
         var customerId = Guid.NewGuid();
@@ -119,7 +119,7 @@ public class GetOrdersTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenRequestIsOutOfRange_ThenReturnsNotFound()
+    public async Task GetOrders_RequestIsOutOfRange_ReturnsNotFound()
     {
         // Arrange
         var customerId = Guid.NewGuid();
@@ -142,7 +142,7 @@ public class GetOrdersTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenRequestIsValid_ThenReturnsOk()
+    public async Task GetOrders_RequestIsValid_ReturnsOk()
     {
         // Arrange
         var customerId = Guid.NewGuid();
@@ -170,7 +170,7 @@ public class GetOrdersTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenRequestIsValidAndCustomerIsAdmin_ThenReturnsOk()
+    public async Task GetOrders_RequestIsValidAndCustomerIsAdmin_ReturnsOk()
     {
         // Arrange
         var customerId = Guid.NewGuid();

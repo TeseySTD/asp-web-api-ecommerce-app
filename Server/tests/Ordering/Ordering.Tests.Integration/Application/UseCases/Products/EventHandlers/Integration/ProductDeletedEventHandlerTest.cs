@@ -28,7 +28,7 @@ public class ProductDeletedEventHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenHandlerHasBeenCalled_ThenProductIsDeletedAndOrdersWithItAreCancelled()
+    public async Task Handle_HasBeenCalled_ShouldDeleteProductAndCancellOrdersWithIt()
     {
         // Arrange
         var productToDelete = Product.Create(

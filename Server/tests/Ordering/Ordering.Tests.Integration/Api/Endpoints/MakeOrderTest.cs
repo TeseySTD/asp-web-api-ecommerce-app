@@ -47,7 +47,7 @@ public class MakeOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    public async Task MakeOrder_Unathorized_ReturnsUnauthorized()
     {
         // Arrange
         var dto = CreateTestRequest([]);
@@ -62,7 +62,7 @@ public class MakeOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenOrderItemIsNotUnique_ThenShouldReturnBadRequest()
+    public async Task MakeOrder_OrderItemIsNotUnique_ReturnsBadRequest()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -87,7 +87,7 @@ public class MakeOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductsNotExists_ThenShouldReturnBadRequest()
+    public async Task MakeOrder_ProductsNotInDb_ReturnsBadRequest()
     {
         // Arrange
         Guid[] nonExistingProductIds = [Guid.NewGuid(), Guid.NewGuid()];
@@ -111,7 +111,7 @@ public class MakeOrderTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenShouldReturnOk()
+    public async Task MakeOrder_DataIsCorrect_ReturnsOk()
     {
         var product1 = Product.Create(
             id: ProductId.Create(Guid.NewGuid()).Value,

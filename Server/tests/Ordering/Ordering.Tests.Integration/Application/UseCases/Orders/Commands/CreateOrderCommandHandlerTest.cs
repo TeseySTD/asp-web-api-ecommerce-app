@@ -33,7 +33,7 @@ public class CreateOrderCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenOrderItemIsNotUnique_ThenReturnsFailureResult()
+    public async Task Handle_OrderItemIsNotUnique_ReturnsOrderItemIsNotUniqueError()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -56,7 +56,7 @@ public class CreateOrderCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenProductsInOrderNotExists_ThenReturnsFailureResult()
+    public async Task Handle_ProductsInOrderNotInDb_ReturnsProductsNotFound()
     {
         // Arrange
         var nonExistingProductId1 = Guid.NewGuid();
@@ -82,7 +82,7 @@ public class CreateOrderCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenDataIsCorrect_ThenReturnsSuccessResultCreateOrderAndPublishEndpoint()
+    public async Task Handle_DataIsValid_ReturnsSuccessResultCreateOrderAndPublishEndpoint()
     {
         // Arrange
         var product1 = Product.Create(
@@ -97,7 +97,7 @@ public class CreateOrderCommandHandlerTest : IntegrationTest
         );
 
         ApplicationDbContext.Products.AddRange(product1, product2);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var orderDto = CreateTestOrderWriteDto(
             [

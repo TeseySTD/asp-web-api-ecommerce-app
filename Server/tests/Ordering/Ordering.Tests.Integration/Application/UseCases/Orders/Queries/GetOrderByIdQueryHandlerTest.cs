@@ -24,7 +24,7 @@ public class GetOrderByIdQueryHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenOrderIsNotFound_ThenReturnsFailure()
+    public async Task Handle_OrderIsNotInDb_ReturnsOrderNotFoundError()
     {
         // Arrange
         var orderId = OrderId.Create(Guid.NewGuid()).Value;
@@ -42,14 +42,14 @@ public class GetOrderByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotOrderOwner_ThenReturnsFailure()
+    public async Task Handle_CustomerIsNotOrderOwner_ReturnsCustomerMismatchError()
     {
         // Arrange
         var order = CreateTestOrder();
         var notOwnerId = CustomerId.Create(Guid.NewGuid()).Value;
 
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var query = new GetOrderByIdQuery(order.Id, notOwnerId, UserRole.Default);
         var handler = new GetOrderByIdQueryHandler(ApplicationDbContext);
@@ -63,13 +63,13 @@ public class GetOrderByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenOrderIsFound_ThenReturnsSuccess()
+    public async Task Handle_OrderIsInDb_ReturnsSuccess()
     {
         // Arrange
         var order = CreateTestOrder();
 
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var query = new GetOrderByIdQuery(order.Id, order.CustomerId, UserRole.Default);
         var handler = new GetOrderByIdQueryHandler(ApplicationDbContext);
@@ -102,14 +102,14 @@ public class GetOrderByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenOrderInDbCustomerIsAdminAndNotOrderOwner_ThenReturnsSuccess()
+    public async Task Handle_OrderInDbCustomerIsAdminAndNotOrderOwner_ReturnsSuccess()
     {
         // Arrange
         var order = CreateTestOrder();
         var notOwnerId = CustomerId.Create(Guid.NewGuid()).Value;
 
         ApplicationDbContext.Orders.Add(order);
-        await ApplicationDbContext.SaveChangesAsync(default);
+        await ApplicationDbContext.SaveChangesAsync();
 
         var query = new GetOrderByIdQuery(order.Id, notOwnerId, UserRole.Admin);
         var handler = new GetOrderByIdQueryHandler(ApplicationDbContext);
