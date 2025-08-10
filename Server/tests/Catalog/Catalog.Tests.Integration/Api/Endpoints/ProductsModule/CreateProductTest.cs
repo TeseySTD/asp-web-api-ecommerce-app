@@ -51,7 +51,7 @@ public class CreateProductTest : ApiTest
     );
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task CreateProduct_Unauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var request = GenerateAddProductRequest();
@@ -66,7 +66,7 @@ public class CreateProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNotSeller_ThenReturnsForbidden()
+    public async Task CreateProduct_NotSeller_ReturnsForbidden()
     {
         // Arrange
         var dto = GenerateAddProductRequest();
@@ -80,7 +80,7 @@ public class CreateProductTest : ApiTest
 
 
     [Fact]
-    public async Task WhenRequsetIsValid_ThenReturnsOk()
+    public async Task CreateProduct_RequsetIsValid_ReturnsOk()
     {
         // Arrange
         var sellerId = Guid.NewGuid();
@@ -106,7 +106,7 @@ public class CreateProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenInvalidData_ThenReturnsBadRequest()
+    public async Task CreateProduct_InvalidData_ReturnsBadRequest()
     {
         // Arrange
         var sellerId = Guid.NewGuid();
@@ -133,7 +133,7 @@ public class CreateProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsBadRequest()
+    public async Task CreateProduct_CategoryNotInDb_ReturnsBadRequest()
     {
         // Arrange
         var sellerId = Guid.NewGuid();

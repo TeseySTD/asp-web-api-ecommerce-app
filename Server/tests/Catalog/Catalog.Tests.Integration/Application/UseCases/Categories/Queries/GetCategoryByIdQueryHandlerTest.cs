@@ -32,7 +32,7 @@ public class GetCategoryByIdQueryHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenCached_ReturnsFromCacheWithoutDbCall()
+    public async Task Handle_Cached_ReturnsFromCacheWithoutDbCall()
     {
         // Arrange
         var existingCategory = CreateTestCategory(Guid.NewGuid()); 
@@ -57,7 +57,7 @@ public class GetCategoryByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenNotCachedAndExists_CachesAndReturnsCategory()
+    public async Task Handle_NotCachedAndExists_ShouldCacheAndReturnCategory()
     {
         // Arrange
         var category = CreateTestCategory(Guid.NewGuid());
@@ -81,7 +81,7 @@ public class GetCategoryByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenNotCachedAndNotExists_ReturnsNotFoundError()
+    public async Task Handle_NotCachedAndNotExists_ReturnsNotFoundError()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();

@@ -20,7 +20,7 @@ public class GetCategoriesQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenNoCategories_ReturnsNotFoundError()
+    public async Task Handle_NoCategories_ReturnsNotFoundError()
     {
         // Arrange
         var query = new GetCategoriesQuery(new PaginationRequest());
@@ -34,7 +34,7 @@ public class GetCategoriesQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoriesExist_ReturnsPaginatedResult()
+    public async Task Handle_CategoriesExist_ReturnsPaginatedResult()
     {
         // Arrange
         var pageIndex = 1;

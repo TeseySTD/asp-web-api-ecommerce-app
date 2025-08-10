@@ -53,7 +53,7 @@ public class DeleteCategoryCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsFailureResult()
+    public async Task Handle_CategoryNotInDb_ReturnsNotFoundError()
     {
         // Arrange
         var nonExistentCategoryId = Guid.NewGuid();
@@ -69,7 +69,7 @@ public class DeleteCategoryCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryExists_WithoutProducts_ThenDeletesCategoryAndRemovesCategoryCacheOnly()
+    public async Task Handle_CategoryExistsWithoutProducts_ShouldDeleteCategoryAndRemoveCategoryCacheOnly()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -104,7 +104,7 @@ public class DeleteCategoryCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryExistsWithProducts_ThenDeletesCategoryAndRemovesProductAndCategoryCache()
+    public async Task Handle_CategoryExistsWithProducts_ShouldDeleteCategoryAndRemoveProductAndCategoryCache()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

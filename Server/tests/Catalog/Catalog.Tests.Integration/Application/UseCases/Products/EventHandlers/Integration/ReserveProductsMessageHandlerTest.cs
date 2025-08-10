@@ -39,7 +39,7 @@ public class ReserveProductsMessageHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenMissingProducts_ThenPublishesFailedEvent()
+    public async Task Handle_MissingProducts_PublishFailedEvent()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -69,7 +69,7 @@ public class ReserveProductsMessageHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenInsufficientQuantity_ThenPublishesFailedEvent()
+    public async Task Handle_InsufficientQuantity_PublishFailedEvent()
     {
         // Arrange
         var prodId = Guid.NewGuid();
@@ -107,7 +107,7 @@ public class ReserveProductsMessageHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidReservation_ThenUpdatesQuantities_AndPublishesReservedEvent()
+    public async Task Handle_ValidReservation_ShouldUpdateQuantitiesAndPublishReservedEvent()
     {
         // Arrange
         var prodId = Guid.NewGuid();

@@ -42,7 +42,7 @@ public class AddProductImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenValidImages_ThenReturnsOk()
+    public async Task AddProductImages_ValidImages_ReturnsOk()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -79,7 +79,7 @@ public class AddProductImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNoImages_ThenReturnsBadRequest()
+    public async Task AddProductImages_NoImages_ReturnsBadRequest()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -102,7 +102,7 @@ public class AddProductImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenImagesAreExceededMaxCount_ThenReturnsBadRequest()
+    public async Task AddProductImages_ImagesAreExceededMaxCount_ReturnsBadRequest()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -136,7 +136,7 @@ public class AddProductImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenInvalidContentType_ThenReturnsBadRequest()
+    public async Task AddProductImages_InvalidContentType_ReturnsBadRequest()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -167,7 +167,7 @@ public class AddProductImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductDoesNotExist_ThenReturnsNotFound()
+    public async Task AddProductImages_ProductNotInDb_ReturnsNotFound()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -188,7 +188,7 @@ public class AddProductImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductSellerIsNotCustomer_ThenReturnsForbidden()
+    public async Task AddProductImages_ProductSellerIsNotCustomer_ReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -215,7 +215,7 @@ public class AddProductImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task AddProductImages_Unauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -230,7 +230,7 @@ public class AddProductImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNotSeller_ThenReturnsForbidden()
+    public async Task AddProductImages_NotSeller_ReturnsForbidden()
     {
         // Arrange
         var userId = Guid.NewGuid();

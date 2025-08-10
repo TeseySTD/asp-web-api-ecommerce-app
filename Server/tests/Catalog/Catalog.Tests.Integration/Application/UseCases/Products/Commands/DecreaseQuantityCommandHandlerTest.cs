@@ -33,7 +33,7 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenProductNotFound_ThenReturnsFailureResult()
+    public async Task Handle_ProductNotInDb_ReturnsProductNotFoundError()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
@@ -50,7 +50,7 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
 
 
     [Fact]
-    public async Task WhenProductSellerIsNotCustomer_ThenReturnsFailureResult()
+    public async Task Handle_ProductSellerIsNotCustomer_ReturnsCustomerMismatchError()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -73,7 +73,7 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenNotEnoughQuantity_ThenReturnsFailureResult()
+    public async Task Handle_NotEnoughQuantity_ReturnsNotEnoughtQuantityError()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -95,7 +95,7 @@ public class DecreaseQuantityCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidData_ThenDecreasesQuantity_SavesContext_AndCachesDto()
+    public async Task Handle_ValidData_ShouldDecreaseQuantityAndCacheDto()
     {
         // Arrange
         var id = Guid.NewGuid();

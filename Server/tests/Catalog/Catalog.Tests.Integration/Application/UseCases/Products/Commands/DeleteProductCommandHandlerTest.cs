@@ -35,7 +35,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenProductNotFound_ThenReturnsFailureResult()
+    public async Task Handle_ProductNotInDb_ReturnsProductNotFoundError()
     {
         // Arrange
         var nonExistentId = ProductId.Create(Guid.NewGuid()).Value;
@@ -53,7 +53,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotProductSeller_ThenReturnsFailureResult()
+    public async Task Handle_CustomerIsNotProductSeller_ReturnsCustomerMismatchError()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -77,7 +77,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
 
 
     [Fact]
-    public async Task WhenProductExists_ThenDeletesProduct_AndRemovesFromCache()
+    public async Task Handle_ProductExists_ShouldDeleteProductAndRemoveFromCache()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -109,7 +109,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidDataCustomerIsAdminAndNotProductSeller_ThenReturnsSuccessResult()
+    public async Task Handle_ValidDataCustomerIsAdminAndNotProductSeller_ShouldDeleteProductAndRemoveFromCache()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -142,7 +142,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenProductHasImages_ThenDeletesProductWithImages()
+    public async Task Handle_ProductHasImages_ShouldDeleteProductWithImages()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -175,7 +175,7 @@ public class DeleteProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenMultipleProductsExist_ThenDeletesOnlySpecifiedProduct()
+    public async Task Handle_MultipleProducts_ShouldDeleteOnlySpecifiedProduct()
     {
         // Arrange
         var product1Id = Guid.NewGuid();

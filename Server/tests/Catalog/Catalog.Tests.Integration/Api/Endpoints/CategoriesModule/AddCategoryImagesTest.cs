@@ -38,7 +38,7 @@ public class AddCategoryImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task AddCategoryImages_Unauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -56,7 +56,7 @@ public class AddCategoryImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotAdmin_ThenReturnsForbidden()
+    public async Task AddCategoryImages_CustomerIsNotAdmin_ReturnsForbidden()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -77,7 +77,7 @@ public class AddCategoryImagesTest : ApiTest
     
 
     [Fact]
-    public async Task WhenValidImages_ThenReturnsOk()
+    public async Task AddCategoryImages_ValidImages_ReturnsOk()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -113,7 +113,7 @@ public class AddCategoryImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNoImages_ThenReturnsBadRequest()
+    public async Task AddCategoryImages_NoImages_ReturnsBadRequest()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -136,7 +136,7 @@ public class AddCategoryImagesTest : ApiTest
 
 
     [Fact]
-    public async Task WhenImagesAreExceededMaxCount_ThenReturnsBadRequest()
+    public async Task AddCategoryImages_ImagesAreExceededMaxCount_ReturnsBadRequest()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -167,7 +167,7 @@ public class AddCategoryImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenInvalidContentType_ThenReturnsBadRequest()
+    public async Task AddCategoryImages_InvalidContentType_ReturnsBadRequest()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -196,7 +196,7 @@ public class AddCategoryImagesTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsNotFound()
+    public async Task AddCategoryImages_CategoryNotFound_ReturnsNotFound()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

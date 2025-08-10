@@ -35,7 +35,7 @@ public class UpdateCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task UpdateCategory_Unauthorized_ReturnsUnauthorized()
     {
         // Act
         var response = await HttpClient.PutAsync( $"{RequestUrl}/{Guid.NewGuid()}", new StringContent("", Encoding.UTF8, "application/json"));
@@ -45,7 +45,7 @@ public class UpdateCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotAdmin_ThenReturnsForbidden()
+    public async Task UpdateCategory_CustomerIsNotAdmin_ReturnsForbidden()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -60,7 +60,7 @@ public class UpdateCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenValidData_ThenReturnsOk()
+    public async Task UpdateCategory_ValidData_ReturnsOk()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -90,7 +90,7 @@ public class UpdateCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsNotFound()
+    public async Task UpdateCategory_CategoryNotInDb_ReturnsNotFound()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();

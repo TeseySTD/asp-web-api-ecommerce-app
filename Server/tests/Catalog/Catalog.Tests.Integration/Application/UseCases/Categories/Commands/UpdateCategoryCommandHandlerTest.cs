@@ -51,7 +51,7 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsFailureResult()
+    public async Task Handle_CategoryNotInDb_ReturnsNotFoundError()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
@@ -73,7 +73,7 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryHasProducts_ThenUpdatesCategoryAndInvalidatesProductCache()
+    public async Task Handle_CategoryHasProducts_ShouldUpdateCategoryAndInvalidateProductCache()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -124,7 +124,7 @@ public class UpdateCategoryCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryHasNoProducts_ThenUpdatesCategoryWithoutProductCacheInvalidation()
+    public async Task Handle_CategoryHasNoProducts_ShouldUpdateCategoryWithoutProductCacheInvalidation()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

@@ -41,7 +41,7 @@ public class DecreaseQuantityTest : ApiTest
     );
 
     [Fact]
-    public async Task WhenValidData_ThenReturnsOk()
+    public async Task DecreaseQuantity_ValidData_ReturnsOk()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -69,7 +69,7 @@ public class DecreaseQuantityTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductDoesNotExist_ThenReturnsNotFound()
+    public async Task DecreaseQuantity_ProductNotInDb_ReturnsNotFound()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -88,7 +88,7 @@ public class DecreaseQuantityTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotProductSeller_ThenReturnsForbidden()
+    public async Task DecreaseQuantity_CustomerIsNotProductSeller_ReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -111,7 +111,7 @@ public class DecreaseQuantityTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnathorized_ThenReturnsUnauthorized()
+    public async Task DecreaseQuantity_Unathorized_ReturnsUnauthorized()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -125,7 +125,7 @@ public class DecreaseQuantityTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNotSeller_ThenReturnsForbidden()
+    public async Task DecreaseQuantity_CustomerIsNotSeller_ReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();

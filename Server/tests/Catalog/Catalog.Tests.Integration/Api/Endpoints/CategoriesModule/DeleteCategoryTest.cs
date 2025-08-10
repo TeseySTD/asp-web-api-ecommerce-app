@@ -29,7 +29,7 @@ public class DeleteCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task DeleteCategory_Unauthorized_ReturnsUnauthorized()
     {
         // Act
         var response = await HttpClient.DeleteAsync($"{RequestUrl}/{Guid.NewGuid()}");
@@ -39,7 +39,7 @@ public class DeleteCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotAdmin_ThenReturnsForbidden()
+    public async Task DeleteCategory_CustomerIsNotAdmin_ReturnsForbidden()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -53,7 +53,7 @@ public class DeleteCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCategoryExists_ThenReturnsOk()
+    public async Task DeleteCategory_CategoryExists_ReturnsOk()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -82,7 +82,7 @@ public class DeleteCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCategoryNotFound_ReturnsBadRequest()
+    public async Task DeleteCategory_CategoryNotInDb_ReturnsBadRequest()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();

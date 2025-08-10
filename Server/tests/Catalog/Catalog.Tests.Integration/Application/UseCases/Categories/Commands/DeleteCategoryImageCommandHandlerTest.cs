@@ -31,7 +31,7 @@ public class DeleteCategoryImageCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsCategoryNotFoundError()
+    public async Task Handle_CategoryNotInDb_ReturnsCategoryNotFoundError()
     {
         // Arrange
         var nonExistentCategoryId = Guid.NewGuid();
@@ -47,7 +47,7 @@ public class DeleteCategoryImageCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenImageNotFoundOrNotBelongToCategory_ThenReturnsImageNotFoundError()
+    public async Task Handle_ImageNotInDbOrNotBelongToCategory_ReturnsImageNotFoundError()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -68,7 +68,7 @@ public class DeleteCategoryImageCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidImage_ThenRemovesImageSavesContextAndUpdatesCache()
+    public async Task Handle_ValidImage_ShouldRemoveImagedUpdateCache()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

@@ -50,7 +50,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenProductNotFound_ThenReturnsFailureResult()
+    public async Task Handle_ProductNotInDb_ReturnsProductNotFoundError()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
@@ -68,7 +68,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsFailureResult()
+    public async Task Handle_CategoryNotInDb_ReturnsCategoryNotFoundError()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -94,7 +94,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
 
 
     [Fact]
-    public async Task WhenProductSellerIsNotCustomer_ThenReturnsFailureResult()
+    public async Task Handle_ProductSellerIsNotCustomer_ReturnsCustomerMismatchError()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -128,7 +128,7 @@ public class UpdateProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidData_ThenUpdatesProductSavesContextAndCachesDto()
+    public async Task Handle_ValidData_ShouldUpdateProductAndCacheDto()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

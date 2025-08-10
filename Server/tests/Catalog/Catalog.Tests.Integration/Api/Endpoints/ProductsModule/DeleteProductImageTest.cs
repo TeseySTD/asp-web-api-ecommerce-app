@@ -43,7 +43,7 @@ public class DeleteProductImageTest : ApiTest
     );
 
     [Fact]
-    public async Task WhenValidData_ThenReturnsOk()
+    public async Task DeleteProductImage_ValidData_ReturnsOk()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -81,7 +81,7 @@ public class DeleteProductImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenImageNotFound_ThenReturnsNotFound()
+    public async Task DeleteProductImage_ImageNotInDb_ReturnsNotFound()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -110,7 +110,7 @@ public class DeleteProductImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductNotFound_ThenReturnsNotFound()
+    public async Task DeleteProductImage_ProductNotInDb_ReturnsNotFound()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -131,7 +131,7 @@ public class DeleteProductImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotProductSeller_ThenReturnsForbidden()
+    public async Task DeleteProductImage_CustomerIsNotProductSeller_ReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -153,7 +153,7 @@ public class DeleteProductImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task DeleteProductImage_Unauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var request =
@@ -167,7 +167,7 @@ public class DeleteProductImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNotSeller_ThenReturnsUnauthorized()
+    public async Task DeleteProductImage_NotSeller_ReturnsUnauthorized()
     {
         // Arrange
         var request = GenerateRequest(Guid.NewGuid(), Guid.NewGuid(), role: "Default");

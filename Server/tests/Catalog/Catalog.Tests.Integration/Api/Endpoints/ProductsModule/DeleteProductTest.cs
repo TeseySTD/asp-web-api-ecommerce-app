@@ -38,7 +38,7 @@ public class DeleteProductTest : ApiTest
     );
 
     [Fact]
-    public async Task WhenValidData_ThenReturnsOk()
+    public async Task Delete_Product_ValidData_ReturnsOk()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -59,7 +59,7 @@ public class DeleteProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductNotFound_ThenReturnsNotFound()
+    public async Task DeleteProduct_ProductNotInDb_ReturnsNotFound()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -78,7 +78,7 @@ public class DeleteProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task DeleteProduct_Unauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -92,7 +92,7 @@ public class DeleteProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotProductSeller_ThenReturnsForbidden()
+    public async Task DeleteProduct_CustomerIsNotProductSeller_ReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -114,7 +114,7 @@ public class DeleteProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotProductSellerButIsAdminAndValidData_ThenReturnsOk()
+    public async Task DeleteProduct_CustomerIsNotProductSellerButIsAdminAndValidData_ReturnsOk()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -136,7 +136,7 @@ public class DeleteProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNotSeller_ThenReturnsForbidden()
+    public async Task DeleteProduct_NotSeller_ReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();

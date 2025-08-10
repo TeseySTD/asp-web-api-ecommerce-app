@@ -20,7 +20,7 @@ public class GetCatregoriesTest : ApiTest
 
 
     [Fact]
-    public async Task WhenNoCategoriesExist_ThenReturnsNotFound()
+    public async Task GetCategories_NoCategoriesExist_ReturnsNotFound()
     {
         // Act
         var response = await HttpClient.GetAsync($"{RequestUrl}?page=1&pageSize=10");
@@ -33,7 +33,7 @@ public class GetCatregoriesTest : ApiTest
 
 
     [Fact]
-    public async Task WhenCategoriesExist_ThenReturnsOk()
+    public async Task GetCategories_CategoriesExist_ReturnsOk()
     {
         // Arrange
         var category1 = Category.Create(

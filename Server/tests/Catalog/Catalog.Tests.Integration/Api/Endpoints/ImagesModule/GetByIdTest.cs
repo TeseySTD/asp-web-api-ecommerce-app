@@ -15,7 +15,7 @@ public class GetByIdTest : ApiTest
     private const string RequestUrl = "/api/images";
 
     [Fact]
-    public async Task WhenValidData_ThenReturnsOk()
+    public async Task GetById_ValidData_ReturnsOk()
     {
         // Arrange
         var imageId = Guid.NewGuid();
@@ -39,7 +39,7 @@ public class GetByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenImageNotFound_ThenReturnsNotFound()
+    public async Task GetById_ImageNotInDb_ReturnsNotFound()
     {
         // Arrange
         var imageId = Guid.NewGuid();

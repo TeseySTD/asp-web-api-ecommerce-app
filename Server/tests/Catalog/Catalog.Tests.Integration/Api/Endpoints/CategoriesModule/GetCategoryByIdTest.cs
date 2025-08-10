@@ -19,7 +19,7 @@ public class GetCategoryByIdTest : ApiTest
     private const string RequestUrl = "/api/categories";
 
     [Fact]
-    public async Task WhenNoCategoriesExist_ThenReturnsNotFound()
+    public async Task GetCategoryById_NoCategoriesExist_ReturnsNotFound()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -34,7 +34,7 @@ public class GetCategoryByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCategoryExists_ThenReturnsOk()
+    public async Task GetCategorById_CategoryExists_ReturnsOk()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

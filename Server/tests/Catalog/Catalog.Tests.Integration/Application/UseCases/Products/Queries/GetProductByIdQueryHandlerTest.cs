@@ -41,7 +41,7 @@ public class GetProductByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCached_ThenReturnsFromCache()
+    public async Task Handle_Cached_ReturnsProductFromCache()
     {
         // Arrange
         var product = await GetProduct();
@@ -70,7 +70,7 @@ public class GetProductByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenNotCachedAndExists_ThenCachesAndReturns()
+    public async Task Handle_NotCachedAndExists_ShouldCacheAndReturnsProduct()
     {
         // Arrange
         var product = await GetProduct();
@@ -91,7 +91,7 @@ public class GetProductByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenNotCachedAndNotExists_ThenReturnsNotFound()
+    public async Task Handle_NotCachedAndNotExists_ReturnsNotFoundError()
     {
         // Arrange
         _cache.GetAsync($"product-{Guid.NewGuid()}").Returns([]);

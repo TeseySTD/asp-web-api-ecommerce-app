@@ -34,7 +34,7 @@ public class IncreaseQuantityCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenProductNotFound_ThenReturnsFailureResult()
+    public async Task Handle_ProductNotInDb_ReturnsProductNotFoundError()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
@@ -49,8 +49,7 @@ public class IncreaseQuantityCommandHandlerTest : IntegrationTest
         result.Errors.Should().ContainSingle(e => e is IncreaseQuantityCommandHandler.ProductNotFoundError);
     }
 
-    [Fact]
-    public async Task WhenProductSellerIsNotCustomer_ThenReturnsFailureResult()
+    [Fact] public async Task Handle_ProductSellerIsNotCustomer_ReturnsCustomerMismatchError()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -75,7 +74,7 @@ public class IncreaseQuantityCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidData_ThenIncreasesQuantity_SavesContext_AndCachesDto()
+    public async Task Handle_ValidData_ShouldIncreaseQuantityAndCacheDto()
     {
         // Arrange
         var productId = Guid.NewGuid();

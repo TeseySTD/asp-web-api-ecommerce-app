@@ -19,7 +19,7 @@ public class GetProductsTest : ApiTest
     private const string RequestUrl = "/api/products";
 
     [Fact]
-    public async Task WhenProductsExist_ThenReturnsOk()
+    public async Task GetProducts_ProductsInDb_ReturnsOk()
     {
         // Arrange
         var product1 = Product.Create(
@@ -65,7 +65,7 @@ public class GetProductsTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductsNotExist_ThenReturnsNotFound()
+    public async Task GetProducts_ProductsNotInDb_ReturnsNotFound()
     {
         // Arrange 
         var page = 0;

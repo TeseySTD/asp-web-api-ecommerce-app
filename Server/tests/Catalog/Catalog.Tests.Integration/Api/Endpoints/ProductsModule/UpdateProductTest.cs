@@ -59,7 +59,7 @@ public class UpdateProductTest : ApiTest
 
 
     [Fact]
-    public async Task WhenValidData_ThenReturnsOk()
+    public async Task UpdateProduct_ValidData_ReturnsOk()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -90,7 +90,7 @@ public class UpdateProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductDoesNotExist_ThenReturnsNotFound()
+    public async Task UpdateProduct_ProductNotInDb_ReturnsNotFound()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -110,7 +110,7 @@ public class UpdateProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCategoryDoesNotExist_ThenReturnsNotFound()
+    public async Task UpdateProduct_CategoryNotInDb_ReturnsNotFound()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -139,7 +139,7 @@ public class UpdateProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotProductSeller_ThenReturnsForbidden()
+    public async Task UpdateProduct_CustomerIsNotProductSeller_ReturnsForbidden()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -163,7 +163,7 @@ public class UpdateProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnautorized_ThenReturnsUnauthorized()
+    public async Task UpdateProduct_Unautorized_ReturnsUnauthorized()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -180,7 +180,7 @@ public class UpdateProductTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenNotSeller_ThenReturnsForbidden()
+    public async Task UpdateProduct_NotSeller_ReturnsForbidden()
     {
         // Arrange
         var dto = GenerateUpdateProductRequest(Guid.NewGuid());

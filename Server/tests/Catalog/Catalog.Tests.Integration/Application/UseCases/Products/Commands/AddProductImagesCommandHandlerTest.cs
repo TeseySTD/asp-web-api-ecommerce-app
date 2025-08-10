@@ -32,7 +32,7 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenProductNotFound_ThenReturnsFailureResult()
+    public async Task Handle_ProductNotInDb_ReturnsProductNotFoundError()
     {
         // Arrange
         var cmd = new AddProductImagesCommand(Guid.NewGuid(), Guid.NewGuid(),
@@ -48,7 +48,7 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenProductSellerIsNotCustomer_ThenReturnsFailureResult()
+    public async Task Handle_ProductSellerIsNotCustomer_ReturnsCustomerMismatchError()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -77,7 +77,7 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenTooMuchImages_ThenReturnsFailureResult()
+    public async Task Handle_TooMuchImages_ReturnsMaxImagesError()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -101,7 +101,7 @@ public class AddProductImagesCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidImages_ThenAddsImages_SavesContext_AndCachesDto()
+    public async Task Handle_ValidImages_ShouldAddImagesAndCacheDto()
     {
         // Arrange
         var id = Guid.NewGuid();

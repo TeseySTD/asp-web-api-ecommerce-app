@@ -33,7 +33,7 @@ public class CreateCategoryTest : ApiTest
     }
  
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task CreateCategory_Unauthorized_ReturnsUnauthorized()
     {
         // Act
         var response = await HttpClient.PostAsync(RequestUrl, new StringContent("", Encoding.UTF8, "application/json"));
@@ -43,7 +43,7 @@ public class CreateCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotAdmin_ThenReturnsForbidden()
+    public async Task CreateCategory_CustomerIsNotAdmin_ReturnsForbidden()
     {
         // Arrange
         var dto = new AddCategoryRequest("New Category", "New Description");
@@ -56,7 +56,7 @@ public class CreateCategoryTest : ApiTest
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
     [Fact]
-    public async Task WhenValidData_ThenReturnsOk()
+    public async Task CreateCategory_ValidData_ReturnsOk()
     {
         // Arrange
         var dto = new AddCategoryRequest("New Category", "New Description");
@@ -74,7 +74,7 @@ public class CreateCategoryTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenInvalidData_ThenReturnsBadRequest()
+    public async Task CreateCategory_InvalidData_ReturnsBadRequest()
     {
         // Arrange
         var dto = new AddCategoryRequest("", "Description"); // Invalid empty name

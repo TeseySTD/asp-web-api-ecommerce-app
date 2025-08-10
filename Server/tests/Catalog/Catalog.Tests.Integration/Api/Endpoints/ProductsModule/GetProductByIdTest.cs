@@ -20,7 +20,7 @@ public class GetProductByIdTest : ApiTest
     private const string RequestUrl = "/api/products";
 
     [Fact]
-    public async Task WhenProductExists_ThenReturnsOk()
+    public async Task GetProductById_ProductExists_ReturnsOk()
     {
         // Arrange
         var product = Product.Create(
@@ -48,7 +48,7 @@ public class GetProductByIdTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenProductDoesNotExist_ThenReturnsNotFound()
+    public async Task  GetProductById_ProductNotInDb_ReturnsNotFound()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();

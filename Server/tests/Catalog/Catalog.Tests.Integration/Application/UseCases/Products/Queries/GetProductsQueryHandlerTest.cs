@@ -45,7 +45,7 @@ public class GetProductsQueryHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenNoProducts_ThenReturnsNotFoundError()
+    public async Task Handle_NoProducts_ReturnsNotFoundError()
     {
         // Arrange
         var query = new GetProductsQuery(new PaginationRequest(), new ProductFilterRequest());
@@ -59,7 +59,7 @@ public class GetProductsQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenProductsExist_ThenReturnsPaginatedResult()
+    public async Task Handle_ProductsExist_ReturnsPaginatedResult()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -94,7 +94,7 @@ public class GetProductsQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenFilterByTitle_ThenReturnsOnlyMatchingProducts()
+    public async Task Handle_FilterByTitle_ReturnsOnlyMatchingProducts()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

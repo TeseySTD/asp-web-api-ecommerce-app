@@ -22,7 +22,7 @@ public class CategoryUpdatedDomainEventHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryCreatedDomainEventRaised_ThenPublishesMessageWithCorrectData()
+    public async Task Handle_CategoryCreatedDomainEventRaised_ShouldPublisheMessageWithCorrectData()
     {
         // Arrange 
         var categoryId = CategoryId.Create(Guid.NewGuid()).Value;

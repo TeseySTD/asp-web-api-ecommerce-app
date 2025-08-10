@@ -40,7 +40,7 @@ public class CreateProductCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenProductAlreadyExists_ThenReturnsFailureResult()
+    public async Task Handle_ProductAlreadyExists_ReturnsProductExistsError()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -75,7 +75,7 @@ public class CreateProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsFailureResult()
+    public async Task Handel_CategoryNotInDb_ReturnsCategoryNotFoundError()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -95,7 +95,7 @@ public class CreateProductCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidData_ThenCreatesProduct_SavesContext_AndCachesDto()
+    public async Task Handle_ValidData_ShouldCreateProductAndCacheDto()
     {
         // Arrange
         var id = Guid.NewGuid();

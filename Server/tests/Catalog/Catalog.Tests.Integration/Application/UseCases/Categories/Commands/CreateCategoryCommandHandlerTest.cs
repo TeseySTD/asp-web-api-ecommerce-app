@@ -22,7 +22,7 @@ public class CreateCategoryCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidRequest_ThenCreatesCategory_SavesContext_AndCachesDto()
+    public async Task Handle_ValidRequest_ShouldCreateCategoryAndCachesDto()
     {
         // Arrange
         var categoryName = "NewCategory";
@@ -53,7 +53,7 @@ public class CreateCategoryCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenSaveThrowsException_ThenReturnsFailureResult()
+    public async Task Handle_SaveMethodThrowsException_ReturnsFailureResult()
     {
         // Arrange
         var categoryName = "FaultyCategory";

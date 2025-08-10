@@ -38,7 +38,7 @@ public class DeleteCategoryImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenUnauthorized_ThenReturnsUnauthorized()
+    public async Task DeleteCategoryImage_Unauthorized_ReturnsUnauthorized()
     {
         // Act
         var response = await HttpClient.DeleteAsync($"{RequestUrl}/{Guid.NewGuid()}/images/{Guid.NewGuid()}");
@@ -48,7 +48,7 @@ public class DeleteCategoryImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotAdmin_ThenReturnsForbidden()
+    public async Task DeleteCategoryImage_CustomerIsNotAdmin_ReturnsForbidden()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -63,7 +63,7 @@ public class DeleteCategoryImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenValidData_ThenReturnsOk()
+    public async Task DeleteCategoryImage_ValidData_ReturnsOk()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -99,7 +99,7 @@ public class DeleteCategoryImageTest : ApiTest
     }
 
     [Fact]
-    public async Task WhenImageNotFound_ThneReturnsNotFound()
+    public async Task DeleteCategoryImage_ImageNotInDb_ReturnsNotFound()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -128,7 +128,7 @@ public class DeleteCategoryImageTest : ApiTest
 
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThneReturnsNotFound()
+    public async Task DeleteCategoryImage_CategoryNotInDb_ReturnsNotFound()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

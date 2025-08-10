@@ -32,7 +32,7 @@ public class AddCategoryImagesCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenCategoryNotFound_ThenReturnsFailureResult()
+    public async Task Handle_CategoryNotInDb_ReturnsCategoryNotFoundError()
     {
         // Arrange
         var nonExistentCategoryId = Guid.NewGuid();
@@ -49,7 +49,7 @@ public class AddCategoryImagesCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenImagesExceedMaximum_ThenReturnsFailureResult()
+    public async Task Handle_ImagesExceedMaximum_ReturnsImagesOutOfRangeError()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
@@ -81,7 +81,7 @@ public class AddCategoryImagesCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenValidImages_ThenAddsImages_SavesContext_AndCachesDto()
+    public async Task Handle_ValidImages_ShouldAddImagesAndCachesDto()
     {
         // Arrange
         var categoryId = Guid.NewGuid();

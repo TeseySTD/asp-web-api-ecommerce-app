@@ -35,7 +35,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
     );
 
     [Fact]
-    public async Task WhenProductNotFound_ThenReturnsFailureResult()
+    public async Task Handle_ProductNotInDb_ReturnsProductNotFoundError()
     {
         // Arrange
         var nonExistentProductId = Guid.NewGuid();
@@ -52,7 +52,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenCustomerIsNotProductSeller_ThenReturnsFailureResult()
+    public async Task Handle_CustomerIsNotProductSeller_ReturnsCustomerMismatchError()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -75,7 +75,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
     }
     
     [Fact]
-    public async Task WhenImageNotFound_ThenReturnsFailureResult()
+    public async Task Handle_ImageNotInDb_ReturnsImageNotFoundError()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -98,7 +98,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenImageExistsButNotBelongToProduct_ThenReturnsFailureResult()
+    public async Task Handle_ImageExistsButNotBelongToProduct_ReturnsImageNotFoundError()
     {
         // Arrange
         var productId = Guid.NewGuid();
@@ -127,7 +127,7 @@ public class DeleteProductImageCommandHandlerTest : IntegrationTest
     }
     
     [Fact]
-    public async Task WhenValidData_ThenRemovesImage_SavesContext_AndCachesDto()
+    public async Task Handle_ValidData_ShouldRemoveImageAndCacheDto()
     {
         // Arrange
         var productId = Guid.NewGuid();

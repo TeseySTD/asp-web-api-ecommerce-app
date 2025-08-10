@@ -14,7 +14,7 @@ public class GetImageByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenImageNotFound_ThenReturnsFailureResult()
+    public async Task Handle_ImageNotInDb_ReturnsImageNotFoundError()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
@@ -33,7 +33,7 @@ public class GetImageByIdQueryHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenImageExists_ThenReturnsImage()
+    public async Task Handle_ImageExists_ReturnsImage()
     {
         // Arrange
         var imageId = Guid.NewGuid();

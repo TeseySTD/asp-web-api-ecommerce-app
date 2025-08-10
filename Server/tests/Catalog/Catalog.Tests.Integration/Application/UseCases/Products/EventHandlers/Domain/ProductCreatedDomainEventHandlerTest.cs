@@ -24,7 +24,7 @@ public class ProductCreatedDomainEventHandlerTest : IntegrationTest
 
 
     [Fact]
-    public async Task WhenProductCreatedDomainEventRaised_ThenPublishesMessageWithCorrectData()
+    public async Task Handle_ProductCreatedDomainEventRaised_ShouldPublishMessageWithCorrectData()
     {
         // Arrange
         var productId = Guid.NewGuid();

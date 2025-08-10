@@ -31,7 +31,7 @@ public class ProductUpdatedDomainEventHandlerTest : IntegrationTest
     }
 
     [Fact]
-    public async Task WhenProductUpdatedEventRaised_ThenPublishesMessageWithCorrectData()
+    public async Task Handle_ProductUpdatedEventRaised_ShouldPublishMessageWithCorrectData()
     {
         // Arrange
         var categoryId = Guid.NewGuid();
