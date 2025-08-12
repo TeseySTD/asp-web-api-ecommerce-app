@@ -1,68 +1,34 @@
 # 🚀 Microservices Web API Project 
----
+
 ## 📋Overview 
 This is a **PET** project — a set of ASP.NET Core web APIs built as microservices.  
 The main goal of the project is to gain hands-on experience with modern architectural practices  (Clean Architecture, DDD, CQRS, event-driven communication, SAGA) and libraries or frameworks (EF Core, MediatR, MassTransit, FluentValidation, etc.) . Each service follows DDD principles and is designed to be independently developed, tested, and deployed.
 
----
-
 ## 🛠️ Tech Stack
-<p align="center">
-  <a href="https://dotnet.microsoft.com/en-us/" title=".NET 8" >
-    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dotnetcore/dotnetcore-original.svg" width="70" height="70"/> 
-  </a> 
-  <a href="https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-8.0" title="ASP.NET Core"> 
-    <img src="./assets/readme/asp.png" width="70" height="70"/> 
-  </a>   
-  <a href="https://www.postgresql.org" title="Postgre Sql"> 
-    <img src="./assets/readme/postgres.svg" width="70" height="70" /> 
-  </a> 
-  <a href="https://redis.io/" title="Redis"> 
-    <img src="./assets/readme/redis.png" width="70" height="70" /> 
-  </a> 
-  <a href="https://www.rabbitmq.com/" title="Rabbit Mq"> 
-    <img src="./assets/readme/rabbitmq.svg" width="70" height="70" /> 
-  </a> 
-  <a href="https://www.docker.com/" title="Docker"> 
-    <img src="./assets/readme/docker.svg" width="70" height="70" /> 
-  </a> 
-  <a href="https://learn.microsoft.com/en-us/ef/" title="Entity Framework Core"> 
-    <img src="./assets/readme/efcore.svg" width="70" height="70" /> 
-  </a>
-  <a href="https://martendb.io/" title="Marten Db"> 
-    <img src="./assets/readme/marten.png" width="70" height="70" /> 
-  </a>
-  <a href="https://masstransit.io/" title="MassTransit"> 
-    <img src="./assets/readme/masstransit.svg" width="70" height="70" /> 
-  </a>
-  <a href="https://github.com/LuckyPennySoftware/MediatR" title="MediatR"> 
-    <img src="./assets/readme/mediatr.png" width="70" height="70" /> 
-  </a>  
-  <a href="https://github.com/FluentValidation/FluentValidation" title="Fluent Validation"> 
-    <img src="./assets/readme/fluentvalidation.png" width="70" height="70" /> 
-  </a>
-  <a href="https://github.com/MapsterMapper/Mapster" title="Mapster"> 
-    <img src="./assets/readme/mapster.png" width="70" height="70"/> 
-  </a>
-  <a href="https://github.com/CarterCommunity/Carter" title="Carter"> 
-    <img src="./assets/readme/carter.png" width="70" height="70"/> 
-  </a>
-  <a href="https://github.com/dotnet/yarp" title="Yarp"> 
-    <img src="./assets/readme/yarp.png" width="70" height="70" /> 
-  </a>
-  <a href="https://xunit.net/?tabs=cs" title="xUnit"> 
-    <img src="./assets/readme/xunit.png" width="70" height="70" /> 
-  </a>
-  <a href="https://nsubstitute.github.io/" title="NSubstitute"> 
-    <img src="./assets/readme/nsub.png" width="70" height="70" /> 
-  </a>
-  <a href="https://testcontainers.com/" title="Testcontainers "> 
-    <img src="./assets/readme/testcont.png" width="70" height="70" /> 
-  </a>
-  <a href="https://github.com/jbogard/Respawn" title="Respawn "> 
-    <img src="./assets/readme/respawn.png" width="70" height="70" /> 
-  </a>
-</p>
+<div align="center">
+
+[<img alt=".NET" height="70" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dotnetcore/dotnetcore-original.svg" title=".NET 8" width="70"/>](https://dotnet.microsoft.com/en-us/)
+[<img alt="ASP.NET Core" height="70" src="./assets/readme/asp.png" title="ASP.NET Core" width="70"/>](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-8.0)
+[<img alt="Postgres" height="70" src="./assets/readme/postgres.svg" title="Postgres" width="70"/>](https://www.postgresql.org)
+[<img alt="Redis" height="70" src="./assets/readme/redis.png" title="Redis" width="70"/>](https://redis.io/)
+[<img alt="RabbitMQ" height="70" src="./assets/readme/rabbitmq.svg" title="RabbitMQ" width="70"/>](https://www.rabbitmq.com/)
+[<img alt="Docker" height="70" src="./assets/readme/docker.svg" title="Docker" width="70"/>](https://www.docker.com/)
+[<img alt="EF Core" height="70" src="./assets/readme/efcore.svg" title="EF Core" width="70"/>](https://learn.microsoft.com/en-us/ef/)
+[<img alt="Marten DB" height="70" src="./assets/readme/marten.png" title="Marten DB" width="70"/>](https://martendb.io/)
+[<img alt="MassTransit" height="70" src="./assets/readme/masstransit.svg" title="MassTransit" width="70"/>](https://masstransit.io/)
+[<img alt="MediatR" height="70" src="./assets/readme/mediatr.png" title="MediatR" width="70"/>](https://github.com/LuckyPennySoftware/MediatR)
+[<img alt="FluentValidation" height="70" src="./assets/readme/fluentvalidation.png" title="FluentValidation" width="70"/>](https://github.com/FluentValidation/FluentValidation)
+[<img alt="Mapster" height="70" src="./assets/readme/mapster.png" title="Mapster" width="70"/>](https://github.com/MapsterMapper/Mapster)
+[<img alt="Carter" height="70" src="./assets/readme/carter.png" title="Carter" width="70"/>](https://github.com/CarterCommunity/Carter)
+[<img alt="YARP" height="70" src="./assets/readme/yarp.png" title="YARP" width="70"/>](https://github.com/dotnet/yarp)
+[<img alt="xUnit" height="70" src="./assets/readme/xunit.png" title="xUnit" width="70"/>](https://xunit.net/?tabs=cs)
+[<img alt="NSubstitute" height="70" src="./assets/readme/nsub.png" title="NSubstitute" width="70"/>](https://nsubstitute.github.io/)
+[<img alt="Testcontainers" height="70" src="./assets/readme/testcont.png" title="Testcontainers" width="70"/>](https://testcontainers.com/)
+[<img alt="Respawn" height="70" src="./assets/readme/respawn.png" title="Respawn" width="70"/>](https://github.com/jbogard/Respawn)
+
+</div>
+
+
 
 ## 📁 Project Structure
 ```
