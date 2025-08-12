@@ -108,4 +108,48 @@ Has two projects - `Shared.Core` and `Shared.Messaging`.
 - `Shared.Core` contains shared logic and base classes. It has Fluent Validation abstractions, Result pattern implementation, and custom validators.
 `Shared.Core` describes all DDD abstractions like Entity<> and AggregateRoot<>, adds MediatR abstractions for CQRS implementation, configurations for logging and validation pipelines,  pagination and envelope records and extension methods for shared authentication, authorization, swagger, etc.
 
+## 🏗️ Architectural Principles
+
+### DDD
+I made an accent in **Rich Domain Model** approach.
+My models have all their domain logic, like creating, updating, event dispathcing, etc.
+Value objects have their logic too. They all have factory method `Create`, that returns `Result<TypeOfValueObject>`.
+This method contains all validation logic , and if the validation process fails, it returns a `Result` object with all errors; if not, it returns success `Result` with ValueObject in the `Value` field.
+I decided to make ValueObject responsible for their own valid state becaus of:
+1. **Single Responsablity Principle** - Domain models take responsibility only for **their state**, not all ValueObjects that they consist of.
+2. **Always-Valid Domain Model** - Domain model consist of ValueObjects or entities, which are consist of ValueObjects too, so if all ValueObject are valid, the model is valid too.
+   This type of validation is perfectly connected with the `FluentValdation` library using a special custom validator that checks input using a factory method in a value object.
+
+For example:
+```csharp
+public class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderCommand>
+{
+    public UpdateOrderCommandValidator()
+    {
+        RuleFor(x => x.CustomerId)
+            .MustBeCreatedWith(CustomerId.Create); // This is the custom validator that takes
+                                                   // ValueObjects factory method, and checks
+                                                   // it result.
+        
+        RuleFor(x => x.OrderId)
+            .MustBeCreatedWith(OrderId.Create);
+        
+        RuleFor(x => x.Value.Payment)
+            .MustBeCreatedWith((p) => Payment.Create(
+                cardName: p.cardName,
+                cardNumber: p.cardNumber,
+                paymentMethod: p.paymentMethod,
+                expiration: p.expiration,
+                cvv: p.cvv
+            )
+        );
+    }
+}
+```
+I also was inspired by this article<sup>[1]</sup> and this video<sup>[2]</sup> about DDD validation.
+
+
+<!-- References -->
+[1]: https://enterprisecraftsmanship.com/posts/validation-and-ddd/ "Validation and DDD — Article"
+[2]: https://youtu.be/mMo8G3gCOtA?si=3LXKO0oUmEB4Nr2J&t=1497 "DDD validation — Video (timestamped)"
 
