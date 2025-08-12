@@ -6,6 +6,64 @@ The main goal of the project is to gain hands-on experience with modern architec
 
 ---
 
+## 🛠️ Tech Stack
+<p align="center">
+  <a href="https://dotnet.microsoft.com/en-us/" title=".NET 8" >
+    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dotnetcore/dotnetcore-original.svg" width="70" height="70" style="border-radius: 50%; "/> 
+  </a> 
+  <a href="https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-8.0" title="ASP.NET Core"> 
+    <img src="./assets/readme/asp.net.jpeg" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>   
+  <a href="https://www.postgresql.org" title="Postgre Sql"> 
+    <img src="./assets/readme/postgres.svg" width="70" height="70" style="border-radius: 50%;"/> 
+  </a> 
+  <a href="https://redis.io/" title="Redis"> 
+    <img src="./assets/readme/redis.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a> 
+  <a href="https://www.rabbitmq.com/" title="Rabbit Mq"> 
+    <img src="./assets/readme/rabbitmq.svg" width="70" height="70" style="border-radius: 50%;"/> 
+  </a> 
+  <a href="https://www.docker.com/" title="Docker"> 
+    <img src="./assets/readme/docker.svg" width="70" height="70" style="border-radius: 50%;"/> 
+  </a> 
+  <a href="https://learn.microsoft.com/en-us/ef/" title="Entity Framework Core"> 
+    <img src="./assets/readme/efcore.svg" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://martendb.io/" title="Marten Db"> 
+    <img src="./assets/readme/marten.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://masstransit.io/" title="MassTransit"> 
+    <img src="./assets/readme/masstransit.svg" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://github.com/LuckyPennySoftware/MediatR" title="MediatR"> 
+    <img src="./assets/readme/mediatr.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>  
+  <a href="https://github.com/FluentValidation/FluentValidation" title="Fluent Validation"> 
+    <img src="./assets/readme/fluentvalidation.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://github.com/MapsterMapper/Mapster" title="Mapster"> 
+    <img src="./assets/readme/mapster.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://github.com/CarterCommunity/Carter" title="Carter"> 
+    <img src="./assets/readme/carter.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://github.com/dotnet/yarp" title="Yarp"> 
+    <img src="./assets/readme/yarp.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://xunit.net/?tabs=cs" title="xUnit"> 
+    <img src="./assets/readme/xunit.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://nsubstitute.github.io/" title="NSubstitute"> 
+    <img src="./assets/readme/nsub.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://testcontainers.com/" title="Testcontainers "> 
+    <img src="./assets/readme/testcont.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+  <a href="https://github.com/jbogard/Respawn" title="Respawn "> 
+    <img src="./assets/readme/respawn.png" width="70" height="70" style="border-radius: 50%;"/> 
+  </a>
+</p>
+
 ## 📁 Project Structure
 ```
 Server/
