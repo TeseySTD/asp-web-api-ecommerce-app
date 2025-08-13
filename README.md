@@ -118,7 +118,9 @@ This method contains all validation logic , and if the validation process fails,
 I decided to make ValueObject responsible for their own valid state becaus of:
 1. **Single Responsablity Principle** - Domain models take responsibility only for **their state**, not all ValueObjects that they consist of.
 2. **Always-Valid Domain Model** - Domain model consist of ValueObjects or entities, which are consist of ValueObjects too, so if all ValueObject are valid, the model is valid too.
-   This type of validation is perfectly connected with the `FluentValdation` library using a special custom validator that checks input using a factory method in a value object.
+3. **Infomation Expert Principle (GRASP)** - Value object contains all necessary information about itself to validate its state.
+
+This type of validation is perfectly connected with the `FluentValdation` library using a special custom validator that checks input using a factory method in a value object.
 
 For example:
 ```csharp
@@ -148,6 +150,19 @@ public class UpdateOrderCommandValidator : AbstractValidator<UpdateOrderCommand>
 ```
 I also was inspired by this article<sup>[1]</sup> and this video<sup>[2]</sup> about DDD validation.
 
+### Clean Architecture
+All services are built using this principle but with a feature for practical purposes.
+This feature is the **EF Core** dependencies between the `Application` and `Persistence` layers.
+Mostly when implementing the business logic (`Application`) layer with **Clean Architecture**, developers make an IRepository interface that describes 
+all necessary methods to work with DB and`Presistence` layer implements it and places it in the dependency injection pool,
+so the `Application` layer is not dependent on the `Persistence` layer - which  **Clean Architecture** needs.
+I did the same in the `Basket` service, but in rest of the services I made a trick. Because **EF Core** `DbSet` and `DbContext`  implement **Repository** and **UnitOfWork** patterns already,
+in the Application layer I would have to implement all interfaces for it, so a lot of boilerplate code had to be written, and also my repositories cannot contain necessary **EF Core** logic like `Include` and `ThenInclude` methods.
+I could write all that boilerplate, but I decided that it's not practical. 
+Instead, I add to the `Application` layer one package - `Microsoft.EntityFrameworkCore.Relational` and define `IApplicationDbContext` interfaces -
+where  `DbSets` and `SaveChangesAsync` methods are defined.
+`Persistence` layer implements this interface and adds it to the dependency injection pool. This approach adds ORM dependency to
+the `Application` layer, so it is harder to test, but it doesn't add a database one - `Application` layer still can use any DB; ORM makes abstraction of the database itself.
 
 <!-- References -->
 [1]: https://enterprisecraftsmanship.com/posts/validation-and-ddd/ "Validation and DDD — Article"
