@@ -156,9 +156,11 @@ This feature is the **EF Core** dependencies between the `Application` and `Pers
 Mostly when implementing the business logic (`Application`) layer with **Clean Architecture**, developers make an IRepository interface that describes 
 all necessary methods to work with DB and`Presistence` layer implements it and places it in the dependency injection pool,
 so the `Application` layer is not dependent on the `Persistence` layer - which  **Clean Architecture** needs.
+    
 I did the same in the `Basket` service, but in rest of the services I made a trick. Because **EF Core** `DbSet` and `DbContext`  implement **Repository** and **UnitOfWork** patterns already,
 in the Application layer I would have to implement all interfaces for it, so a lot of boilerplate code had to be written, and also my repositories cannot contain necessary **EF Core** logic like `Include` and `ThenInclude` methods.
 I could write all that boilerplate, but I decided that it's not practical. 
+
 Instead, I add to the `Application` layer one package - `Microsoft.EntityFrameworkCore.Relational` and define `IApplicationDbContext` interfaces -
 where  `DbSets` and `SaveChangesAsync` methods are defined.
 `Persistence` layer implements this interface and adds it to the dependency injection pool. This approach adds ORM dependency to
