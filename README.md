@@ -258,6 +258,12 @@ I also defined some behaviors in the **MediatR** pipeline: `ValidationBehaviour`
 
 `ValidationBehaviour` takes all commands and queries validators from **FluentValidation** library, checks their results before execution, and if result is failure - returns it instead.
 
+### Event-Driven
+I implement **Event-Driven Architecture** using **RabbitMQ** as a *message broker* and **MassTransit** library to interact with it.
+
+Most of the time, events need only one action to handle them, so it's enough to have single event handlers in microservices. 
+
+To orchestrate much more complicated workflows, I used the **SAGA Pattern** and stored the saga state in the DB, using **EF Core**. In my API it was `Ordering Workflow` that had actions across many microservices.
 
 <!-- References -->
 [1]: https://enterprisecraftsmanship.com/posts/validation-and-ddd/ "Validation and DDD — Article"
