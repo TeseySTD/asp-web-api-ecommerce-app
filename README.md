@@ -56,7 +56,7 @@ Server/
 │   │   │   │   ├── Users.Application/
 │   │   │   │   ├── Users.Core/
 │   │   │   │   ├── Users.Infrastructure/
-│   │   │   │   └── Users.Persistence/
+│   │   │   └── └── Users.Persistence/
 │   │   ├── Shared/
 │   │   │   ├── Shared.Core/
 │   │   │   └── Shared.Messaging/
@@ -265,7 +265,34 @@ Most of the time, events need only one action to handle them, so it's enough to 
 
 To orchestrate much more complicated workflows, I used the **SAGA Pattern** and stored the saga state in the DB, using **EF Core**. In my API it was `Ordering Workflow` that had actions across many microservices.
 
+## 🧪 Testing
+For each service I wrote two types of tests: **Integration** and **Unit** test.
+### Unit Tests
+I decided to use **xUnit** as main test framework and **NSubtitute** as mock library, I didn't use **Moq** because of security vulnerabilities<sup>[3]</sup> that were, so I think it is no safe to trust them.
+
+In all projects `Core` or `Domain` layer tested usinge unit tests but `Application` layer only in `Basket` service. 
+This is because of ORM _(for details look in **Integration Tests** section)_ and test unreliability.
+
+### Integration Tests
+I decided to use **Testcontainers** in this type of tests, because:
+1. It is more reliable to test with real infrastructure elements.
+2. Almost any CI/CD has **Docker** and **Docker** is the lightweight way to use different services.
+3. No need to write any `Dockerfiles` - all containers are up from code.
+
+All services has `API` layer integration tests, where endpoints reponses are tested and almost all (despite `Basket` service) has `Application` layer integration tests.
+The reason of it is the **EF Core** dependency in each of this services. 
+
+I think it is better to test **EF Core** using integration tests approach then unit test because:
+1. It is hard to mock. Mocking `DbContext` is quite hard and requires to make some test abstractions. 
+And even if it's done, developer must think about any _raw sql_ logic or methods, that directly works with SQL like `ExecuteDeleteAsync` and `ExecuteUpdateAsync`. 
+2. Any mocks or fake realisations are not guarantee<sup>[4]</sup> that provider-specific translations will pass and LINQ methods will work correctly.
+3. In-Memory Providers also has limitations like it is not able to execute any _raw sql_.
+
+So, I add database dependency in `Application` layer test where EF Core was, but other dependencies was mocked if it could be.
+
+
 <!-- References -->
 [1]: https://enterprisecraftsmanship.com/posts/validation-and-ddd/ "Validation and DDD — Article"
 [2]: https://youtu.be/mMo8G3gCOtA?si=3LXKO0oUmEB4Nr2J&t=1497 "DDD validation — Video (timestamped)"
-
+[3]: https://github.com/devlooped/moq/issues/1372#issuecomment-1670344399 "Decompiled code, that spawns external git process to get email"
+[4]: https://learn.microsoft.com/en-us/ef/core/testing/choosing-a-testing-strategy#overall-comparison "Comparison of different aproaches to test EF Core"
