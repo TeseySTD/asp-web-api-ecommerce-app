@@ -258,7 +258,7 @@ I also defined some behaviors in the **MediatR** pipeline: `ValidationBehaviour`
 
 `ValidationBehaviour` takes all commands and queries validators from **FluentValidation** library, checks their results before execution, and if result is failure - returns it instead.
 
-### Event-Driven
+### Event-Driven Architecture
 I implement **Event-Driven Architecture** using **RabbitMQ** as a *message broker* and **MassTransit** library to interact with it.
 
 Most of the time, events need only one action to handle them, so it's enough to have single event handlers in microservices. 
@@ -268,7 +268,7 @@ To orchestrate much more complicated workflows, I used the **SAGA Pattern** and 
 ## 🧪 Testing
 For each service, I wrote two types of tests: **Integration** and **Unit** tests.
 All of them was written in `Arrange Act Assert` pattern and their names in  `MethodName_ScenarioUnderTest_ExpectedBehavior` pattern. 
-I decided to use these patterns because they defined as best<sup>[3]</sup> for .NET testing. 
+I used these patterns because they defined as best<sup>[3]</sup> for .NET testing. 
 ### Unit Tests
 I decided to use **xUnit** as main test framework and **NSubtitute** as mock library, I didn't use **Moq** because of security vulnerabilities<sup>[4]</sup> that were, so I think it is not safe to trust them.
 
@@ -290,10 +290,10 @@ And even if it's done, the developer must think about any _raw sql_ logic or met
 2. Any mocks or fake realizations do not guarantee<sup>[5]</sup> that provider-specific translations will pass and LINQ methods will work correctly.
 3. In-Memory Providers also have limitations, like not being able to execute any _raw sql_.
 
-All of it pushed me to making the decision to make integration test for the `Application` layer in services, where EF Core was.
+All of it pushed me to make the decision to choose integration tests for the `Application` layer in services, where EF Core was.
 Other dependencies in such tests were mocked if it could be done.
 
-For clearing datebase after each test I used **Respawn** libary - it sql script that cleans DB so this is lighter than manual DB clearing.
+For clearing datebase after each test I used **Respawn** libary - it generates sql script that cleans DB so this is lighter than manual DB clearing.
 
 
 <!-- References -->
