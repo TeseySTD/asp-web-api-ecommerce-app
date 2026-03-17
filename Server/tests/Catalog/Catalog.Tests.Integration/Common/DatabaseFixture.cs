@@ -20,7 +20,7 @@ public class DatabaseFixture : IAsyncLifetime
     private NpgsqlConnection _connection = null!;
 
     public string ConnectionString => _dbContainer.GetConnectionString();
-    
+
     public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
@@ -32,16 +32,18 @@ public class DatabaseFixture : IAsyncLifetime
             .UseNpgsql(_dbContainer.GetConnectionString())
             .Options;
         
-        using var migrationContext = new ApplicationDbContext(options);
-        migrationContext.Database.Migrate();
-        
-        _respawner = await Respawner.CreateAsync(_connection , new()
+        await using var migrationContext = new ApplicationDbContext(options);
+
+        await migrationContext.Database.MigrateAsync();
+        await Task.Delay(500); // Pause for postgres
+
+        _respawner = await Respawner.CreateAsync(_connection, new()
         {
             DbAdapter = DbAdapter.Postgres,
             SchemasToInclude = ["public"]
         });
     }
-    
+
     public async Task ResetAsync() => await _respawner.ResetAsync(_connection);
 
     public async Task DisposeAsync()
