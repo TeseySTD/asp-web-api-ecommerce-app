@@ -32,7 +32,7 @@ public class IntegrationTestWebApplicationFactory : WebApplicationFactory<Progra
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseSolutionRelativeContentRoot("src/Services/Users/Users.API");
+        builder.UseSolutionRelativeContentRoot("src/Services/Ordering/Ordering.API");
 
         builder.ConfigureAppConfiguration(cfg => { cfg.AddEnvironmentVariables(); });
 
