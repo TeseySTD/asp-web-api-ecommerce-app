@@ -17,7 +17,7 @@ public class DatabaseFixture : IAsyncLifetime
         .WithDatabase("catalog-api")
         .WithUsername("postgres")
         .WithPassword("postgres")
-        .WithName("catalog.test.database")
+        // .WithName("catalog.test.database")
         .Build();
 
     private Respawner _respawner = null!;

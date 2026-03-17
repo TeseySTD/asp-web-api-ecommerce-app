@@ -5,7 +5,7 @@ namespace Users.Tests.Integration.Common;
 public class SmtpServerFixture : IAsyncLifetime
 {
     private readonly PapercutContainer _smtpServerContainer = new PapercutBuilder()
-        .WithName("users.test.smtp")
+        // .WithName("users.test.smtp")
         .WithImage("changemakerstudiosus/papercut-smtp:latest")
         .Build();
 

@@ -6,7 +6,7 @@ public class MessageBrokerFixture : IAsyncLifetime
 {
     private RabbitMqContainer _messageBrokerContainer = new RabbitMqBuilder()
         .WithImage("rabbitmq:management")
-        .WithName("ordering.test.messagebroker")
+        // .WithName("ordering.test.messagebroker")
         .WithHostname("ecommerce-mq")
         .WithUsername("guest")
         .WithPassword("guest")

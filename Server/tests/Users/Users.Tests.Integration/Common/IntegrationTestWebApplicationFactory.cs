@@ -53,11 +53,20 @@ public class IntegrationTestWebApplicationFactory : WebApplicationFactory<Progra
         builder.UseSetting("Email:SenderEmail", _emailSender);
         builder.UseSetting("Email:Sender", _emailName);
 
-        Environment.SetEnvironmentVariable("JWT_PUBLIC_KEY_PATH",
-            "D:/projects/ASP/WebApiEcommerceProject/server/secrets/jwt_public_key.pem");
-        Environment.SetEnvironmentVariable("JWT_PRIVATE_KEY_PATH",
-            "D:/projects/ASP/WebApiEcommerceProject/Server/secrets/jwt_private_key.pem");
+        var currentDir = new DirectoryInfo(Directory.GetCurrentDirectory());
+        while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "WebApiEcommerceProject.sln")))
+        {
+            currentDir = currentDir.Parent;
+        }
         
+        if (currentDir != null)
+        {
+            var secretsPath = Path.Combine(currentDir.FullName, "secrets");
+            var jwtPublicPath = Path.Combine(secretsPath, "jwt_public_key.pem");
+            var jwtPrivatePath = Path.Combine(secretsPath, "jwt_private_key.pem");
+            Environment.SetEnvironmentVariable("JWT_PUBLIC_KEY_PATH", jwtPublicPath);
+            Environment.SetEnvironmentVariable("JWT_PRIVATE_KEY_PATH", jwtPrivatePath);
+        }
     }
         
     protected override IHost CreateHost(IHostBuilder builder)

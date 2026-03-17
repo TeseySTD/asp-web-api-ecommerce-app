@@ -13,7 +13,7 @@ public class DatabaseFixture : IAsyncLifetime
         .WithDatabase("ordering-api")
         .WithUsername("postgres")
         .WithPassword("postgres")
-        .WithName("ordering.test.database")
+        // .WithName("ordering.test.database")
         .Build();
 
     private Respawner _respawner = null!;

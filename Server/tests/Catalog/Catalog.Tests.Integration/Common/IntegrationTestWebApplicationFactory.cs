@@ -45,8 +45,18 @@ public class IntegrationTestWebApplicationFactory : WebApplicationFactory<Progra
         builder.UseSetting("MessageBroker:UserName", _messageBrokerUserName);
         builder.UseSetting("MessageBroker:Password", _messageBrokerPassword);
 
-        Environment.SetEnvironmentVariable("JWT_PUBLIC_KEY_PATH",
-            "D:/projects/ASP/WebApiEcommerceProject/server/secrets/jwt_public_key.pem");
+        var currentDir = new DirectoryInfo(Directory.GetCurrentDirectory());
+        while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "WebApiEcommerceProject.sln")))
+        {
+            currentDir = currentDir.Parent;
+        }
+        
+        if (currentDir != null)
+        {
+            var secretsPath = Path.Combine(currentDir.FullName, "secrets");
+            var jwtPublicPath = Path.Combine(secretsPath, "jwt_public_key.pem");
+            Environment.SetEnvironmentVariable("JWT_PUBLIC_KEY_PATH", jwtPublicPath);
+        }
 
         builder.ConfigureTestServices(services =>
         {

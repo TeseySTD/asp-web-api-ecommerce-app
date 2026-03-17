@@ -6,7 +6,7 @@ namespace Catalog.Tests.Integration.Common;
 public class CacheFixture : IAsyncLifetime
 {
     private readonly RedisContainer _cacheContainer = new RedisBuilder()
-        .WithName("catalog.test.cache")
+        // .WithName("catalog.test.cache")
         .WithImage("redis")
         .Build();
 
