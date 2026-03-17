@@ -1,0 +1,33 @@
+﻿name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./Server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' 
+
+      - name: Restore dependencies
+        run: dotnet restore WebApiEcommerceProject.sln
+
+      - name: Build project
+        run: dotnet build WebApiEcommerceProject.sln --configuration Release --no-restore
+
+      - name: Run Tests
+        run: dotnet test WebApiEcommerceProject.sln --configuration Release --no-build --verbosity normal
