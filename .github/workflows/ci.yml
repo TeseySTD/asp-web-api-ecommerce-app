@@ -15,19 +15,22 @@ jobs:
         working-directory: ./Server
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x' 
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore WebApiEcommerceProject.sln
+    - name: Restore dependencies
+      run: dotnet restore WebApiEcommerceProject.sln
 
-      - name: Build project
-        run: dotnet build WebApiEcommerceProject.sln --configuration Release --no-restore
+    - name: Build project
+      run: dotnet build WebApiEcommerceProject.sln --configuration Release --no-restore
 
-      - name: Run Tests
-        run: dotnet test WebApiEcommerceProject.sln --configuration Release --no-build --verbosity normal
+    - name: Generate Auth Keys
+      run: dotnet run --project src/KeyManager/KeyManager.csproj
+
+    - name: Run Tests
+      run: dotnet test WebApiEcommerceProject.sln --configuration Release --no-build --verbosity normal
