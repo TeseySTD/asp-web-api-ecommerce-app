@@ -1,14 +1,20 @@
 ﻿using System.Text;
 using KeyManager;
 
-var solutionRootPath = Environment.CurrentDirectory.Substring(0, Environment.CurrentDirectory.IndexOf("src", StringComparison.Ordinal));
+var currentDir = Environment.CurrentDirectory;
+
+int srcIndex = currentDir.IndexOf("src", StringComparison.Ordinal);
+var solutionRootPath = srcIndex != -1 
+    ? currentDir.Substring(0, srcIndex) 
+    : currentDir;
+
 var secretsPath = Path.Combine(solutionRootPath, "secrets");
 var privateKeyPath = Path.Combine(secretsPath, "jwt_private_key.pem");
 var publicKeyPath = Path.Combine(secretsPath, "jwt_public_key.pem");
 
 if (!File.Exists(privateKeyPath) || !File.Exists(publicKeyPath))
 {
-    Console.WriteLine("Keys not found. Creating new...");
+    Console.WriteLine($"Keys not found at {secretsPath}. Creating new...");
     
     var keys = KeyManager.KeyManager.GenerateKeys();
     SecretManager.SaveKeys(secretsPath, keys.privateKey, keys.publicKey);
