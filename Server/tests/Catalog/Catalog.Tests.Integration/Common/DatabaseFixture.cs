@@ -29,13 +29,12 @@ public class DatabaseFixture : IAsyncLifetime
         await _connection.OpenAsync();
         
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql(_dbContainer.GetConnectionString())
+            .UseNpgsql(_connection)
             .Options;
         
         await using var migrationContext = new ApplicationDbContext(options);
 
         await migrationContext.Database.EnsureCreatedAsync();
-        await Task.Delay(500); // Pause for postgres
 
         _respawner = await Respawner.CreateAsync(_connection, new()
         {
