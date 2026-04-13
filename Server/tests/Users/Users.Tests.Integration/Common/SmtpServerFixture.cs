@@ -6,7 +6,7 @@ public class SmtpServerFixture : IAsyncLifetime
 {
     private readonly PapercutContainer _smtpServerContainer = new PapercutBuilder()
         // .WithName("users.test.smtp")
-        .WithImage("changemakerstudiosus/papercut-smtp:latest")
+        .WithImage("changemakerstudiosus/papercut-smtp:7.0.0-rc1")
         .Build();
 
     public string Port => _smtpServerContainer.SmtpPort.ToString();
