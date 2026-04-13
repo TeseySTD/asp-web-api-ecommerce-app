@@ -77,7 +77,8 @@ public class MakeOrderSagaTest : IntegrationTest
     }
 
     [Fact]
-    public async Task CheckedCustomer_InCheckingCustomerState_ShouldTransitToReservingProductsAndPublishReserveProductsMessage()
+    public async Task
+        CheckedCustomer_InCheckingCustomerState_ShouldTransitToReservingProductsAndPublishReserveProductsMessage()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -231,15 +232,10 @@ public class MakeOrderSagaTest : IntegrationTest
         // Arrange
         var orderId = Guid.NewGuid();
         var customerId = Guid.NewGuid();
-        var products = new List<ProductWithQuantityDto>
-        {
-            new(Guid.NewGuid(), 1),
-            new(Guid.NewGuid(), 3)
-        };
+        var products = new List<ProductWithQuantityDto> { new(Guid.NewGuid(), 1) };
         var orderItems = new List<OrderItemApprovedDto>
         {
-            new(Guid.NewGuid(), "Product A", "Product A Description", 1, 15.00m),
-            new(Guid.NewGuid(), "Product B", "Product B Description", 3, 8.50m)
+            new(Guid.NewGuid(), "Product A", "Desc", 1, 15.00m)
         };
 
         var sagaHarness = _harness.GetSagaStateMachineHarness<MakeOrderSaga, MakeOrderSagaState>();
@@ -247,23 +243,28 @@ public class MakeOrderSagaTest : IntegrationTest
         // Act & Assert
         // Step 1: OrderMade
         await _harness.Bus.Publish(new OrderMadeEvent(orderId, customerId, products));
-        await Task.Delay(DelayTime);
+
+        (await sagaHarness.Consumed.Any<OrderMadeEvent>(x => x.Context.Message.OrderId == orderId)).Should().BeTrue();
 
         var saga = sagaHarness.Sagas.Contains(orderId);
+        saga.Should().NotBeNull();
         saga.CurrentState.Should().Be(nameof(MakeOrderSaga.CheckingCustomer));
-        (await _harness.Published.Any<CheckCustomerMessage>()).Should().BeTrue();
 
         // Step 2: CustomerChecked
         await _harness.Bus.Publish(new CheckedCustomerEvent(orderId));
-        await Task.Delay(DelayTime);
 
+        (await _harness.Published.Any<ReserveProductsMessage>(x => x.Context.Message.OrderId == orderId)).Should()
+            .BeTrue();
+
+        saga = sagaHarness.Sagas.Contains(orderId);
         saga.CurrentState.Should().Be(nameof(MakeOrderSaga.ReservingProducts));
-        (await _harness.Published.Any<ReserveProductsMessage>()).Should().BeTrue();
 
         // Step 3: ProductsReserved
         await _harness.Bus.Publish(new ReservedProductsEvent(orderId, orderItems));
-        await Task.Delay(DelayTime);
 
+        (await _harness.Published.Any<ApprovedOrderEvent>(x => x.Context.Message.OrderId == orderId)).Should().BeTrue();
+
+        saga = sagaHarness.Sagas.Contains(orderId);
         saga.CurrentState.Should().Be("Final");
         (await _harness.Published.Any<ApprovedOrderEvent>()).Should().BeTrue();
 

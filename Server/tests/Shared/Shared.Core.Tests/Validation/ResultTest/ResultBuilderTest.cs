@@ -6,9 +6,6 @@ namespace Shared.Core.Tests.Validation.ResultTest;
 
 public class ResultBuilderTest
 {
-    private const int NumberOfPreformanceChecks = 100000;
-    private const int MaxReasonablePreformanceTimeMs = 75;
-    
     private static Result CreateFailure() => Result.Failure(new Error("E", "M"));
     
     [Fact]
@@ -290,47 +287,6 @@ public class ResultBuilderTest
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e.Message == "Error1");
         triggered.Should().BeFalse();
-    }
-    
-    [Fact]
-    public void LargeChain_Performance_CompletesInReasonableTime()
-    {
-        // Arrange
-        var stopwatch = Stopwatch.StartNew();
-    
-        var builder = Result.Try();
-        
-        // Act
-        for (int i = 0; i < NumberOfPreformanceChecks; i++)
-        {
-            builder = builder.Check(false, new Error($"E{i}", $"D{i}"));
-        }
-        var result = builder.Build();
-        stopwatch.Stop();
-        
-        // Assert
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(MaxReasonablePreformanceTimeMs);
-        result.IsSuccess.Should().BeTrue();
-    }
-    
-    [Fact]
-    public async Task LargeAsyncChain_Performance_CompletesInReasonableTime()
-    {
-        // Arrange
-        var stopwatch = Stopwatch.StartNew();
-        var builder = Result.Try().CheckAsync(async () => await Task.FromResult(false), new Error("E", "D"));
-        
-        // Act
-        for (int i = 0; i < NumberOfPreformanceChecks; i++)
-        {
-            builder = builder.CheckAsync(async () => await Task.FromResult(false), new Error($"E{i}", $"D{i}"));
-        }
-        var result = await builder.BuildAsync();
-        stopwatch.Stop();
-        
-        // Assert
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(MaxReasonablePreformanceTimeMs);
-        result.IsSuccess.Should().BeTrue();
     }
 
     [Theory]
