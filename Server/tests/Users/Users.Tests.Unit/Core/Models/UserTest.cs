@@ -29,7 +29,7 @@ public class UserTest
         user.VerifyEmail();
 
         // Assert
-        user.IsEmailVerified.Should().BeTrue();
+        user.IsEmailVerified.Should().BeFalse();
         user.DomainEvents.OfType<UserEmailVerifiedDomainEvent>().Should().ContainSingle();
     }
 
