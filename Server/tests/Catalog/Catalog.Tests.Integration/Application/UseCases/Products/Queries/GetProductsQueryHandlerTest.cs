@@ -67,7 +67,8 @@ public class GetProductsQueryHandlerTest : IntegrationTest
         ApplicationDbContext.Categories.Add(category);
 
         List<Product> products = [];
-        for (int i = 1; i <= 5; i++)
+        const int productCount = 5;
+        for (int i = 1; i <= productCount; i++)
         {
             var prod = CreateTestProduct($"Title #{i}", i, category.Id.Value);
 
@@ -87,7 +88,7 @@ public class GetProductsQueryHandlerTest : IntegrationTest
         result.IsSuccess.Should().BeTrue();
 
         var page = result.Value;
-        page.Data.Count().Should();
+        page.Data.Count().Should().Be(productCount);
         var dtos = products
             .Adapt<List<ProductReadDto>>();
         page.Data.Should().BeEquivalentTo(dtos);
