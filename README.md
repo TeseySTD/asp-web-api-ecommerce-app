@@ -295,6 +295,12 @@ Other dependencies in such tests were mocked if it could be done.
 
 For clearing datebase after each test I used **Respawn** libary - it generates sql script that cleans DB so this is lighter than manual DB clearing.
 
+### Continuous Integration & Static Analysis
+To ensure that all code meets high-quality standards before being merged, I implemented a **CI/CD pipeline** using **GitHub Actions**:
+  * **Automated Testing:** On every Pull Request or Push to the main branch, the pipeline automatically spins up the necessary infrastructure via Docker and executes the full test suite (both Unit and Integration). This prevents regressions and ensures that the "build once, run everywhere" principle holds true.
+  * **SonarCloud Integration:** I integrated **SonarCloud** as a static analysis tool to perform deep code inspections. It tracks code coverage, detects "code smells," vulnerabilities, and bugs.
+  * **Quality Gate:** The project is configured with a strict "Quality Gate." If the code coverage drops below the threshold or new security vulnerabilities are detected, the build fails, ensuring that only clean, maintainable, and secure code reaches the repository.
+
 
 <!-- References -->
 [1]: https://enterprisecraftsmanship.com/posts/validation-and-ddd/ "Validation and DDD — Article"
