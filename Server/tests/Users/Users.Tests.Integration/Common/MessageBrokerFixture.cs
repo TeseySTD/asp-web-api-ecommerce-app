@@ -5,7 +5,7 @@ namespace Users.Tests.Integration.Common;
 public class MessageBrokerFixture : IAsyncLifetime
 {
     private RabbitMqContainer _messageBrokerContainer = new RabbitMqBuilder()
-        .WithImage("rabbitmq:management")
+        .WithImage("rabbitmq:3.13.7-management-alpine")
         // .WithName("users.test.messagebroker")
         .WithHostname("ecommerce-mq")
         .WithUsername("guest")

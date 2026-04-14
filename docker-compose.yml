@@ -2,34 +2,34 @@ version: '3.9'
 
 services:
   messagebroker:
-    image: rabbitmq:management
+    image: rabbitmq:3.13.7-management-alpine
   
   users.db:
-    image: postgres
+    image: postgres:17.4-alpine3.20
     container_name: users.db
     ports:
       - "5432:5432"
   
   catalog.db:
-    image: postgres
+    image: postgres:17.4-alpine3.20
     container_name: catalog.db
     ports:
       - "5431:5432"
         
   ordering.db:
-    image: postgres
+    image: postgres:17.4-alpine3.20
     container_name: ordering.db
     ports:
       - "5430:5432"
       
   basket.db:
-    image: postgres
+    image: postgres:17.4-alpine3.20
     container_name: basket.db
     ports:
       - "5429:5432"
         
   distributed.cache:
-    image: redis
+    image: redis:7.4-alpine
   
   users.api:
     image: users.api
@@ -38,10 +38,10 @@ services:
       context: .
       dockerfile: Server/src/Services/Users/Users.API/Dockerfile
     ports:
-      - "8080:8080" 
+      - "8081:8080" 
         
   users.smtp:
-    image: changemakerstudiosus/papercut-smtp:latest
+    image: changemakerstudiosus/papercut-smtp:7.0.0-rc1
     ports:
       - "25:25"
       - "2525:80"

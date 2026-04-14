@@ -10,7 +10,7 @@ services:
     restart: always
     ports:
       - "5672:5672"
-      - "15672:15672"
+      - "15672:15672" # UI
     volumes:
       - message_broker_data:/var/lib/rabbitmq
       - message_broker_log:/var/log/rabbitmq

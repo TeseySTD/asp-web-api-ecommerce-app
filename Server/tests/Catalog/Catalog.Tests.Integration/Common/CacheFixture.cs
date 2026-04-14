@@ -7,7 +7,7 @@ public class CacheFixture : IAsyncLifetime
 {
     private readonly RedisContainer _cacheContainer = new RedisBuilder()
         // .WithName("catalog.test.cache")
-        .WithImage("redis")
+        .WithImage("redis:7.4-alpine")
         .Build();
 
     private IConnectionMultiplexer? _connection;

@@ -9,7 +9,7 @@ namespace Users.Tests.Integration.Common;
 public class DatabaseFixture : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:latest")
+        .WithImage("postgres:17.4-alpine3.20")
         .WithDatabase("users-api")
         .WithUsername("postgres")
         .WithPassword("postgres")
