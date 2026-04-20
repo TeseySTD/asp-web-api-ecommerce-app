@@ -1,0 +1,14 @@
+﻿apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: catalog-api-monitor
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: catalog-api
+  endpoints:
+    - port: http
+      path: /health
+      interval: 15s
