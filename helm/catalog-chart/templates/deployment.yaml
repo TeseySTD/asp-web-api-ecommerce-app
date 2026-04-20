@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "catalog-chart.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "catalog-chart.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "catalog-chart.name" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "{{ .Values.service.port }}"
+            - name: JWT_PUBLIC_KEY_PATH
+              value: "/home/app/secrets/jwt_public_key.pem"
+            - name: ConnectionStrings__Database
+              value: "Username=postgres;Password=password;Host={{ .Values.infra.dbHost }};Port=5432;Database=catalogdb;Include Error Detail=true"
+            - name: ConnectionStrings__Redis
+              value: {{ .Values.infra.redisHost | quote }}
+            - name: MessageBroker__Host
+              value: {{ .Values.infra.rabbitmqHost | quote }}
+            - name: MessageBroker_UserName
+              value: "guest"
+            - name: MessageBroker_Password
+              value: "guest"
+          volumeMounts:
+            - name: jwt-secret-volume
+              mountPath: /home/app/secrets
+              readOnly: true
+      volumes:
+        - name: jwt-secret-volume
+          secret:
+            secretName: jwt-public-key

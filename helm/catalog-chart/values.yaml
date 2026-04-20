@@ -1,0 +1,15 @@
+replicaCount: 2
+
+image:
+  repository: catalog.api
+  tag: "latest"
+  pullPolicy: Never
+
+infra:
+  dbHost: "catalog-db-postgresql"
+  redisHost: "distributed-cache-master:6379"
+  rabbitmqHost: "amqp://eccomerce-mq:5672"
+
+service:
+  type: NodePort
+  port: 7080
