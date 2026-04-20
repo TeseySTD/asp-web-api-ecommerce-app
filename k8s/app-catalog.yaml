@@ -1,0 +1,68 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-api
+  template:
+    metadata:
+      labels:
+        app: catalog-api
+    spec:
+      containers:
+      - name: catalog-api
+        image: catalog.api:latest
+        imagePullPolicy: Never
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+        - name: ASPNETCORE_HTTP_PORTS
+          value: "7080"
+        - name: JWT_PUBLIC_KEY_PATH
+          value: "/home/app/secrets/jwt_public_key.pem"
+        - name: ConnectionStrings__Database
+          value: "Username=postgres;Password=password;Host=catalog-db-svc;Port=5432;Database=catalogdb;Include Error Detail=true"
+        - name: ConnectionStrings__Redis
+          value: "distributed-cache:6379"
+        - name: MessageBroker__Host
+          value: "amqp://eccomerce-mq:5672"
+        - name: MessageBroker_UserName
+          value: "guest"
+        - name: MessageBroker_Password
+          value: "guest"
+        ports:
+        - containerPort: 7080
+        volumeMounts:
+        - name: jwt-secret-volume
+          mountPath: /home/app/secrets
+          readOnly: true
+        # Temp fix cause health checks are not set
+       # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 7080
+        #   initialDelaySeconds: 15
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 7080
+        #   initialDelaySeconds: 30
+      volumes:
+      - name: jwt-secret-volume
+        secret:
+          secretName: jwt-public-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-api-svc
+spec:
+  type: NodePort
+  selector:
+    app: catalog-api
+  ports:
+  - port: 7080
+    nodePort: 30080
