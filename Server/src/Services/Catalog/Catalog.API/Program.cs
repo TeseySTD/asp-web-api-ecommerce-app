@@ -5,6 +5,7 @@ using Catalog.Persistence;
 using Catalog.Persistence.Extensions;
 using Shared.Core.Auth;
 using Shared.Core.Extensions;
+using Prometheus; 
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -38,7 +39,11 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHttpMetrics();
+
 app.MapCarter();
+
+app.MapMetrics();
 
 app.Run();
 
